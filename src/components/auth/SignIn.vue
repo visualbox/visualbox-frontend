@@ -16,7 +16,10 @@
       autofocus
       required
     )
-    v-btn(@click="signIn") Sign In
+    v-btn(
+      flat
+      @click="signIn"
+    ) Sign In
   v-form(v-if="mfaView")
     v-text-field(
       v-model="code"
@@ -25,7 +28,10 @@
       autofocus
       required
     )
-    v-btn(@click="confirm") Verify
+    v-btn(
+      flat
+      @click="confirm"
+    ) Verify
 </template>
 
 <script>

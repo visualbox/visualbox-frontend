@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import '@/assets/styles/global.styl'
 
 Vue.use(Vuetify, {
   theme: {

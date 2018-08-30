@@ -1,26 +1,17 @@
 <template lang="pug">
 v-container(fluid)
-  v-responsive#jumbotron(:aspect-ratio="16/9")
-    v-container(fluid fill-height)
-      v-layout(align-center justify-center)
-        v-flex(xs12 text-xs-center)
-          //- .display-4.font-weight-thin VISUALBOX
-          svg#my-svg(
-            width="580"
-            height="120"
-          )
-            g
-              text(
-                stroke="#000"
-                font-family="Roboto"
-                font-weight="100"
-                font-size="114"
-                y="100"
-                x="0"
-                stroke-width="0"
-                fill="#ff0067"
-              ) VISUALBOX
-          .display-1.font-weight-light.mt-4 Quck data integration and visualization tool
+  v-container#jumbotron(fluid fill-height)
+    v-layout(align-center justify-center)
+      v-flex(xs12 text-xs-center)
+        #visualbox-animation.d-inline-block
+        //- .display-3.font-weight-thin VISUALBOX
+        .display-1.font-weight-light.mt-4 Data integration and visualization toolbox
+
+  v-container#infotron(fluid fill-height)
+    v-layout(align-center justify-center)
+      v-flex(xs12 text-xs-center)
+        .display-3.font-weight-thin A CAPSTONE PROJECT
+        .display-1.font-weight-light.mt-4 By Pontus Edvard Aurdal at the University of Tromsø
 </template>
 
 <script>
@@ -28,8 +19,16 @@ import Vivus from 'vivus'
 
 export default {
   name: 'Home',
+  data: () => ({
+    vivus: null
+  }),
   mounted () {
-    let v = new Vivus('my-svg', { duration: 500 })
+    this.vivus = new Vivus('visualbox-animation', {
+      type: 'sync',
+      duration: 100,
+      animTimingFunction: Vivus.EASE,
+      file: require('../assets/img/visualbox.svg')
+    })
   }
 }
 </script>
@@ -39,6 +38,15 @@ export default {
   padding 0
 
   #jumbotron
-    background-color #252525
-    color #ff0067 !important
+    height 600px
+    color #FFF !important
+    background linear-gradient(160deg, #9fffe7, #1ee9b6 75%, #42eac1 75%, #05d6a1 100%)
+
+    #visualbox-animation
+      width 250px
+
+  #infotron
+    height 600px
+    color #edeef1 !important
+    background #253853
 </style>

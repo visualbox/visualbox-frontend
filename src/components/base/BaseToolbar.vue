@@ -1,18 +1,31 @@
 <template lang="pug">
 v-toolbar.elevation-0(
   app dark
-  color="#252525"
+  color="#1bcea2"
   absolute
   clipped-left
 )
-  v-toolbar-side-icon(@click="setDrawer(!drawer)")
-  .title.ml-3 VISUALBOX
+  v-toolbar-side-icon.hidden-md-and-up.mr-3(@click="setDrawer(!drawer)")
+  .title.font-weight-light(@click="$router.push('/')") VISUALBOX.IO
   v-spacer
-  v-toolbar-items
+  v-btn.mr-3.hidden-sm-and-down.black--text(
+    to="/auth"
+    color="white"
+    depressed round
+  ) Get Started
+  v-toolbar-items.hidden-sm-and-down
     v-btn(
       to="/auth"
       flat
-    ) Login
+    ) Features
+    v-btn(
+      to="/auth"
+      flat
+    ) FAQ
+    v-btn(
+      to="/auth"
+      flat
+    ) Sign In
 </template>
 
 <script>
@@ -25,7 +38,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.v-toolbar
-  >>> .title
-    color #ff0067 !important
 </style>

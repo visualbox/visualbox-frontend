@@ -1,8 +1,9 @@
 <template lang="pug">
 v-navigation-drawer(
   app
-  v-model="drawer"
+  v-model="model"
   fixed clipped
+  disable-resize-watcher
 )
   v-list
     template(v-for="(item, i) in items")
@@ -37,19 +38,22 @@ export default {
   name: 'BaseNavigationDrawer',
   mixins: [ mapApp ],
   data: () => ({
+    model: false,
     items: [
       { icon: 'network_check', text: 'Get Started' },
-      { icon: 'launch', text: 'Sign In' },
       { divider: true },
       { heading: 'VisualBox' },
-      { icon: 'call_merge', text: 'Data Integrations' },
-      { icon: 'widgets', text: 'Widgets' },
-      { icon: 'web', text: 'Dashboards' },
+      { icon: 'widgets', text: 'Features' },
+      { icon: 'help', text: 'FAQ' },
       { divider: true },
-      { icon: 'settings', text: 'Settings' },
-      { icon: 'help', text: 'Help' }
+      { icon: 'launch', text: 'Sign In' }
     ]
-  })
+  }),
+  watch: {
+    drawer () {
+      this.model = true
+    }
+  }
 }
 </script>
 

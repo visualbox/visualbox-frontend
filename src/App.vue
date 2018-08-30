@@ -5,8 +5,7 @@ v-app
   base-toolbar
 
   v-content
-    v-fade-transition(appear)
-      router-view(v-if="isReady")
+    router-view(v-if="isReady")
 </template>
 
 <script>

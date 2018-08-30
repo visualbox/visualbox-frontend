@@ -3,10 +3,12 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   computed: mapGetters('App', [
     'isReady',
-    'snackbar'
+    'snackbar',
+    'drawer'
   ]),
   methods: mapActions('App', [
     'setIsReady',
-    'setSnackbar'
+    'setSnackbar',
+    'setDrawer'
   ])
 }

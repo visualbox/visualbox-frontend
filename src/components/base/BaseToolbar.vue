@@ -1,5 +1,12 @@
 <template lang="pug">
-v-toolbar.elevation-0(app dark)
+v-toolbar.elevation-0(
+  app dark
+  color="#252525"
+  absolute
+  clipped-left
+)
+  v-toolbar-side-icon(@click="setDrawer(!drawer)")
+  .title.ml-3 VISUALBOX
   v-spacer
   v-toolbar-items
     v-btn(
@@ -16,3 +23,9 @@ export default {
   mixins: [ mapApp ]
 }
 </script>
+
+<style lang="stylus" scoped>
+.v-toolbar
+  >>> .title
+    color #ff0067 !important
+</style>

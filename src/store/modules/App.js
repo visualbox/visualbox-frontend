@@ -2,7 +2,8 @@ import * as t from '@/store/types'
 
 const state = {
   isReady: false,
-  snackbar: {}
+  snackbar: {},
+  drawer: false
 }
 
 const mutations = {
@@ -11,6 +12,9 @@ const mutations = {
   },
   [t.APP_SET_SNACKBAR] (state, payload) {
     state.snackbar = payload
+  },
+  [t.APP_SET_DRAWER] (state, payload) {
+    state.drawer = payload
   }
 }
 
@@ -20,6 +24,9 @@ const actions = {
   },
   setSnackbar ({ commit }, payload) {
     commit(t.APP_SET_SNACKBAR, payload)
+  },
+  setDrawer ({ commit }, payload) {
+    commit(t.APP_SET_DRAWER, payload)
   }
 }
 
@@ -29,6 +36,9 @@ const getters = {
   },
   snackbar (state) {
     return state.snackbar
+  },
+  drawer (state) {
+    return state.drawer
   }
 }
 

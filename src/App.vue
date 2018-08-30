@@ -1,6 +1,7 @@
 <template lang="pug">
 v-app
   base-snackbar
+  base-navigation-drawer
   base-toolbar
 
   v-content
@@ -28,8 +29,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#app
-  font-family "Hind Vadodara", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
 </style>

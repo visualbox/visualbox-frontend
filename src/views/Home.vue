@@ -38,7 +38,7 @@ export default {
   padding 0
 
   #jumbotron
-    height 600px
+    height 800px
     color #FFF !important
     background linear-gradient(160deg, #9fffe7, #1ee9b6 75%, #42eac1 75%, #05d6a1 100%)
 

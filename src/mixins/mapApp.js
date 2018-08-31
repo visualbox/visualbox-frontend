@@ -8,6 +8,7 @@ export default {
   ]),
   methods: mapActions('App', [
     'setIsReady',
+    'setIsLoading',
     'setSnackbar',
     'setDrawer'
   ])

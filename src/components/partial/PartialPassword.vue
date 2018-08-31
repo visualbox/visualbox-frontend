@@ -1,0 +1,33 @@
+<template lang="pug">
+div
+  v-text-field.mb-3(
+    v-model="internalValue"
+    label="Password"
+    name="password"
+    type="password"
+  )
+  v-layout(
+    align-center
+    justify-space-between
+  )
+    router-link(to="/auth/forgot")
+      base-link Forgot password?
+    v-btn.text-capitalize.ma-0(
+      :disabled="!value"
+      :loading="isLoading"
+      color="primary"
+      depressed
+      @click="$emit('next')"
+    ) Next
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import ProxyValue from '@/mixins/proxyValue'
+
+export default {
+  name: 'PartialPassword',
+  mixins: [ ProxyValue ],
+  computed: mapGetters('App', ['isLoading'])
+}
+</script>

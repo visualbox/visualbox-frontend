@@ -1,96 +1,85 @@
 <template lang="pug">
-#c-sign-in
-  v-form(v-if="!mfaView")
-    v-text-field(
-      v-model="username"
-      label="Username"
-      @keyup.enter="signIn"
-      autofocus
-      required
-    )
-    v-text-field(
-      v-model="password"
-      label="Password"
-      type="password"
-      @keyup.enter="signIn"
-      autofocus
-      required
-    )
-    v-btn(
-      flat
-      @click="signIn"
-    ) Sign In
-  v-form(v-if="mfaView")
-    v-text-field(
-      v-model="code"
-      label="Verification Code"
-      @keyup.enter="confirm"
-      autofocus
-      required
-    )
-    v-btn(
-      flat
-      @click="confirm"
-    ) Verify
+base-card
+  v-card-text.pa-5
+    .text-xs-center.mb-5
+      h1.headline.mb-3 {{ tab ? 'Welcome' : 'Sign In' }}
+
+      .id
+        v-slide-y-transition(mode="out-in")
+          v-chip(
+            v-if="tab"
+            outline
+            @click.native="tab = 0"
+          )
+            v-icon(
+              color="primary"
+              left
+            ) account_circle
+            span.body-2 {{ email }}
+            v-icon(
+              color="black"
+              right
+            ) keyboard_arrow_down
+          .subheading(v-else) with your VisualBox account
+
+    v-tabs-items(v-model="tab")
+      v-tab-item
+        partial-email(
+          v-model="email"
+          @next="tab = 1"
+        )
+      v-tab-item
+        partial-password(
+          v-model="password"
+          @next="submit"
+        )
 </template>
 
 <script>
-import { Auth, Logger, JS } from 'aws-amplify'
-const logger = new Logger('SignIn')
+import { mapActions } from 'vuex'
 
 export default {
   name: 'SignIn',
+  components: {
+    PartialEmail: () => import('@/components/partial/PartialEmail'),
+    PartialPassword: () => import('@/components/partial/PartialPassword')
+  },
   data: () => ({
-    mfaView: false,
-    user: null,
-    username: '',
-    password: '',
-    code: ''
+    email: undefined,
+    password: undefined,
+    tab: 0
   }),
   methods: {
-    async signIn () {
+    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('Cognito', ['signInUser']),
+    async submit () {
+      this.setIsLoading(true)
       try {
-        this.user = await Auth.signIn(this.username, this.password)
-        logger.debug('sign in success', this.user)
-        // Commit user
-
-        if (this.user.challengeName === 'SMS_MFA') {
-          this.mfaView = true
-          return
-        }
-        this.checkUser()
+        await this.signInUser({
+          username: this.email,
+          password: this.password
+        })
+        this.setSnackbar({
+          type: 'success',
+          msg: `Successfully signed in user ${this.email}`
+        })
       } catch (e) {
-        logger.debug('sign in error', e)
-        this.handleError(e)
-      }
-    },
-    async checkUser () {
-      if (!this.user)
-        return
-
-      try {
-        const data = await Auth.verifiedContact(this.user)
-        logger.debug('verify result', data)
-        // Commit user verification
-
-        if (!JS.eEmpty(data.verified))
-          this.$router.push('/')
-        else
-          this.$router.push('/auth/verifyContact')
-      } catch (e) {
-        logger.debug('check user error', e)
-        this.handleError(e)
-      }
-    },
-    async confirm () {
-      try {
-        await Auth.confirmSignIn(this.user, this.code)
-        this.$router.push('/')
-      } catch (e) {
-        logger.debug('confirm error', e)
-        this.handleError(e)
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading()
       }
     }
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+.v-card
+  height 370px
+
+  .id
+    height 40px
+</style>

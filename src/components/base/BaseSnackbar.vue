@@ -16,7 +16,7 @@ v-snackbar(
 </template>
 
 <script>
-import mapApp from '@/mixins/mapApp'
+import { mapGetters } from 'vuex'
 
 const ICON_MAP = {
   error: 'error',
@@ -27,12 +27,12 @@ const ICON_MAP = {
 
 export default {
   name: 'BaseSnackbar',
-  mixins: [ mapApp ],
   data: () => ({
     model: false,
     message: null
   }),
   computed: {
+    ...mapGetters('App', ['snackbar']),
     icon () {
       return ICON_MAP[this.snackbar.type] || 'check'
     }

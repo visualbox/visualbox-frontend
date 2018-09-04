@@ -4,7 +4,7 @@ base-card
     .text-xs-center.mb-5
       h1.headline.mb-3 {{ tab ? 'Welcome' : 'Sign In' }}
 
-      .id
+      .welcome
         v-slide-y-transition(mode="out-in")
           v-chip(
             v-if="tab"
@@ -63,6 +63,7 @@ export default {
           type: 'success',
           msg: `Successfully signed in user ${this.email}`
         })
+        this.$router.push('/app')
       } catch (e) {
         this.setSnackbar({
           type: 'error',
@@ -80,6 +81,6 @@ export default {
 .v-card
   height 370px
 
-  .id
+  .welcome
     height 40px
 </style>

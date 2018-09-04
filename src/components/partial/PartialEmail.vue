@@ -5,6 +5,7 @@ div
     label="Email or phone"
     name="email"
     autofocus
+    @keydown.enter="$emit('next')"
   )
   v-layout(
     align-center

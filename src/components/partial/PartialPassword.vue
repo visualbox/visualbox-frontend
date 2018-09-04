@@ -5,6 +5,8 @@ div
     label="Password"
     name="password"
     type="password"
+    autofocus
+    @keydown.enter="$emit('next')"
   )
   v-layout(
     align-center

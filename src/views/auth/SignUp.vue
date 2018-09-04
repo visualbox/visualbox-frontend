@@ -3,7 +3,7 @@ base-card
   v-card-text.pa-5
     .text-xs-center.mb-5
       h2.headline.primary--text.mb-3 VisualBox
-      h1.headline.mb-5 Create account
+      .subheading.mb-5 Create an account to get started
 
     v-form(
       v-model="form"
@@ -11,20 +11,20 @@ base-card
     )
       v-container.pa-0
         v-layout.pb-4(wrap)
-          v-flex.pl-0.pr-0(xs6)
+          v-flex(xs12 sm6)
             v-text-field(
               v-model="firstName"
               :rules="[rules.required('Enter first name')]"
               label="First name"
               autofocus
             )
-          v-flex.pr-0(xs6)
+          v-flex(xs12 sm6)
             v-text-field(
               v-model="lastName"
               :rules="[rules.required('Enter last name')]"
               label="Last name"
             )
-          v-flex.pl-0.pr-0(xs12)
+          v-flex(xs12)
             v-text-field(
               v-model="email"
               :rules="[rules.required('Enter your email address')]"
@@ -32,14 +32,14 @@ base-card
               hint="You can use letters, numbers & periods"
               persistent-hint
             )
-          v-flex.pl-0(xs6)
+          v-flex(xs12 sm6)
             v-text-field(
               v-model="password"
               :rules="[rules.required('Enter a password')]"
               label="Password"
               type="password"
             )
-          v-flex.pr-0(xs6)
+          v-flex(xs12 sm6)
             v-text-field(
               v-model="confirmPassword"
               :rules="[rules.required('Confirm your password'), rules.confirm]"

@@ -14,9 +14,10 @@ base-card
     div
       v-text-field.mb-3(
         v-model="code"
-        :rules="[rules.required('Enter your email address')]"
+        :rules="[rules.required('Enter verification code')]"
         label="Code"
         autofocus
+        @keydown.enter="submit"
       )
 
     v-layout(

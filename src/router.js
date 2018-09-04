@@ -6,6 +6,8 @@ import Auth from '@/views/Auth'
 import SignIn from '@/views/auth/SignIn'
 import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
+import SignOut from '@/views/auth/SignOut'
+import App from '@/views/App'
 
 Vue.use(Router)
 
@@ -36,8 +38,17 @@ export default new Router({
           path: 'verify',
           name: 'verify',
           component: Verify
+        },
+        {
+          path: 'signout',
+          name: 'signout',
+          component: SignOut
         }
       ]
+    },
+    {
+      path: '/app',
+      component: App
     }
   ]
 })

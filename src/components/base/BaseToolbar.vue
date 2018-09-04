@@ -6,25 +6,26 @@ v-toolbar.elevation-0(
   clipped-left
 )
   v-toolbar-side-icon.hidden-md-and-up.mr-3(@click="setDrawer(!drawer)")
-  .title.font-weight-light(@click="$router.push('/')") VISUALBOX.IO
+  .title.font-weight-regular(@click="$router.push('/')") VISUALBOX.IO
   v-spacer
   v-btn.mr-3.hidden-sm-and-down.black--text(
-    to="/auth"
+    to="/auth/signup"
     color="white"
     depressed round
   ) Get Started
   v-toolbar-items.hidden-sm-and-down
     v-btn(
-      to="/auth"
+      to="/features"
       flat
     ) Features
     v-btn(
-      to="/auth"
+      to="/faq"
       flat
     ) FAQ
     v-btn(
       to="/auth"
       flat
+      exact
     ) Sign In
 </template>
 
@@ -38,4 +39,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.title
+  cursor pointer
 </style>

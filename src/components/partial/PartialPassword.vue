@@ -12,10 +12,11 @@ div
   )
     router-link(to="/auth/forgot")
       base-link Forgot password?
-    v-btn.text-capitalize.ma-0(
+    v-btn.ma-0(
       :disabled="!value"
       :loading="isLoading"
       color="primary"
+      prominent
       depressed
       @click="$emit('next')"
     ) Next

@@ -12,9 +12,10 @@ div
   )
     router-link(to="/auth/signup")
       base-link Create account
-    base-btn(
+    base-btn.ma-0(
       :disabled="!value"
       prominent
+      depressed
       @click="$emit('next')"
     ) Next
 </template>

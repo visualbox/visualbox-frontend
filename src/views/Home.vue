@@ -5,7 +5,7 @@ v-container(fluid)
       v-flex(xs12 text-xs-center)
         #visualbox-animation.d-inline-block
         //- .display-3.font-weight-thin VISUALBOX
-        .display-1.font-weight-light.mt-4 Data integration and visualization toolbox
+        .display-1.font-weight-regular.mt-4 Data integration and visualization toolbox
 
   v-container#infotron(fluid fill-height)
     v-layout(align-center justify-center)

@@ -3,7 +3,9 @@ import Router from 'vue-router'
 
 import Home from '@/views/Home'
 import Auth from '@/views/Auth'
-import SignIn from '@/components/auth/SignIn'
+import SignIn from '@/views/auth/SignIn'
+import SignUp from '@/views/auth/SignUp'
+import Verify from '@/views/auth/Verify'
 
 Vue.use(Router)
 
@@ -24,6 +26,16 @@ export default new Router({
           path: '',
           name: 'signin',
           component: SignIn
+        },
+        {
+          path: 'signup',
+          name: 'signup',
+          component: SignUp
+        },
+        {
+          path: 'verify',
+          name: 'verify',
+          component: Verify
         }
       ]
     }

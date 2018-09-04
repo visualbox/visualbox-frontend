@@ -69,7 +69,7 @@ export default {
           msg: e.message
         })
       } finally {
-        this.setIsLoading()
+        this.setIsLoading(false)
       }
     }
   }

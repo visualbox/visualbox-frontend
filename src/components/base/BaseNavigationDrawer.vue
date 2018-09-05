@@ -4,6 +4,7 @@ v-navigation-drawer(
   v-model="model"
   fixed clipped
   disable-resize-watcher
+  floating
 )
   v-list
     template(v-for="(item, i) in items")
@@ -55,7 +56,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.v-navigation-drawer
-  >>> &__border
-    display none
 </style>

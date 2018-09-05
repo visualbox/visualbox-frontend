@@ -2,12 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Home from '@/views/Home'
-import Auth from '@/views/Auth'
+import Auth from '@/views/auth/Auth'
 import SignIn from '@/views/auth/SignIn'
 import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
 import SignOut from '@/views/auth/SignOut'
-import App from '@/views/App'
+import App from '@/views/app/App'
 
 Vue.use(Router)
 

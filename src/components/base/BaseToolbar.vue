@@ -1,5 +1,5 @@
 <template lang="pug">
-.base-toolbar(v-if="isReady")
+.base-toolbar(v-if="showToolbar")
   v-toolbar.elevation-0(
     v-if="!isLoggedIn"
     app dark
@@ -44,9 +44,12 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'BaseToolbar',
   computed: {
-    ...mapGetters('App', ['isReady']),
     ...mapGetters('Cognito', ['isLoggedIn']),
-    ...mapState('Cognito', ['user'])
+    ...mapState('Cognito', ['user']),
+    ...mapState('Route', ['path']),
+    showToolbar () {
+      return this.path.substr(0, 4) !== '/app'
+    }
   },
   methods: {
     ...mapActions('App', ['setDrawer']),

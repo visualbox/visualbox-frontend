@@ -9,7 +9,7 @@ v-snackbar(
     :class="snackbar.type === 'warning' ? 'black--text' : 'white--text'"
     v-text="snackbar.msg"
   )
-  v-icon(
+  v-icon.ml-2(
     :dark="snackbar.type !== 'warning'"
     v-text="icon"
   )

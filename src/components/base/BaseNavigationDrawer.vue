@@ -32,11 +32,8 @@ v-navigation-drawer(
 </template>
 
 <script>
-import mapApp from '@/mixins/mapApp'
-
 export default {
   name: 'BaseNavigationDrawer',
-  mixins: [ mapApp ],
   data: () => ({
     model: false,
     items: [

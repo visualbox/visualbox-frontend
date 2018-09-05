@@ -13,7 +13,7 @@ export default {
   async mounted () {
     this.setIsLoading(true)
     try {
-      await this.signOut()
+      this.signOut()
     } catch (e) {
       this.setSnackbar({
         type: 'error',

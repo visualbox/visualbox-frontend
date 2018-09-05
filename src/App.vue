@@ -1,5 +1,5 @@
 <template lang="pug">
-v-app
+v-app(:dark="dark")
   base-snackbar
   base-navigation-drawer
   base-toolbar
@@ -9,11 +9,18 @@ v-app
 </template>
 
 <script>
-import mapApp from '@/mixins/mapApp'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'App',
-  mixins: [ mapApp ],
+  computed: {
+    ...mapGetters('App', ['isReady']),
+    ...mapState('Route', ['path']),
+    dark () {
+      return this.path.substr(0, 4) === '/app'
+    }
+  },
+  methods: mapActions('App', ['setIsReady', 'setSnackbar']),
   async mounted () {
     try {
       await this.$store.dispatch('Cognito/fetchSession')

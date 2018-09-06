@@ -8,6 +8,10 @@ import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
 import SignOut from '@/views/auth/SignOut'
 import App from '@/views/app/App'
+import Projects from '@/views/app/Projects'
+import Integrations from '@/views/app/Integrations'
+import Widgets from '@/views/app/Widgets'
+import Settings from '@/views/app/Settings'
 
 Vue.use(Router)
 
@@ -48,7 +52,29 @@ export default new Router({
     },
     {
       path: '/app',
-      component: App
+      component: App,
+      children: [
+        {
+          path: '',
+          name: 'projects',
+          component: Projects
+        },
+        {
+          path: 'i',
+          name: 'integrations',
+          component: Integrations
+        },
+        {
+          path: 'w',
+          name: 'widgets',
+          component: Widgets
+        },
+        {
+          path: 's',
+          name: 'settings',
+          component: Settings
+        }
+      ]
     }
   ]
 })

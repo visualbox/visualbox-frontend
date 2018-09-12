@@ -1,11 +1,32 @@
 <template lang="pug">
 v-container(fluid)
-  v-container#jumbotron(fluid fill-height)
-    v-layout(align-center justify-center)
-      v-flex(xs12 text-xs-center)
-        #visualbox-animation.d-inline-block
-        //- .display-3.font-weight-thin VISUALBOX
-        .display-1.font-weight-regular.mt-4 Data integration and visualization toolbox
+
+  v-responsive.white--text(:aspect-ratio="2.5/1")
+    v-container(fill-height grid-list-xl)
+      v-layout(align-center justify-center wrap)
+        #visualbox-animation.mx-4
+        v-flex(shrink)
+          .display-3.font-weight-light Data integration and
+          .display-3.font-weight-light.mb-4 visualization toolbox
+          div
+            v-btn.primary--text(
+              to="/auth/signup"
+              color="white"
+              large
+            ) Get Started
+            v-btn(
+              color="white"
+              large outline
+            )
+              v-icon(dark left) mdi-star-circle-outline
+              | Features
+            v-btn(
+              to="/auth"
+              color="white"
+              large outline
+            )
+              v-icon(dark left) mdi-launch
+              | Sign In
 
   v-container#infotron(fluid fill-height)
     v-layout(align-center justify-center)
@@ -37,9 +58,8 @@ export default {
 .container
   padding 0
 
-  #jumbotron
-    height 800px
-    color #FFF !important
+  .v-responsive
+    padding 64px 16px
     background linear-gradient(160deg, #9fffe7, #1ee9b6 75%, #42eac1 75%, #05d6a1 100%)
 
     #visualbox-animation

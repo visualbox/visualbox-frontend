@@ -2,24 +2,15 @@
 .base-toolbar(v-if="showToolbar")
   v-toolbar.elevation-0(
     v-if="!isLoggedIn"
-    app dark
-    color="#1bcea2"
+    dark
+    color="transparent"
     absolute
     clipped-left
   )
     v-toolbar-side-icon.hidden-md-and-up.mr-3(@click="setDrawer(!drawer)")
     .title.font-weight-regular(@click="$router.push('/')") VISUALBOX.IO
     v-spacer
-    v-btn.mr-3.hidden-sm-and-down.black--text(
-      to="/auth/signup"
-      color="white"
-      outline
-    ) Get Started
     v-toolbar-items.hidden-sm-and-down
-      v-btn(
-        to="/features"
-        flat
-      ) Features
       v-btn(
         to="/faq"
         flat

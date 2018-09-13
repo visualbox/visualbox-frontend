@@ -2,7 +2,7 @@
 .base-toolbar(v-if="showToolbar")
   v-toolbar.elevation-0(
     v-if="!isLoggedIn"
-    dark
+    :dark="dark"
     color="transparent"
     absolute
     clipped-left
@@ -40,6 +40,9 @@ export default {
     ...mapState('Route', ['path']),
     showToolbar () {
       return this.path.substr(0, 4) !== '/app'
+    },
+    dark () {
+      return this.path === '/'
     }
   },
   methods: {

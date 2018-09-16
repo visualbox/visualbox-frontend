@@ -1,20 +1,24 @@
 <template lang="pug">
-#settings
+#dashboards
   v-list
     v-list-tile
       v-list-tile-content
-        v-list-tile-title Settings
+        v-list-tile-title Dashboards
+      v-list-tile-action
+        v-icon mdi-plus-box
     v-divider
+    v-list-tile
+      v-list-tile-title Test
 </template>
 
 <script>
 export default {
-  name: 'Settings'
+  name: 'Dashboards'
 }
 </script>
 
 <style lang="stylus" scoped>
-#settings
+#dashboards
   .v-list
     padding 0
 </style>

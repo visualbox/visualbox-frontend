@@ -12,18 +12,17 @@ v-container(fluid)
             v-btn.primary--text(
               to="/auth/signup"
               color="white"
-              large
             ) Get Started
             v-btn(
               color="white"
-              large outline
+              outline
             )
               v-icon(dark left) mdi-star-circle-outline
               | Features
             v-btn(
               to="/auth"
               color="white"
-              large outline
+              outline
             )
               v-icon(dark left) mdi-launch
               | Sign In
@@ -32,7 +31,9 @@ v-container(fluid)
     v-layout(align-center justify-center)
       v-flex(xs12 text-xs-center)
         .display-3.font-weight-thin A CAPSTONE PROJECT
-        .display-1.font-weight-light.mt-4 By Pontus Edvard Aurdal at the University of Tromsø
+        .display-1.font-weight-light.mt-4 by Pontus Edvard Aurdal at the University of Tromsø – the Arctic University of Norway
+
+  #container
 </template>
 
 <script>
@@ -60,7 +61,7 @@ export default {
 
   .v-responsive
     padding 64px 16px
-    background linear-gradient(160deg, #9fffe7, #1ee9b6 75%, #42eac1 75%, #05d6a1 100%)
+    background linear-gradient(160deg, #b1f3b3, #68bd6a 75%, #73c777 75%, #235a25 100%)
 
     #visualbox-animation
       width 250px
@@ -68,5 +69,5 @@ export default {
   #infotron
     height 600px
     color #edeef1 !important
-    background #253853
+    background #272727
 </style>

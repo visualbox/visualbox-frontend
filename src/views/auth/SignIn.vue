@@ -9,6 +9,7 @@ base-card
           v-chip(
             v-if="tab"
             outline
+            color="primary"
             @click.native="tab = 0"
           )
             v-icon(
@@ -17,7 +18,7 @@ base-card
             ) account_circle
             span.body-2 {{ email }}
             v-icon(
-              color="black"
+              color="primary"
               right
             ) keyboard_arrow_down
           .subheading(v-else) with your VisualBox account
@@ -31,6 +32,7 @@ base-card
       v-tab-item
         partial-password(
           v-model="password"
+          :tab="tab"
           @next="submit"
         )
 </template>

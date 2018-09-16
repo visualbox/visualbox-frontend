@@ -6,7 +6,7 @@ import '@/assets/styles/global.styl'
 
 Vue.use(Vuetify, {
   theme: {
-    primary: '#1ccfa1',
+    primary: '#4CAF50',
     secondary: '#5163ba',
     accent: '#82B1FF',
     error: '#FF5252',

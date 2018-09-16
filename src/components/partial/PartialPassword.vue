@@ -5,7 +5,9 @@ div
     label="Password"
     name="password"
     type="password"
-    autofocus
+    ref="password"
+    :disabled="isLoading"
+    :loading="isLoading"
     @keydown.enter="$emit('next')"
   )
   v-layout(
@@ -31,6 +33,13 @@ import ProxyValue from '@/mixins/proxyValue'
 export default {
   name: 'PartialPassword',
   mixins: [ ProxyValue ],
-  computed: mapGetters('App', ['isLoading'])
+  props: ['tab'],
+  computed: mapGetters('App', ['isLoading']),
+  watch: {
+    tab (n) {
+      if (n === 1)
+        this.$refs.password.focus()
+    }
+  }
 }
 </script>

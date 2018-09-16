@@ -8,7 +8,7 @@ import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
 import SignOut from '@/views/auth/SignOut'
 import App from '@/views/app/App'
-import Projects from '@/views/app/Projects'
+import Dashboards from '@/views/app/Dashboards'
 import Integrations from '@/views/app/Integrations'
 import Widgets from '@/views/app/Widgets'
 import Settings from '@/views/app/Settings'
@@ -56,8 +56,8 @@ export default new Router({
       children: [
         {
           path: '',
-          name: 'projects',
-          component: Projects
+          name: 'dashboards',
+          component: Dashboards
         },
         {
           path: 'i',

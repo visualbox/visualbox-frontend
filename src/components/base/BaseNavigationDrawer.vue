@@ -33,6 +33,8 @@ v-navigation-drawer(
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'BaseNavigationDrawer',
   data: () => ({
@@ -47,6 +49,7 @@ export default {
       { icon: 'launch', text: 'Sign In' }
     ]
   }),
+  computed: mapGetters('App', ['drawer']),
   watch: {
     drawer () {
       this.model = true

@@ -6,6 +6,7 @@ div
     name="email"
     autofocus
     @keydown.enter="$emit('next')"
+    tabindex="1"
   )
   v-layout(
     align-center
@@ -18,6 +19,7 @@ div
       prominent
       depressed
       @click="$emit('next')"
+      tabindex="2"
     ) Next
 </template>
 

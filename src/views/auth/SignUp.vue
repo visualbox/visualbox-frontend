@@ -54,15 +54,17 @@ base-card
           alig-center
           justify-space-between
         )
-          router-link(to="/auth")
-            base-link Sign in instead
-          base-btn.ma-0(
+          v-btn.ma-0(
+            to="/auth"
+            color="primary"
+            outline
+          ) Sign in instead
+          v-btn.ma-0(
             :disabled="!form"
             :loading="isLoading"
-            color="primary"
-            prominent
-            depressed
             @click="submit"
+            color="primary"
+            prominent depressed
           ) Next
 </template>
 

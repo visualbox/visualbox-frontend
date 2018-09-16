@@ -1,20 +1,18 @@
 <template lang="pug">
 #settings
-  v-list
-    v-list-tile
-      v-list-tile-content
-        v-list-tile-title Settings
-    v-divider
+  app-context-toolbar
+    .subheading Settings
+    v-spacer
 </template>
 
 <script>
+import AppContextToolbar from '@/components/app/AppContextToolbar'
+
 export default {
-  name: 'Settings'
+  name: 'Settings',
+  components: { AppContextToolbar }
 }
 </script>
 
 <style lang="stylus" scoped>
-#settings
-  .v-list
-    padding 0
 </style>

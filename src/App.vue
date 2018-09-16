@@ -1,7 +1,6 @@
 <template lang="pug">
-v-app(:dark="dark")
+v-app(dark)
   base-snackbar
-  base-navigation-drawer
   base-toolbar
 
   v-content
@@ -15,10 +14,7 @@ export default {
   name: 'App',
   computed: {
     ...mapGetters('App', ['isReady']),
-    ...mapState('Route', ['path']),
-    dark () {
-      return this.path.substr(0, 4) === '/app'
-    }
+    ...mapState('Route', ['path'])
   },
   methods: mapActions('App', ['setIsReady', 'setSnackbar']),
   async mounted () {

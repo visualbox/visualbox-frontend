@@ -6,8 +6,7 @@ const set = property => (store, payload) => (store[property] = payload)
 const state = {
   isReady: false,
   isLoading: false,
-  snackbar: {},
-  drawer: false
+  snackbar: {}
 }
 
 const mutations = {
@@ -15,8 +14,7 @@ const mutations = {
   [t.APP_SET_IS_LOADING]: set('isLoading'),
   [t.APP_SET_SNACKBAR] (state, payload) {
     state.snackbar = _.clone(payload)
-  },
-  [t.APP_SET_DRAWER]: set('drawer')
+  }
 }
 
 const actions = {
@@ -28,9 +26,6 @@ const actions = {
   },
   setSnackbar ({ commit }, payload) {
     commit(t.APP_SET_SNACKBAR, payload)
-  },
-  setDrawer ({ commit }, payload) {
-    commit(t.APP_SET_DRAWER, payload)
   }
 }
 
@@ -43,9 +38,6 @@ const getters = {
   },
   snackbar (state) {
     return state.snackbar
-  },
-  drawer (state) {
-    return state.drawer
   }
 }
 

@@ -9,16 +9,16 @@ base-card
           v-chip(
             v-if="tab"
             outline
-            color="primary"
+            color="white"
             @click.native="tab = 0"
           )
             v-icon(
-              color="primary"
+              color="white"
               left
             ) account_circle
             span.body-2 {{ email }}
             v-icon(
-              color="primary"
+              color="white"
               right
             ) keyboard_arrow_down
           .subheading(v-else) with your VisualBox account
@@ -81,7 +81,7 @@ export default {
 
 <style lang="stylus" scoped>
 .v-card
-  height 370px
+  height 352px
 
   .welcome
     height 40px

@@ -69,5 +69,5 @@ export default {
   #infotron
     height 600px
     color #edeef1 !important
-    background #272727
+    background #333
 </style>

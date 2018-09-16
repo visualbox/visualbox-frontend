@@ -14,15 +14,17 @@ div
     align-center
     justify-space-between
   )
-    router-link(to="/auth/forgot")
-      base-link Forgot password?
+    v-btn.ma-0(
+      to="/auth/forgot"
+      color="primary"
+      outline
+    ) Forgot password?
     v-btn.ma-0(
       :disabled="!value"
       :loading="isLoading"
-      color="primary"
-      prominent
-      depressed
       @click="$emit('next')"
+      color="primary"
+      prominent depressed
     ) Next
 </template>
 

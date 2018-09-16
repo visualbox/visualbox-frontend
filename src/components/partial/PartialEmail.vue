@@ -12,13 +12,16 @@ div
     align-center
     justify-space-between
   )
-    router-link(to="/auth/signup")
-      base-link Create account
-    base-btn.ma-0(
+    v-btn.ma-0(
+      to="/auth/signup"
+      color="primary"
+      outline
+    ) Create account
+    v-btn.ma-0(
       :disabled="!value"
-      prominent
-      depressed
       @click="$emit('next')"
+      color="primary"
+      prominent depressed
       tabindex="2"
     ) Next
 </template>

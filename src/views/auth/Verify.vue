@@ -24,14 +24,16 @@ base-card
       align-center
       justify-space-between
     )
-      router-link(to="/auth/resend")
-        base-link Resend verification
-      base-btn.ma-0(
+      v-btn.ma-0(
+        to="/auth/resend"
+        color="primary"
+        outline
+      ) Resend verification
+      v-btn.ma-0(
         :disabled="!code"
         :loading="isLoading"
-        prominent
-        depressed
         @click="submit"
+        prominent depressed
       ) Next
 </template>
 

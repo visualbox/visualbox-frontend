@@ -66,6 +66,7 @@ export default {
       .v-icon
         color #FFF !important
 
+      // Left border
       &:before
         content ''
         display block

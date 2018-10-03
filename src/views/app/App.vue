@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import { API } from 'aws-amplify'
 import unauthGuard from '@/mixins/unauthGuard'
 import AppNavigationDrawer from '@/components/app/AppNavigationDrawer'
 
@@ -15,8 +14,7 @@ export default {
   components: { AppNavigationDrawer },
   async mounted () {
     try {
-      const result = await API.get('default', '/dashboard/list')
-      console.log('SUCCESS', result)
+      this.$store.dispatch('Dashboard/list')
     } catch (e) {
       console.error(e)
     }

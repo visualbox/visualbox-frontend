@@ -1,4 +1,5 @@
 const dev = {
+  env: 'dev',
   apiGateway: {
     REGION: process.env.VUE_APP_REGION || undefined,
     ENDPOINT: process.env.VUE_APP_API_GATEWAY_ENDPOINT || undefined
@@ -12,6 +13,7 @@ const dev = {
 }
 
 const prod = {
+  env: 'prod',
   apiGateway: {
     REGION: process.env.VUE_APP_REGION || undefined,
     ENDPOINT: process.env.VUE_APP_API_GATEWAY_ENDPOINT || undefined

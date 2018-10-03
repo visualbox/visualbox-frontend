@@ -15,7 +15,7 @@ Amplify.configure({
   API: {
     endpoints: [
       {
-        name: 'default',
+        name: config.env,
         endpoint: config.apiGateway.ENDPOINT,
         region: config.apiGateway.REGION
       }

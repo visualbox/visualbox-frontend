@@ -3,6 +3,10 @@
   app-context-toolbar
     .subheading Widgets
     v-spacer
+    v-btn(icon)
+      v-icon mdi-magnify
+    v-btn(icon)
+      v-icon mdi-plus-box
   .pa-2
     v-text-field.search(
       clearable solo flat

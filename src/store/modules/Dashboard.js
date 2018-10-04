@@ -13,6 +13,7 @@ const mutations = {
   },
   [t.DASHBOARD_SET_CREATE] (state, payload) {
     // TODO
+    console.log('CREAAATE', payload)
   }
 }
 
@@ -28,12 +29,11 @@ const actions = {
       commit(t.DASHBOARD_SET_LIST, result)
     }
   },
-  async create ({ commit }, payload) {
+  async create ({ commit }) {
     let result = null // Default value
 
     try {
       result = await API.post(config.env, '/dashboard/create')
-      // TODO
     } catch (e) {
       throw e
     } finally {

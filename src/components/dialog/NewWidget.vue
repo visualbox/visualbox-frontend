@@ -5,7 +5,7 @@ v-dialog(
   scrollable
 )
   base-card(:loading="isLoading")
-    v-card-title.headline New Dashboard
+    v-card-title.headline New Widget
     v-card-text
       v-text-field(
         v-model="label"
@@ -28,7 +28,7 @@ import { mapActions, mapGetters } from 'vuex'
 import ProxyValue from '@/mixins/proxyValue'
 
 export default {
-  name: 'NewDashboard',
+  name: 'NewIntegration',
   mixins: [ ProxyValue ], // Possible dialog mixin
   data: () => ({
     label: undefined
@@ -36,11 +36,11 @@ export default {
   computed: mapGetters('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Dashboard', ['create']),
+    // ...mapActions('Widget', ['create']),
     async submit () {
       this.setIsLoading(true)
       try {
-        this.create()
+        // this.create()
       } catch (e) {
         this.setSnackbar({
           type: 'error',

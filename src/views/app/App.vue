@@ -1,7 +1,6 @@
 <template lang="pug">
 #app
   app-navigation-drawer
-  span CONTENT
 </template>
 
 <script>

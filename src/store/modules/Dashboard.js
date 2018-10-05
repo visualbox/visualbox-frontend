@@ -22,7 +22,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result = await API.get(config.env, '/dashboard/list')
+      result = await API.get(config.env, '/dashboard')
     } catch (e) {
       throw e
     } finally {
@@ -33,7 +33,7 @@ const actions = {
     let result = null // Default value
 
     try {
-      result = await API.post(config.env, '/dashboard/create')
+      result = await API.post(config.env, '/dashboard')
     } catch (e) {
       throw e
     } finally {

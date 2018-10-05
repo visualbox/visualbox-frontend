@@ -33,6 +33,7 @@ base-card
         :disabled="!code"
         :loading="isLoading"
         @click="submit"
+        color="primary"
         prominent depressed
       ) Next
 </template>

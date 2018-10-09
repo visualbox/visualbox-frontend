@@ -17,7 +17,7 @@ v-container(fluid fill-height)
       .subheading Widgets are the building blocks of your dashboard.
       .subheading They are self-contained components that are fed data from integrations.
       .subheading You can create your own widgets, or search for already existing widgets.
-      .subheading Reused widgets can be modified to your own needs.
+      .subheading Existing widgets can be modified to your own needs.
       v-icon.index-icon mdi-hexagon-multiple
 </template>
 

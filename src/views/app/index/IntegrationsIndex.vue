@@ -17,7 +17,7 @@ v-container(fluid fill-height)
       .subheading Integrations are the engines behind your dashboard.
       .subheading They fetch, process and format data to be displayed by widgets.
       .subheading You can create your own integration, or search for already existing integrations.
-      .subheading Reused integrations can be modified to your own needs.
+      .subheading Existing integrations can be modified to your own needs.
       v-icon.index-icon mdi-lan
 </template>
 

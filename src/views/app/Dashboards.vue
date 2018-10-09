@@ -36,7 +36,7 @@ export default {
     async submit () {
       this.setIsLoading(true)
       try {
-        this.create()
+        await this.create()
       } catch (e) {
         this.setSnackbar({
           type: 'error',

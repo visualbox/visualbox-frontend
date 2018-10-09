@@ -26,6 +26,16 @@ const actions = {
   },
   setSnackbar ({ commit }, payload) {
     commit(t.APP_SET_SNACKBAR, payload)
+  },
+  async initApp ({dispatch}) {
+    try {
+      await Promise.all([
+        dispatch('Dashboard/list', null, { root: true }),
+        dispatch('Widget/list', null, { root: true })
+      ])
+    } catch (e) {
+      throw e
+    }
   }
 }
 

@@ -8,13 +8,15 @@ import router from '@/router'
 // Vuex modules
 import App from '@/store/modules/App'
 import Dashboard from '@/store/modules/Dashboard'
+import Widget from '@/store/modules/Widget'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   modules: {
     App,
-    Dashboard
+    Dashboard,
+    Widget
   },
   // eslint-disable-next-line
   strict: process.env.NODE_ENV !== 'production'

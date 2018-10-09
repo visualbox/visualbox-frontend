@@ -1,9 +1,12 @@
 <template lang="pug">
 #app
   app-navigation-drawer
+  v-content
+    router-view
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import unauthGuard from '@/mixins/unauthGuard'
 import AppNavigationDrawer from '@/components/app/AppNavigationDrawer'
 
@@ -11,12 +14,29 @@ export default {
   name: 'App',
   mixins: [ unauthGuard ],
   components: { AppNavigationDrawer },
+  methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),
   async mounted () {
+    this.setIsLoading(true)
     try {
-      this.$store.dispatch('Dashboard/list')
+      await this.initApp()
     } catch (e) {
-      console.error(e)
+      this.setSnackbar({
+        type: 'error',
+        msg: e.message
+      })
+    } finally {
+      this.setIsLoading(false)
     }
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+#app
+  height 100%
+
+  & > .v-content
+    height 100%
+    margin-left 300px
+    padding 0 !important
+</style>

@@ -13,6 +13,11 @@ import Integrations from '@/views/app/Integrations'
 import Widgets from '@/views/app/Widgets'
 import Settings from '@/views/app/Settings'
 
+import DashboardsIndex from '@/views/app/index/DashboardsIndex'
+import IntegrationsIndex from '@/views/app/index/IntegrationsIndex'
+import WidgetsIndex from '@/views/app/index/WidgetsIndex'
+import SettingsIndex from '@/views/app/index/SettingsIndex'
+
 Vue.use(Router)
 
 export default new Router({
@@ -57,22 +62,34 @@ export default new Router({
         {
           path: '',
           name: 'dashboards',
-          component: Dashboards
+          components: {
+            context: Dashboards,
+            default: DashboardsIndex
+          }
         },
         {
           path: 'i',
           name: 'integrations',
-          component: Integrations
+          components: {
+            context: Integrations,
+            default: IntegrationsIndex
+          }
         },
         {
           path: 'w',
           name: 'widgets',
-          component: Widgets
+          components: {
+            context: Widgets,
+            default: WidgetsIndex
+          }
         },
         {
           path: 's',
           name: 'settings',
-          component: Settings
+          components: {
+            context: Settings,
+            default: SettingsIndex
+          }
         }
       ]
     }

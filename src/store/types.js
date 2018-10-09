@@ -7,3 +7,7 @@ export const APP_SET_DRAWER = 'APP_SET_DRAWER'
 // Module: Dashboard
 export const DASHBOARD_SET_LIST = 'DASHBOARD_SET_LIST'
 export const DASHBOARD_CONCAT_LIST = 'DASHBOARD_CONCAT_LIST'
+
+// Module: Dashboard
+export const WIDGET_SET_LIST = 'WIDGET_SET_LIST'
+export const WIDGET_CONCAT_LIST = 'WIDGET_CONCAT_LIST'

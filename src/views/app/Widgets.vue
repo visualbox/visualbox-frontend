@@ -1,7 +1,5 @@
 <template lang="pug">
 #widgets
-  new-widget(v-model="showDialog")
-
   app-context-toolbar
     .subheading Widgets
     v-spacer
@@ -13,7 +11,9 @@
       v-icon(v-if="showSearch") mdi-close
     v-btn(
       icon
-      @click="showDialog = true"
+      @click="submit"
+      :loading="isLoading"
+      :disabled="isLoading"
     )
       v-icon mdi-plus-box
 
@@ -28,11 +28,15 @@
 
   //- List
   v-list(v-if="!showSearch")
-    v-list-tile
-      v-list-tile-title Foo
+    v-list-tile(
+      v-for="(item, index) in list"
+      :key="index"
+    )
+      v-list-tile-title {{ item.label }}
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
 import NewWidget from '@/components/dialog/NewWidget'
 
@@ -45,7 +49,28 @@ export default {
   data: () => ({
     showDialog: false,
     showSearch: false
-  })
+  }),
+  computed: {
+    ...mapGetters('App', ['isLoading']),
+    ...mapGetters('Widget', ['list'])
+  },
+  methods: {
+    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('Widget', ['create']),
+    async submit () {
+      this.setIsLoading(true)
+      try {
+        await this.create()
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading(false)
+      }
+    }
+  }
 }
 </script>
 

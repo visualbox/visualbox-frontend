@@ -1,13 +1,13 @@
 <template lang="pug">
 #dashboards
-  new-dashboard(v-model="showDialog")
-
   app-context-toolbar
     .subheading Dashboards
     v-spacer
     v-btn(
       icon
-      @click="showDialog = true"
+      @click="submit"
+      :loading="isLoading"
+      :disabled="isLoading"
     )
       v-icon mdi-plus-box
 
@@ -16,24 +16,37 @@
       v-for="(item, index) in list"
       :key="index"
     )
-      v-list-tile-title {{ index }}
+      v-list-tile-title {{ item.label }}
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
-import NewDashboard from '@/components/dialog/NewDashboard'
 
 export default {
   name: 'Dashboards',
-  components: {
-    AppContextToolbar,
-    NewDashboard
+  components: { AppContextToolbar },
+  computed: {
+    ...mapGetters('App', ['isLoading']),
+    ...mapGetters('Dashboard', ['list'])
   },
-  data: () => ({
-    showDialog: false
-  }),
-  computed: mapGetters('Dashboard', ['list'])
+  methods: {
+    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('Dashboard', ['create']),
+    async submit () {
+      this.setIsLoading(true)
+      try {
+        this.create()
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading(false)
+      }
+    }
+  }
 }
 </script>
 

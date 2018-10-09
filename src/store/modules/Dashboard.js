@@ -11,9 +11,8 @@ const mutations = {
   [t.DASHBOARD_SET_LIST] (state, payload) {
     state.list = _.clone(payload)
   },
-  [t.DASHBOARD_SET_CREATE] (state, payload) {
-    // TODO
-    console.log('CREAAATE', payload)
+  [t.DASHBOARD_CONCAT_LIST] (state, payload) {
+    state.list = state.list.concat(payload)
   }
 }
 
@@ -30,14 +29,14 @@ const actions = {
     }
   },
   async create ({ commit }) {
-    let result = null // Default value
+    let result = [] // Default value
 
     try {
-      result = await API.post(config.env, '/dashboard')
+      result.push(await API.post(config.env, '/dashboard'))
     } catch (e) {
       throw e
     } finally {
-      commit(t.DASHBOARD_SET_CREATE, result)
+      commit(t.DASHBOARD_CONCAT_LIST, result)
     }
   }
 }

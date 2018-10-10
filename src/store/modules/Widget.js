@@ -13,6 +13,9 @@ const mutations = {
   },
   [t.WIDGET_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
+  },
+  [t.WIDGET_DELETE_LIST] (state, id) {
+    state.list = state.list.filter(i => i.id !== id)
   }
 }
 
@@ -38,12 +41,25 @@ const actions = {
     } finally {
       commit(t.WIDGET_CONCAT_LIST, result)
     }
+  },
+  async del ({ commit }, id) {
+    // Immediately remove widget from local app
+    commit(t.WIDGET_DELETE_LIST, id)
+
+    try {
+      await API.del(config.env, `/widget/${id}`)
+    } catch (e) {
+      throw e
+    } finally {}
   }
 }
 
 const getters = {
   list (state) {
     return state.list
+  },
+  widgetById: state => id => {
+    return state.list.find(i => i.id === id)
   }
 }
 

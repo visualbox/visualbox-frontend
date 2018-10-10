@@ -1,5 +1,5 @@
 <template lang="pug">
-#settings
+#settings-ctx
   app-context-toolbar
     .subheading Settings
     v-spacer
@@ -7,9 +7,8 @@
 
 <script>
 import AppContextToolbar from '@/components/app/AppContextToolbar'
-
 export default {
-  name: 'Settings',
+  name: 'SettingsCtx',
   components: { AppContextToolbar }
 }
 </script>

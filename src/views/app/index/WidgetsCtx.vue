@@ -1,5 +1,5 @@
 <template lang="pug">
-#widgets
+#widgets-ctx
   app-context-toolbar
     .subheading Widgets
     v-spacer
@@ -31,24 +31,29 @@
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
+      @mouseover="hoverIndex = index"
+      @mouseout="hoverIndex = null"
+      @click="goto(item.id)"
     )
-      v-list-tile-title {{ item.label }}
+      v-list-tile-content
+        v-list-tile-sub-title {{ item.label }}
+      v-list-tile-action(v-if="index === hoverIndex")
+        v-icon(
+          small
+          @click.stop="del(item.id)"
+        ) mdi-trash-can-outline
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
-import NewWidget from '@/components/dialog/NewWidget'
 
 export default {
-  name: 'Widgets',
-  components: {
-    AppContextToolbar,
-    NewWidget
-  },
+  name: 'WidgetsCtx',
+  components: { AppContextToolbar },
   data: () => ({
-    showDialog: false,
-    showSearch: false
+    showSearch: false,
+    hoverIndex: null
   }),
   computed: {
     ...mapGetters('App', ['isLoading']),
@@ -56,7 +61,10 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Widget', ['create']),
+    ...mapActions('Widget', ['create', 'del']),
+    goto (id) {
+      this.$router.push(`/app/w/${id}`)
+    },
     async submit () {
       this.setIsLoading(true)
       try {
@@ -75,7 +83,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#widgets
+#widgets-ctx
   .v-list
     padding 0
 </style>

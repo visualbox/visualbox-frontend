@@ -1,5 +1,5 @@
 <template lang="pug">
-#dashboards
+#dashboards-ctx
   app-context-toolbar
     .subheading Dashboards
     v-spacer
@@ -24,7 +24,7 @@ import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
 
 export default {
-  name: 'Dashboards',
+  name: 'DashboardsCtx',
   components: { AppContextToolbar },
   computed: {
     ...mapGetters('App', ['isLoading']),
@@ -51,7 +51,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#dashboards
+#dashboards-ctx
   .v-list
     padding 0
 </style>

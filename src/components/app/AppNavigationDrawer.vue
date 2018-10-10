@@ -37,7 +37,8 @@ v-navigation-drawer(
               medium
             ) {{ item.icon }}
   .context
-    router-view(name="context")
+    v-scroll-x-transition(mode="out-in")
+      router-view(name="context")
   </template>
 
 <script>

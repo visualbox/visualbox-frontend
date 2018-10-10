@@ -8,15 +8,20 @@ import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
 import SignOut from '@/views/auth/SignOut'
 import App from '@/views/app/App'
-import Dashboards from '@/views/app/Dashboards'
-import Integrations from '@/views/app/Integrations'
-import Widgets from '@/views/app/Widgets'
-import Settings from '@/views/app/Settings'
 
+// Index
+import DashboardsCtx from '@/views/app/index/DashboardsCtx'
 import DashboardsIndex from '@/views/app/index/DashboardsIndex'
+import IntegrationsCtx from '@/views/app/index/IntegrationsCtx'
 import IntegrationsIndex from '@/views/app/index/IntegrationsIndex'
+import WidgetsCtx from '@/views/app/index/WidgetsCtx'
 import WidgetsIndex from '@/views/app/index/WidgetsIndex'
+import SettingsCtx from '@/views/app/index/SettingsCtx'
 import SettingsIndex from '@/views/app/index/SettingsIndex'
+
+// Selected
+import WidgetCtx from '@/views/app/selected/WidgetCtx'
+import Widget from '@/views/app/selected/Widget'
 
 Vue.use(Router)
 
@@ -61,33 +66,41 @@ export default new Router({
       children: [
         {
           path: '',
-          name: 'dashboards',
+          name: 'dashboards-index',
           components: {
-            context: Dashboards,
+            context: DashboardsCtx,
             default: DashboardsIndex
           }
         },
         {
           path: 'i',
-          name: 'integrations',
+          name: 'integrations-index',
           components: {
-            context: Integrations,
+            context: IntegrationsCtx,
             default: IntegrationsIndex
           }
         },
         {
           path: 'w',
-          name: 'widgets',
+          name: 'widgets-index',
           components: {
-            context: Widgets,
+            context: WidgetsCtx,
             default: WidgetsIndex
           }
         },
         {
-          path: 's',
-          name: 'settings',
+          path: 'w/:id',
+          name: 'widget',
           components: {
-            context: Settings,
+            context: WidgetCtx,
+            default: Widget
+          }
+        },
+        {
+          path: 's',
+          name: 'settings-index',
+          components: {
+            context: SettingsCtx,
             default: SettingsIndex
           }
         }

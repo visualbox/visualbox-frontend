@@ -1,7 +1,5 @@
 <template lang="pug">
-#integrations
-  new-integration(v-model="showDialog")
-
+#integrations-ctx
   app-context-toolbar
     .subheading Integrations
     v-spacer
@@ -34,23 +32,18 @@
 
 <script>
 import AppContextToolbar from '@/components/app/AppContextToolbar'
-import NewIntegration from '@/components/dialog/NewIntegration'
 
 export default {
-  name: 'Integrations',
-  components: {
-    AppContextToolbar,
-    NewIntegration
-  },
+  name: 'IntegrationsCtx',
+  components: { AppContextToolbar },
   data: () => ({
-    showDialog: false,
     showSearch: false
   })
 }
 </script>
 
 <style lang="stylus" scoped>
-#integrations
+#integrations-ctx
   .v-list
     padding 0
 </style>

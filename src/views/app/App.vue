@@ -2,7 +2,8 @@
 #app
   app-navigation-drawer
   v-content
-    router-view
+    v-scroll-x-transition(mode="out-in")
+      router-view
 </template>
 
 <script>

@@ -19,9 +19,9 @@ import WidgetsIndex from '@/views/app/index/WidgetsIndex'
 import SettingsCtx from '@/views/app/index/SettingsCtx'
 import SettingsIndex from '@/views/app/index/SettingsIndex'
 
-// Selected
-import WidgetCtx from '@/views/app/selected/WidgetCtx'
-import Widget from '@/views/app/selected/Widget'
+// Page
+import WidgetCtx from '@/views/app/page/WidgetCtx'
+import Widget from '@/views/app/page/Widget'
 
 Vue.use(Router)
 

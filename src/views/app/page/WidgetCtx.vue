@@ -1,16 +1,16 @@
 <template lang="pug">
-#widget-ctx
+#widget-ctx(v-if="loaded")
   app-context-toolbar
     v-btn(
       icon
       @click="$router.go(-1)"
     )
       v-icon mdi-menu-left
-    .subheading {{ widget.label }}
+    .subheading {{ loaded.label }}
 
   v-form.pa-3
     v-text-field.mb-3(
-      v-model="widget.label"
+      v-model="loaded.label"
       label="Label"
       outline
     )
@@ -23,12 +23,7 @@ import AppContextToolbar from '@/components/app/AppContextToolbar'
 export default {
   name: 'WidgetCtx',
   components: { AppContextToolbar },
-  computed: {
-    ...mapGetters('Widget', ['widgetById']),
-    widget () {
-      return this.widgetById(this.$route.params.id)
-    }
-  }
+  computed: mapGetters('Widget', ['loaded'])
 }
 </script>
 

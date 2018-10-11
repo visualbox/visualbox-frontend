@@ -4,10 +4,14 @@ import { API } from 'aws-amplify'
 import config from '@/config'
 
 const state = {
+  loaded: null,
   list: []
 }
 
 const mutations = {
+  [t.WIDGET_LOAD] (state, payload) {
+    state.loaded = _.clone(payload)
+  },
   [t.WIDGET_SET_LIST] (state, payload) {
     state.list = _.clone(payload)
   },
@@ -20,6 +24,10 @@ const mutations = {
 }
 
 const actions = {
+  // Load a widget by making a local copy
+  load ({ commit, getters }, id) {
+    commit(t.WIDGET_LOAD, getters.widgetById(id))
+  },
   async list ({ commit }, payload) {
     let result = [] // Default value
 
@@ -55,6 +63,9 @@ const actions = {
 }
 
 const getters = {
+  loaded (state) {
+    return state.loaded
+  },
   list (state) {
     return state.list
   },

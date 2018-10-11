@@ -4,13 +4,15 @@ import * as t from '@/store/types'
 const set = property => (store, payload) => (store[property] = payload)
 
 const state = {
-  isReady: false,
+  sessionIsReady: false,
+  appIsReady: false,
   isLoading: false,
   snackbar: {}
 }
 
 const mutations = {
-  [t.APP_SET_IS_READY]: set('isReady'),
+  [t.APP_SET_SESSION_IS_READY]: set('sessionIsReady'),
+  [t.APP_SET_APP_IS_READY]: set('appIsReady'),
   [t.APP_SET_IS_LOADING]: set('isLoading'),
   [t.APP_SET_SNACKBAR] (state, payload) {
     state.snackbar = _.clone(payload)
@@ -18,16 +20,22 @@ const mutations = {
 }
 
 const actions = {
-  setIsReady ({ commit }, payload) {
-    commit(t.APP_SET_IS_READY, payload)
-  },
   setIsLoading ({ commit }, payload) {
     commit(t.APP_SET_IS_LOADING, payload)
   },
   setSnackbar ({ commit }, payload) {
     commit(t.APP_SET_SNACKBAR, payload)
   },
-  async initApp ({dispatch}) {
+  async initSession ({ commit, dispatch }) {
+    try {
+      await dispatch('Cognito/fetchSession', null, { root: true })
+    } catch (e) {
+      throw e
+    } finally {
+      commit(t.APP_SET_SESSION_IS_READY, true)
+    }
+  },
+  async initApp ({ commit, dispatch }) {
     try {
       await Promise.all([
         dispatch('Dashboard/list', null, { root: true }),
@@ -35,13 +43,18 @@ const actions = {
       ])
     } catch (e) {
       throw e
+    } finally {
+      commit(t.APP_SET_APP_IS_READY, true)
     }
   }
 }
 
 const getters = {
-  isReady (state) {
-    return state.isReady
+  sessionIsReady (state) {
+    return state.sessionIsReady
+  },
+  appIsReady (state) {
+    return state.appIsReady
   },
   isLoading (state) {
     return state.isLoading

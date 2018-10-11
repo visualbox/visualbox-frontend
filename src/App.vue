@@ -4,7 +4,7 @@ v-app(dark)
   base-toolbar
 
   v-content
-    router-view(v-if="isReady")
+    router-view(v-if="sessionIsReady")
 </template>
 
 <script>
@@ -13,17 +13,16 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   name: 'App',
   computed: {
-    ...mapGetters('App', ['isReady']),
+    ...mapGetters('App', ['sessionIsReady']),
     ...mapState('Route', ['path'])
   },
-  methods: mapActions('App', ['setIsReady', 'setSnackbar']),
+  methods: mapActions('App', ['initSession', 'setSnackbar']),
   async mounted () {
     try {
-      await this.$store.dispatch('Cognito/fetchSession')
+      await this.initSession()
     } catch (e) {
       // Silent
     } finally {
-      this.setIsReady(true)
       this.setSnackbar({ msg: 'App inited' })
     }
   }

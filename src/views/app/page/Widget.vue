@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import * as monaco from 'monaco-editor'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
 
@@ -36,31 +37,35 @@ export default {
     editorInfo: null
   }),
   methods: {
+    ...mapActions('Widget', ['load']),
     updateDimensions () {
       this.editorInfo.layout()
       this.editorSource.layout()
+    },
+    init () {
+      this.editorInfo = monaco.editor.create(this.$refs.editorInfo, {
+        value: [
+          '# Hello',
+          'World'
+        ].join('\n'),
+        language: 'markdown',
+        theme: 'vs-dark'
+      })
+      this.editorSource = monaco.editor.create(this.$refs.editorSource, {
+        value: [
+          'function x() {',
+          '\tconsole.log("Edit Source");',
+          '}'
+        ].join('\n'),
+        language: 'javascript',
+        theme: 'vs-dark'
+      })
+      window.addEventListener('resize', this.updateDimensions)
     }
   },
   mounted () {
-    this.editorInfo = monaco.editor.create(this.$refs.editorInfo, {
-      value: [
-        'function x() {',
-        '\tconsole.log("Edit Info");',
-        '}'
-      ].join('\n'),
-      language: 'javascript',
-      theme: 'vs-dark'
-    })
-    this.editorSource = monaco.editor.create(this.$refs.editorSource, {
-      value: [
-        'function x() {',
-        '\tconsole.log("Edit Source");',
-        '}'
-      ].join('\n'),
-      language: 'javascript',
-      theme: 'vs-dark'
-    })
-    window.addEventListener('resize', this.updateDimensions)
+    this.load(this.$route.params.id)
+    this.init()
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.updateDimensions)

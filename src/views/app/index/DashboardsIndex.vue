@@ -14,7 +14,7 @@ v-container(fluid fill-height)
       offset-xl3
     )
       .display-3.mb-4 VisualBox
-      .headline Welcome back, {{ user.attributes.name }}!
+      .headline Welcome back!
       v-icon.index-icon mdi-creation
 </template>
 

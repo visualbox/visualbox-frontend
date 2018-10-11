@@ -13,7 +13,7 @@ v-container(fluid fill-height)
       offset-lg2
       offset-xl3
     )
-      .display-3.mb-4 Widgets!
+      .display-3.mb-4 Widgets
       .subheading Widgets are the building blocks of your dashboard.
       .subheading They are self-contained components that are fed data from integrations.
       .subheading You can create your own widgets, or search for already existing widgets.

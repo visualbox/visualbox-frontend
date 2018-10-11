@@ -33,7 +33,7 @@
       :key="index"
       @mouseover="hoverIndex = index"
       @mouseout="hoverIndex = null"
-      @click="goto(item.id)"
+      @click="$router.push(`/app/w/${item.id}`)"
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
@@ -61,10 +61,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Widget', ['create', 'del']),
-    goto (id) {
-      this.$router.push(`/app/w/${id}`)
-    },
+    ...mapActions('Widget', ['load', 'create', 'del']),
     async submit () {
       this.setIsLoading(true)
       try {

@@ -9,10 +9,6 @@
     v-spacer
     v-toolbar-items
       v-btn(
-        to="/features"
-        flat
-      ) Features
-      v-btn(
         to="/auth"
         flat exact
       ) Sign In

@@ -13,6 +13,7 @@
     "aws-amplify": "^1.0.8",
     "lodash": "^4.17.10",
     "marked": "^0.5.1",
+    "moment": "^2.22.2",
     "monaco-editor": "^0.14.3",
     "monaco-editor-webpack-plugin": "^1.5.4",
     "vivus": "^0.4.4",

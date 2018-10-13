@@ -1,7 +1,7 @@
 <template lang="pug">
 #app
   app-navigation-drawer
-  v-content
+  v-content#content
     v-scroll-x-transition(mode="out-in")
       router-view(v-if="appIsReady")
 </template>
@@ -37,8 +37,10 @@ export default {
 #app
   height 100%
 
-  & > .v-content
+  #content
     height 100%
     margin-left 300px
     padding 0 !important
+    position relative
+    overflow hidden
 </style>

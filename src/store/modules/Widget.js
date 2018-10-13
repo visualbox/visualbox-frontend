@@ -9,9 +9,6 @@ const state = {
 }
 
 const mutations = {
-  [t.WIDGET_LOAD] (state, payload) {
-    state.loaded = _.clone(payload)
-  },
   [t.WIDGET_SET_LIST] (state, payload) {
     state.list = _.clone(payload)
   },
@@ -20,14 +17,16 @@ const mutations = {
   },
   [t.WIDGET_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
+  },
+  [t.WIDGET_SET_LOADED] (state, payload) {
+    state.loaded = _.clone(payload)
+  },
+  [t.WIDGET_CONCAT_LOADED] (state, payload) {
+    state.loaded = Object.assign(state.loaded, payload)
   }
 }
 
 const actions = {
-  // Load a widget by making a local copy
-  load ({ commit, getters }, id) {
-    commit(t.WIDGET_LOAD, getters.widgetById(id))
-  },
   async list ({ commit }, payload) {
     let result = [] // Default value
 
@@ -59,6 +58,15 @@ const actions = {
     } catch (e) {
       throw e
     } finally {}
+  },
+  // Load a widget by making a local copy
+  load ({ commit, getters }, id) {
+    commit(t.WIDGET_SET_LOADED, getters.widgetById(id))
+  },
+  // Update a loaded local widget (reuse mutation code)
+  updateLoaded ({ commit }, payload) {
+    payload.updatedAt = +new Date()
+    commit(t.WIDGET_CONCAT_LOADED, payload)
   }
 }
 

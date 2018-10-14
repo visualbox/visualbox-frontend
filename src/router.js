@@ -22,6 +22,8 @@ import SettingsIndex from '@/views/app/index/SettingsIndex'
 // Page
 import WidgetCtx from '@/views/app/page/WidgetCtx'
 import Widget from '@/views/app/page/Widget'
+import IntegrationCtx from '@/views/app/page/IntegrationCtx'
+import Integration from '@/views/app/page/Integration'
 
 Vue.use(Router)
 
@@ -78,6 +80,14 @@ export default new Router({
           components: {
             context: IntegrationsCtx,
             default: IntegrationsIndex
+          }
+        },
+        {
+          path: 'i/:id',
+          name: 'integration',
+          components: {
+            context: IntegrationCtx,
+            default: Integration
           }
         },
         {

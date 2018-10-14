@@ -1,5 +1,5 @@
 <template lang="pug">
-#widget(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#integration(v-if="loaded !== null && typeof loaded !== 'undefined'")
   app-context-toolbar
     v-tabs.elevation-0(
       v-model="tab"
@@ -44,7 +44,7 @@ import AppContextToolbar from '@/components/app/AppContextToolbar'
 import MonacoEditor from '@/components/app/MonacoEditor'
 
 export default {
-  name: 'Widget',
+  name: 'Integration',
   components: {
     AppContextToolbar,
     MonacoEditor
@@ -58,7 +58,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('Widget', ['loaded']),
+    ...mapGetters('Integration', ['loaded']),
     compiledMarkdown () {
       try {
         return marked(this.readme, {
@@ -87,7 +87,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('Widget', ['load', 'updateLoaded', 'commitLoaded']),
+    ...mapActions('Integration', ['load', 'updateLoaded', 'commitLoaded']),
     updateDimensions () {
       this.$refs.editorReadme.getMonaco().layout()
       this.$refs.editorSource.getMonaco().layout()
@@ -106,7 +106,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#widget
+#integration
   height 100%
 
   >>> .tabs-items

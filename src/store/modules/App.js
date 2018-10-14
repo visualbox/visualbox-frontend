@@ -39,7 +39,8 @@ const actions = {
     try {
       await Promise.all([
         dispatch('Dashboard/list', null, { root: true }),
-        dispatch('Widget/list', null, { root: true })
+        dispatch('Widget/list', null, { root: true }),
+        dispatch('Integration/list', null, { root: true })
       ])
     } catch (e) {
       throw e

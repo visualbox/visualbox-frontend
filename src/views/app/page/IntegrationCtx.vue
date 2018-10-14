@@ -1,5 +1,5 @@
 <template lang="pug">
-#widget-ctx(v-if="loaded")
+#integration-ctx(v-if="loaded")
   app-context-toolbar
     v-btn(
       icon
@@ -31,14 +31,14 @@ import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
 
 export default {
-  name: 'WidgetCtx',
+  name: 'IntegrationCtx',
   components: { AppContextToolbar },
   data: () => ({
     internalValue: null
   }),
-  methods: mapActions('Widget', ['updateLoaded']),
+  methods: mapActions('Integration', ['updateLoaded']),
   computed: {
-    ...mapGetters('Widget', ['loaded']),
+    ...mapGetters('Integration', ['loaded']),
     label: {
       get () {
         return this.loaded.label

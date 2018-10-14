@@ -29,7 +29,7 @@ v-navigation-drawer(
         v-list-tile(
           slot="activator"
           :to="item.to"
-          exact
+          :exact="item.to === '/app'"
         )
           v-list-tile-action
             v-icon(

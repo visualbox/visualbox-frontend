@@ -11,7 +11,9 @@
       v-icon(v-if="showSearch") mdi-close
     v-btn(
       icon
-      @click="showDialog = true"
+      @click="submit"
+      :loading="isLoading"
+      :disabled="isLoading"
     )
       v-icon mdi-plus-box
 
@@ -26,19 +28,54 @@
 
   //- List
   v-list(v-if="!showSearch")
-    v-list-tile
-      v-list-tile-title Foo
+    v-list-tile(
+      v-for="(item, index) in list"
+      :key="index"
+      @mouseover="hoverIndex = index"
+      @mouseout="hoverIndex = null"
+      @click="$router.push(`/app/i/${item.id}`)"
+    )
+      v-list-tile-content
+        v-list-tile-sub-title {{ item.label }}
+      v-list-tile-action(v-if="index === hoverIndex")
+        v-icon(
+          small
+          @click.stop="del(item.id)"
+        ) mdi-trash-can-outline
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import AppContextToolbar from '@/components/app/AppContextToolbar'
 
 export default {
   name: 'IntegrationsCtx',
   components: { AppContextToolbar },
   data: () => ({
-    showSearch: false
-  })
+    showSearch: false,
+    hoverIndex: null
+  }),
+  computed: {
+    ...mapGetters('App', ['isLoading']),
+    ...mapGetters('Integration', ['list'])
+  },
+  methods: {
+    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('Integration', ['load', 'create', 'del']),
+    async submit () {
+      this.setIsLoading(true)
+      try {
+        await this.create()
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading(false)
+      }
+    }
+  }
 }
 </script>
 

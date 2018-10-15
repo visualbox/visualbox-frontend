@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Widget', ['load', 'create', 'del']),
+    ...mapActions('Widget', ['create', 'del']),
     async submit () {
       this.setIsLoading(true)
       try {

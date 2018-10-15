@@ -11,12 +11,22 @@
     )
       v-icon mdi-plus-box
 
+  //- List
   v-list
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
+      @mouseover="hoverIndex = index"
+      @mouseout="hoverIndex = null"
+      @click="$router.push(`/app/d/${item.id}`)"
     )
-      v-list-tile-title {{ item.label }}
+      v-list-tile-content
+        v-list-tile-sub-title {{ item.label }}
+      v-list-tile-action(v-if="index === hoverIndex")
+        v-icon(
+          small
+          @click.stop="del(item.id)"
+        ) mdi-trash-can-outline
 </template>
 
 <script>
@@ -26,13 +36,16 @@ import AppContextToolbar from '@/components/app/AppContextToolbar'
 export default {
   name: 'DashboardsCtx',
   components: { AppContextToolbar },
+  data: () => ({
+    hoverIndex: null
+  }),
   computed: {
     ...mapGetters('App', ['isLoading']),
     ...mapGetters('Dashboard', ['list'])
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Dashboard', ['create']),
+    ...mapActions('Dashboard', ['create', 'del']),
     async submit () {
       this.setIsLoading(true)
       try {

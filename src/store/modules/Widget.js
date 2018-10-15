@@ -5,8 +5,8 @@ import config from '@/config'
 import difference from '@/lib/difference'
 
 const state = {
-  loaded: null,
-  list: []
+  list: [],
+  loaded: null
 }
 
 const mutations = {

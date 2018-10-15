@@ -20,6 +20,8 @@ import SettingsCtx from '@/views/app/index/SettingsCtx'
 import SettingsIndex from '@/views/app/index/SettingsIndex'
 
 // Page
+import DashboardCtx from '@/views/app/page/DashboardCtx'
+import Dashboard from '@/views/app/page/Dashboard'
 import WidgetCtx from '@/views/app/page/WidgetCtx'
 import Widget from '@/views/app/page/Widget'
 import IntegrationCtx from '@/views/app/page/IntegrationCtx'
@@ -72,6 +74,15 @@ export default new Router({
           components: {
             context: DashboardsCtx,
             default: DashboardsIndex
+          }
+        },
+
+        {
+          path: 'd/:id',
+          name: 'dashboard',
+          components: {
+            context: DashboardCtx,
+            default: Dashboard
           }
         },
         {

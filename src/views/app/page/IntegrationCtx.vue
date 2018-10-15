@@ -33,9 +33,6 @@ import AppContextToolbar from '@/components/app/AppContextToolbar'
 export default {
   name: 'IntegrationCtx',
   components: { AppContextToolbar },
-  data: () => ({
-    internalValue: null
-  }),
   methods: mapActions('Integration', ['updateLoaded']),
   computed: {
     ...mapGetters('Integration', ['loaded']),

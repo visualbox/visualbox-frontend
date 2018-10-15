@@ -4,7 +4,8 @@ import { API } from 'aws-amplify'
 import config from '@/config'
 
 const state = {
-  list: []
+  list: [],
+  loaded: null
 }
 
 const mutations = {
@@ -13,6 +14,12 @@ const mutations = {
   },
   [t.DASHBOARD_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
+  },
+  [t.DASHBOARD_DELETE_LIST] (state, id) {
+    state.list = state.list.filter(i => i.id !== id)
+  },
+  [t.DASHBOARD_SET_LOADED] (state, payload) {
+    state.loaded = _.cloneDeep(payload)
   }
 }
 
@@ -38,12 +45,32 @@ const actions = {
     } finally {
       commit(t.DASHBOARD_CONCAT_LIST, result)
     }
+  },
+  async del ({ commit }, id) {
+    // Immediately remove dashboard from local app
+    commit(t.DASHBOARD_DELETE_LIST, id)
+
+    try {
+      await API.del(config.env, `/dashboard/${id}`)
+    } catch (e) {
+      throw e
+    } finally {}
+  },
+  // Load a dashboard by making a local copy
+  load ({ commit, getters }, id) {
+    commit(t.DASHBOARD_SET_LOADED, getters.dashboardById(id))
   }
 }
 
 const getters = {
   list (state) {
     return state.list
+  },
+  dashboardById: state => id => {
+    return state.list.find(i => i.id === id)
+  },
+  loaded (state) {
+    return state.loaded
   }
 }
 

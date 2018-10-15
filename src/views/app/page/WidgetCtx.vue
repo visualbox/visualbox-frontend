@@ -33,9 +33,6 @@ import AppContextToolbar from '@/components/app/AppContextToolbar'
 export default {
   name: 'WidgetCtx',
   components: { AppContextToolbar },
-  data: () => ({
-    internalValue: null
-  }),
   methods: mapActions('Widget', ['updateLoaded']),
   computed: {
     ...mapGetters('Widget', ['loaded']),

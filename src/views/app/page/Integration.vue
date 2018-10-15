@@ -11,7 +11,6 @@
       v-tab Edit Info
       v-tab Edit Source
       v-tab Edit Config
-      v-tab Preview
 
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : tab === 0 }")
@@ -32,8 +31,6 @@
       )
     .tab-item(:class="{ 'active' : tab === 3 }")
       span EDIT CONFIG
-    .tab-item(:class="{ 'active' : tab === 4 }")
-      span PREVIEW
 </template>
 
 <script>

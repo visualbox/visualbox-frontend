@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Integration', ['load', 'create', 'del']),
+    ...mapActions('Integration', ['create', 'del']),
     async submit () {
       this.setIsLoading(true)
       try {

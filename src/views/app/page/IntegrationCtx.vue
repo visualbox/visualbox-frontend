@@ -8,20 +8,24 @@
       v-icon mdi-menu-left
     .subheading {{ label }}
 
-  v-form.pa-3
-    v-text-field.mb-3(
-      v-model="label"
-      label="Label"
-      hide-details
-      outline
-    )
-    v-switch(
-      v-model="public"
-      label="Public"
-      color="primary"
-      hide-details
-    )
-    .body-1.font-weight-thin.mt-3.text-xs-right.grey--text Updated: {{ updatedAt }}
+  v-container.pa-3(grid-list-lg)
+    v-layout(row wrap)
+      v-flex(xs12)
+        v-text-field(
+          v-model="label"
+          label="Label"
+          hide-details
+          outline
+        )
+      v-flex(xs12)
+        v-switch(
+          v-model="public"
+          label="Public"
+          color="primary"
+          hide-details
+        )
+      v-flex(xs12)
+        .body-1.font-weight-thin.text-xs-right.grey--text Updated: {{ updatedAt }}
 </template>
 
 <script>

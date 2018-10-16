@@ -20,6 +20,10 @@ const mutations = {
   },
   [t.DASHBOARD_SET_LOADED] (state, payload) {
     state.loaded = _.cloneDeep(payload)
+  },
+  [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
+    state.loaded = _.merge(state.loaded, payload)
+    // state.loaded = _.cloneDeep(state.loaded)
   }
 }
 
@@ -59,6 +63,11 @@ const actions = {
   // Load a dashboard by making a local copy
   load ({ commit, getters }, id) {
     commit(t.DASHBOARD_SET_LOADED, getters.dashboardById(id))
+  },
+  // Update a loaded local dashboard
+  updateLoaded ({ commit, dispatch }, payload) {
+    payload.updatedAt = +new Date()
+    commit(t.DASHBOARD_CONCAT_LOADED, payload)
   }
 }
 

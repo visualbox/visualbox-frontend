@@ -9,20 +9,19 @@ v-container#dashboard(
     row
     fill-height
   )
-    mr-container.elevation-5(
+    dashboard-layout.elevation-5(
       :style="style"
-      @drop="dropHandler"
     )
-      span foo
 </template>
 
 <script>
+import * as _ from 'lodash'
 import { mapActions, mapGetters } from 'vuex'
-import MrContainer from '@/components/app/MrContainer'
+import { DashboardLayout } from '@/components/app'
 
 export default {
   name: 'Dashboard',
-  components: { MrContainer },
+  components: { DashboardLayout },
   computed: {
     ...mapGetters('Dashboard', ['loaded']),
     style () {
@@ -37,20 +36,30 @@ export default {
       }
     }
   },
-  methods: {
-    ...mapActions('Dashboard', ['load']),
-    dropHandler (e) {
-      const appContainer = document.getElementById('app')
-      let element = JSON.parse(e.dataTransfer.getData('text/plain'))
-
-      let top = e.pageY + appContainer.scrollTop - appContainer.offsetTop - this.$el.offsetTop - (50 / 2)
-      let left = e.pageX + appContainer.scrollLeft - appContainer.offsetLeft - this.$el.offsetLeft - (50 / 2)
-      console.log(top, left)
-
-      // const fixedElement = fixElementToParentBounds({top, left, height, width}, this.page)
-      // element = {...element, ...fixedElement}
-      // this.registerElement({pageId: this.page.id, el: element, global: e.shiftKey})
+  watch: {
+    loaded: {
+      handler: _.debounce(async function () {
+        try {
+          await this.commitLoaded()
+          this.setSnackbar({
+            type: 'info',
+            msg: `Saved changes`,
+            timeout: 1500
+          })
+        } catch (e) {
+          this.setSnackbar({
+            type: 'error',
+            msg: `Failed to saved changes`,
+            timeout: 1500
+          })
+        }
+      }, process.env.VUE_APP_COMMIT_DEBOUNCE),
+      deep: true
     }
+  },
+  methods: {
+    ...mapActions('App', ['setSnackbar']),
+    ...mapActions('Dashboard', ['load', 'commitLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
@@ -61,8 +70,4 @@ export default {
 <style lang="stylus" scoped>
 #dashboard
   height 100%
-
-  #mr-container
-    height 100%
-    background #FFF
 </style>

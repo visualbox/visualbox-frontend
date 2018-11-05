@@ -123,6 +123,12 @@ export default {
       &.scroll
         overflow auto
 
+        .markdown
+          word-wrap break-word
+
+          img
+            max-width 100%
+
   >>> .editor
     height 100%
 </style>

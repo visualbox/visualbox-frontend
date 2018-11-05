@@ -47,8 +47,8 @@ export default {
   data: () => ({
     items: [
       { title: 'Dashboards', to: '/app', icon: 'panorama_wide_angle' },
-      { title: 'Integrations', to: '/app/i', icon: 'device_hub' },
-      { title: 'Widgets', to: '/app/w', icon: 'widgets' },
+      { title: 'Manage Integrations', to: '/app/i', icon: 'device_hub' },
+      { title: 'Manage Widgets', to: '/app/w', icon: 'widgets' },
       { title: 'Settings', to: '/app/s', icon: 'settings' },
       { title: 'Logout', to: '/auth/signout', icon: 'power_settings_new', class: 'bottom' }
     ]

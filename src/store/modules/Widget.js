@@ -3,6 +3,7 @@ import * as t from '@/store/types'
 import { API } from 'aws-amplify'
 import config from '@/config'
 import difference from '@/lib/difference'
+import mergeDeep from '@/lib/mergeDeep'
 
 const state = {
   list: [],
@@ -23,7 +24,8 @@ const mutations = {
     state.loaded = _.cloneDeep(payload)
   },
   [t.WIDGET_CONCAT_LOADED] (state, payload) {
-    state.loaded = Object.assign(state.loaded, payload)
+    state.loaded = mergeDeep(state.loaded, payload)
+    state.loaded = _.cloneDeep(state.loaded)
   },
   [t.WIDGET_COMMIT_LOADED] (state) {
     const { loaded } = state

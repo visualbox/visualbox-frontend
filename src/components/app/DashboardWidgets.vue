@@ -1,33 +1,40 @@
 <template lang="pug">
 #dashboard-widgets
-  v-list
-    v-list-tile(
-      v-for="(item, index) in list"
-      :key="index"
-      draggable="true"
-      @dragstart="e => dragstartHandler(e, item)"
-      @click=""
-    )
-      v-list-tile-avatar
-        v-icon widgets
-      v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
+
+  v-container.pa-3(grid-list-xs)
+    v-layout(row wrap)
+      v-flex(
+        xs4
+        v-for="(item, index) in list"
+        :key="index"
+        @click="addWidget(item.id)"
+        justify-center
+      )
+        v-card.text-xs-center
+          v-card-text
+            v-layout(column justify-center fill-height)
+              .caption {{ item.label }}
 </template>
 
 <script>
-import * as _ from 'lodash'
-import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'DashboardWidgets',
   computed: mapGetters('Widget', ['list']),
   methods: {
-    dragstartHandler (e, item) {
-      e.dataTransfer.dropEffect = 'copy'
-      e.dataTransfer.effectAllowed = 'all'
-      e.dataTransfer.setData('text/plain', JSON.stringify(item))
-      console.log(item)
+    ...mapActions('Dashboard', ['updateLoaded']),
+    addWidget (id) {
+      const config = {} // Parse config definition here, this.widgetById(id)
+      const newWidget = {
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+        i: id, // Make unique ID here (need to check if DB already has ID)
+        config
+      }
+      this.updateLoaded({ widgets: [newWidget] })
     }
   }
 }
@@ -35,8 +42,11 @@ export default {
 
 <style lang="stylus" scoped>
 #dashboard-widgets
-  .v-card
-    height 90px
-    overflow hidden
-    word-break break-all
+  .v-card__text
+    height 80px
+    padding 6px
+
+    div
+      overflow hidden
+      word-wrap break-word
 </style>

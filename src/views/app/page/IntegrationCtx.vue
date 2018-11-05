@@ -37,7 +37,10 @@ import { AppContextToolbar } from '@/components/app'
 export default {
   name: 'IntegrationCtx',
   components: { AppContextToolbar },
-  methods: mapActions('Integration', ['updateLoaded']),
+  methods: {
+    ...mapActions('Integration', ['updateLoaded']),
+    ...mapActions('App', ['setSnackbar'])
+  },
   computed: {
     ...mapGetters('Integration', ['loaded']),
     label: {
@@ -59,6 +62,22 @@ export default {
     updatedAt () {
       const { updatedAt } = this.loaded
       return moment(updatedAt).format('DD/MM HH:mm:ss')
+    }
+  },
+  watch: {
+    loaded: {
+      handler: function (oldVal, newVal) {
+        // Don't display 'Saved changes' when changing integration
+        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
+          return
+
+        this.setSnackbar({
+          type: 'info',
+          msg: `Saved changes`,
+          timeout: 1500
+        })
+      },
+      deep: true
     }
   }
 }

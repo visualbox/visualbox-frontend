@@ -74,7 +74,7 @@ import { BaseCard } from '@/components/base'
 
 export default {
   name: 'SignUp',
-  component: { BaseCard },
+  components: { BaseCard },
   data () {
     const data = {
       form: false,

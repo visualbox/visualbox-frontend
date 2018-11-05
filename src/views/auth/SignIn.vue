@@ -83,7 +83,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-base-card
+.v-card
   height 352px
 
   .welcome

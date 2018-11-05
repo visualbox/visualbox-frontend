@@ -15,8 +15,9 @@ export default {
 
   >>> .v-toolbar__content
     padding 0 16px !important
-    
+
     .subheading
+      white-space nowrap
       overflow hidden
       text-overflow ellipsis
 </style>

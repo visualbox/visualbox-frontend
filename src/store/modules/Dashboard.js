@@ -2,6 +2,8 @@ import * as _ from 'lodash'
 import * as t from '@/store/types'
 import { API } from 'aws-amplify'
 import config from '@/config'
+import difference from '@/lib/difference'
+import mergeDeep from '@/lib/mergeDeep'
 
 const state = {
   list: [],
@@ -22,8 +24,14 @@ const mutations = {
     state.loaded = _.cloneDeep(payload)
   },
   [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
-    state.loaded = _.merge(state.loaded, payload)
-    // state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = mergeDeep(state.loaded, payload)
+    state.loaded = _.cloneDeep(state.loaded)
+  },
+  [t.DASHBOARD_COMMIT_LOADED] (state) {
+    const { loaded } = state
+    let index = state.list.findIndex(i => i.id === loaded.id)
+    state.list[index] = _.cloneDeep(loaded)
+    state.list = _.cloneDeep(state.list)
   }
 }
 
@@ -68,6 +76,15 @@ const actions = {
   updateLoaded ({ commit, dispatch }, payload) {
     payload.updatedAt = +new Date()
     commit(t.DASHBOARD_CONCAT_LOADED, payload)
+  },
+  // Commit a loaded local dashboard
+  async commitLoaded ({ commit, getters }) {
+    try {
+      await API.put(config.env, `/dashboard/${getters.loaded.id}`, { body: getters.loadedDiff })
+      commit(t.DASHBOARD_COMMIT_LOADED)
+    } catch (e) {
+      throw e
+    } finally {}
   }
 }
 
@@ -80,6 +97,15 @@ const getters = {
   },
   loaded (state) {
     return state.loaded
+  },
+  // Return diff between loaded and old item in list
+  loadedDiff (state, getters) {
+    try {
+      const loaded = state.loaded
+      return difference(loaded, getters.dashboardById(loaded.id))
+    } catch (e) {
+      return {}
+    }
   }
 }
 

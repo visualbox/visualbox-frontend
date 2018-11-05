@@ -37,7 +37,10 @@ import { AppContextToolbar } from '@/components/app'
 export default {
   name: 'WidgetCtx',
   components: { AppContextToolbar },
-  methods: mapActions('Widget', ['updateLoaded']),
+  methods: {
+    ...mapActions('Widget', ['updateLoaded']),
+    ...mapActions('App', ['setSnackbar'])
+  },
   computed: {
     ...mapGetters('Widget', ['loaded']),
     label: {
@@ -59,6 +62,22 @@ export default {
     updatedAt () {
       const { updatedAt } = this.loaded
       return moment(updatedAt).format('DD/MM HH:mm:ss')
+    }
+  },
+  watch: {
+    loaded: {
+      handler: function (oldVal, newVal) {
+        // Don't display 'Saved changes' when changing widget
+        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
+          return
+
+        this.setSnackbar({
+          type: 'info',
+          msg: `Saved changes`,
+          timeout: 1500
+        })
+      },
+      deep: true
     }
   }
 }

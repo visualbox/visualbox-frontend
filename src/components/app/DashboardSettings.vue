@@ -33,8 +33,7 @@
               )
               | Background Color
             color-picker(
-              v-model="colors"
-              @input="updateColor"
+              v-model="bgc"
             )
 </template>
 
@@ -77,18 +76,18 @@ export default {
         this.updateLoaded({ settings: { height } })
       }, 20)
     },
-    bgc () {
-      const { r, g, b, a } = this.loaded.settings.rgba
-      return `rgba(${r}, ${g}, ${b}, ${a})`
+    bgc: {
+      get () {
+        const { r, g, b, a } = this.loaded.settings.rgba
+        return `rgba(${r}, ${g}, ${b}, ${a})`
+      },
+      set: _.debounce(function (val) {
+        const { rgba } = val
+        this.updateLoaded({ settings: { rgba } })
+      }, 20)
     }
   },
-  methods: {
-    ...mapActions('Dashboard', ['updateLoaded']),
-    updateColor: _.debounce(function (val) {
-      const { rgba } = val
-      this.updateLoaded({ settings: { rgba } })
-    }, 20)
-  }
+  methods: mapActions('Dashboard', ['updateLoaded'])
 }
 </script>
 
@@ -97,13 +96,13 @@ export default {
   >>> .vc-chrome
     width unset
     font-family inherit
-    
+
     .vc-chrome-body
       background-color #424242
-      
+
       .vc-checkerboard
         background-repeat repeat
-      
+
       .vc-chrome-fields
         .vc-input__input, .vc-input__label
           color #FFF !important

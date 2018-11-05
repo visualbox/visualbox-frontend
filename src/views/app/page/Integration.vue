@@ -37,8 +37,7 @@
 import marked from 'marked'
 import * as _ from 'lodash'
 import { mapActions, mapGetters } from 'vuex'
-import AppContextToolbar from '@/components/app/AppContextToolbar'
-import MonacoEditor from '@/components/app/MonacoEditor'
+import { AppContextToolbar, MonacoEditor } from '@/components/app'
 
 export default {
   name: 'Integration',

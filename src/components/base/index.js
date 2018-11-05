@@ -1,9 +1,3 @@
-import Vue from 'vue'
-
-import BaseCard from './BaseCard'
-import BaseSnackbar from './BaseSnackbar'
-import BaseToolbar from './BaseToolbar'
-
-Vue.component('base-card', BaseCard)
-Vue.component('base-snackbar', BaseSnackbar)
-Vue.component('base-toolbar', BaseToolbar)
+export { default as BaseCard } from './BaseCard'
+export { default as BaseSnackbar } from './BaseSnackbar'
+export { default as BaseToolbar } from './BaseToolbar'

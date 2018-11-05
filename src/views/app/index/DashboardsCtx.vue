@@ -31,7 +31,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import AppContextToolbar from '@/components/app/AppContextToolbar'
+import { AppContextToolbar } from '@/components/app'
 
 export default {
   name: 'DashboardsCtx',

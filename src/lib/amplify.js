@@ -2,7 +2,7 @@ import Amplify from '@aws-amplify/core'
 import config from '@/config'
 
 Amplify.Logger.LOG_LEVEL = process.env.NODE_ENV === 'development'
-  ? 'DEBUG'
+  ? 'INFO'
   : 'ERROR'
 
 Amplify.configure({

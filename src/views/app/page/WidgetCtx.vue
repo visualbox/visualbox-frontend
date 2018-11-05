@@ -32,7 +32,7 @@
 import * as _ from 'lodash'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
-import AppContextToolbar from '@/components/app/AppContextToolbar'
+import { AppContextToolbar } from '@/components/app'
 
 export default {
   name: 'WidgetCtx',

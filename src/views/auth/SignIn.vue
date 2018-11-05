@@ -39,12 +39,15 @@ base-card
 
 <script>
 import { mapActions } from 'vuex'
+import { BaseCard } from '@/components/base'
+import { PartialEmail, PartialPassword } from '@/components/partial'
 
 export default {
   name: 'SignIn',
   components: {
-    PartialEmail: () => import('@/components/partial/PartialEmail'),
-    PartialPassword: () => import('@/components/partial/PartialPassword')
+    BaseCard,
+    PartialEmail,
+    PartialPassword
   },
   data: () => ({
     email: undefined,
@@ -80,7 +83,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.v-card
+base-card
   height 352px
 
   .welcome

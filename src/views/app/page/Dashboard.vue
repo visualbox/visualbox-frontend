@@ -9,15 +9,20 @@ v-container#dashboard(
     row
     fill-height
   )
-    #slate.elevation-5(:style="style")
+    mr-container.elevation-5(
+      :style="style"
+      @drop="dropHandler"
+    )
       span foo
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import MrContainer from '@/components/app/MrContainer'
 
 export default {
   name: 'Dashboard',
+  components: { MrContainer },
   computed: {
     ...mapGetters('Dashboard', ['loaded']),
     style () {
@@ -32,7 +37,21 @@ export default {
       }
     }
   },
-  methods: mapActions('Dashboard', ['load']),
+  methods: {
+    ...mapActions('Dashboard', ['load']),
+    dropHandler (e) {
+      const appContainer = document.getElementById('app')
+      let element = JSON.parse(e.dataTransfer.getData('text/plain'))
+
+      let top = e.pageY + appContainer.scrollTop - appContainer.offsetTop - this.$el.offsetTop - (50 / 2)
+      let left = e.pageX + appContainer.scrollLeft - appContainer.offsetLeft - this.$el.offsetLeft - (50 / 2)
+      console.log(top, left)
+
+      // const fixedElement = fixElementToParentBounds({top, left, height, width}, this.page)
+      // element = {...element, ...fixedElement}
+      // this.registerElement({pageId: this.page.id, el: element, global: e.shiftKey})
+    }
+  },
   mounted () {
     this.load(this.$route.params.id)
   }
@@ -43,7 +62,7 @@ export default {
 #dashboard
   height 100%
 
-  #slate
+  #mr-container
     height 100%
     background #FFF
 </style>

@@ -70,9 +70,11 @@ base-card
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { BaseCard } from '@/components/base'
 
 export default {
   name: 'SignUp',
+  component: { BaseCard },
   data () {
     const data = {
       form: false,

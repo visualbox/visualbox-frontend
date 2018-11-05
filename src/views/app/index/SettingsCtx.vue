@@ -6,7 +6,8 @@
 </template>
 
 <script>
-import AppContextToolbar from '@/components/app/AppContextToolbar'
+import { AppContextToolbar } from '@/components/app'
+
 export default {
   name: 'SettingsCtx',
   components: { AppContextToolbar }

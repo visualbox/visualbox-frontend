@@ -9,9 +9,14 @@ v-app(dark)
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { BaseToolbar, BaseSnackbar } from '@/components/base'
 
 export default {
   name: 'App',
+  components: {
+    BaseToolbar,
+    BaseSnackbar
+  },
   computed: {
     ...mapGetters('App', ['sessionIsReady']),
     ...mapState('Route', ['path'])

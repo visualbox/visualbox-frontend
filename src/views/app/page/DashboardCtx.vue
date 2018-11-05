@@ -32,9 +32,7 @@
 import * as _ from 'lodash'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
-import AppContextToolbar from '@/components/app/AppContextToolbar'
-import DashboardWidgets from '@/components/app/DashboardWidgets'
-import DashboardSettings from '@/components/app/DashboardSettings'
+import { AppContextToolbar, DashboardWidgets, DashboardSettings } from '@/components/app'
 
 export default {
   name: 'DashboardCtx',

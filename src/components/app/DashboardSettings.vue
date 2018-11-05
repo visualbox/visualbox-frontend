@@ -97,13 +97,13 @@ export default {
   >>> .vc-chrome
     width unset
     font-family inherit
-    
+
     .vc-chrome-body
       background-color #424242
-      
+
       .vc-checkerboard
         background-repeat repeat
-      
+
       .vc-chrome-fields
         .vc-input__input, .vc-input__label
           color #FFF !important

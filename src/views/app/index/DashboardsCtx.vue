@@ -22,11 +22,12 @@
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action(v-if="index === hoverIndex")
-        v-icon(
-          small
+      v-list-tile-action(v-if="index === hoverIndex || true")
+        v-btn(
+          flat icon
           @click.stop="del(item.id)"
-        ) mdi-trash-can-outline
+        )
+          v-icon(small) mdi-trash-can-outline
 </template>
 
 <script>
@@ -67,4 +68,7 @@ export default {
 #dashboards-ctx
   .v-list
     padding 0
+
+    .v-list__tile__content
+      cursor pointer
 </style>

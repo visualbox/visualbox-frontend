@@ -38,10 +38,11 @@
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
       v-list-tile-action(v-if="index === hoverIndex")
-        v-icon(
-          small
+        v-btn(
+          flat icon
           @click.stop="del(item.id)"
-        ) mdi-trash-can-outline
+        )
+          v-icon(small) mdi-trash-can-outline
 </template>
 
 <script>

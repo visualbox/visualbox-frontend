@@ -46,11 +46,11 @@ export default {
     ...mapGetters('Dashboard', ['loaded']),
     label: {
       get () {
-        return this.loaded.label
+        return _.get(this, 'loaded.label', '')
       },
-      set: _.debounce(function (label) {
+      set (label) {
         this.updateLoaded({ label })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     },
     updatedAt () {
       const { updatedAt } = this.loaded

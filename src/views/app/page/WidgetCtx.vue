@@ -29,8 +29,8 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
 import moment from 'moment'
+import * as _ from 'lodash'
 import { mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 
@@ -45,39 +45,23 @@ export default {
     ...mapGetters('Widget', ['loaded']),
     label: {
       get () {
-        return this.loaded.label
+        return _.get(this, 'loaded.label', '')
       },
-      set: _.debounce(function (label) {
+      set (label) {
         this.updateLoaded({ label })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     },
     public: {
       get () {
-        return this.loaded.public
+        return _.get(this, 'loaded.public', false)
       },
-      set: _.debounce(function (isPublic) {
+      set (isPublic) {
         this.updateLoaded({ public: isPublic })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     },
     updatedAt () {
       const { updatedAt } = this.loaded
       return moment(updatedAt).format('DD/MM HH:mm:ss')
-    }
-  },
-  watch: {
-    loaded: {
-      handler: function (oldVal, newVal) {
-        // Don't display 'Saved changes' when changing widget
-        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
-          return
-
-        this.setSnackbar({
-          type: 'info',
-          msg: `Saved changes`,
-          timeout: 1500
-        })
-      },
-      deep: true
     }
   }
 }

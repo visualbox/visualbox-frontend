@@ -4,6 +4,7 @@ import { API } from 'aws-amplify'
 import config from '@/config'
 import difference from '@/lib/difference'
 import mergeDeep from '@/lib/mergeDeep'
+import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
@@ -27,11 +28,15 @@ const mutations = {
     state.loaded = mergeDeep(state.loaded, payload)
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.WIDGET_COMMIT_LOADED] (state) {
+  [t.WIDGET_COMMIT_LOADED] (state, nullify = false) {
     const { loaded } = state
     let index = state.list.findIndex(i => i.id === loaded.id)
     state.list[index] = _.cloneDeep(loaded)
     state.list = _.cloneDeep(state.list)
+
+    // Used when closing / exiting 'loaded'
+    if (nullify)
+      state.loaded = null
   }
 }
 
@@ -73,11 +78,20 @@ const actions = {
     commit(t.WIDGET_SET_LOADED, getters.widgetById(id))
   },
   // Update a loaded local widget
-  updateLoaded ({ commit, dispatch }, payload) {
+  updateLoaded ({ commit, dispatch }, payload = {}) {
     payload.updatedAt = +new Date()
     commit(t.WIDGET_CONCAT_LOADED, payload)
-
-    dispatch('commitLoaded')
+  },
+  async closeLoaded ({ commit, dispatch, getters }) {
+    dispatch('updateLoaded') // To add timestamp
+    try {
+      const id = getters.loaded.id
+      const diff = cloneDeep(getters.loadedDiff)
+      commit(t.WIDGET_COMMIT_LOADED, true) // Must come before API call
+      await API.put(config.env, `/widget/${id}`, { body: diff })
+    } catch (e) {
+      throw e
+    }
   },
   // Commit a loaded local widget
   async commitLoaded ({ commit, getters }) {
@@ -86,7 +100,7 @@ const actions = {
       commit(t.WIDGET_COMMIT_LOADED)
     } catch (e) {
       throw e
-    } finally {}
+    }
   }
 }
 

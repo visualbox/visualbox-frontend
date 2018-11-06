@@ -38,7 +38,11 @@ export default {
   },
   watch: {
     loaded: {
-      handler: _.debounce(async function () {
+      handler: _.debounce(async function (oldVal, newVal) {
+        // Don't display 'Saved changes' when changing dashboard
+        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
+          return
+
         try {
           await this.commitLoaded()
           this.setSnackbar({
@@ -46,23 +50,20 @@ export default {
             msg: `Saved changes`,
             timeout: 1500
           })
-        } catch (e) {
-          this.setSnackbar({
-            type: 'error',
-            msg: `Failed to saved changes`,
-            timeout: 1500
-          })
-        }
+        } catch (e) {}
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     }
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'commitLoaded'])
+    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
+  },
+  beforeDestroy () {
+    this.closeLoaded()
   }
 }
 </script>

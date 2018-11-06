@@ -56,25 +56,25 @@ export default {
       get () {
         return this.loaded.label
       },
-      set: _.debounce(function (label) {
+      set (label) {
         this.updateLoaded({ label })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     },
     width: {
       get () {
         return this.loaded.settings.width
       },
-      set: _.debounce(function (width) {
+      set (width) {
         this.updateLoaded({ settings: { width } })
-      }, 20)
+      }
     },
     height: {
       get () {
         return this.loaded.settings.height
       },
-      set: _.debounce(function (height) {
+      set (height) {
         this.updateLoaded({ settings: { height } })
-      }, 20)
+      }
     },
     bgc: {
       get () {

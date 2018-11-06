@@ -51,6 +51,23 @@ export default {
   watch: {
     tab () {
       this.updateDimensions()
+    },
+    loaded: {
+      handler: _.debounce(async function (oldVal, newVal) {
+        // Don't display 'Saved changes' when changing integration
+        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
+          return
+
+        try {
+          await this.commitLoaded()
+          this.setSnackbar({
+            type: 'info',
+            msg: `Saved changes`,
+            timeout: 1500
+          })
+        } catch (e) {}
+      }, process.env.VUE_APP_COMMIT_DEBOUNCE),
+      deep: true
     }
   },
   computed: {
@@ -67,23 +84,24 @@ export default {
     },
     readme: {
       get () {
-        return this.loaded.readme
+        return _.get(this, 'loaded.readme', '')
       },
-      set: _.debounce(function (readme) {
+      set (readme) {
         this.updateLoaded({ readme })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     },
     source: {
       get () {
-        return this.loaded.source
+        return _.get(this, 'loaded.source', '')
       },
-      set: _.debounce(function (source) {
+      set (source) {
         this.updateLoaded({ source })
-      }, process.env.VUE_APP_COMMIT_DEBOUNCE)
+      }
     }
   },
   methods: {
-    ...mapActions('Integration', ['load', 'updateLoaded', 'commitLoaded']),
+    ...mapActions('App', ['setSnackbar']),
+    ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
     updateDimensions () {
       this.$refs.editorReadme.getMonaco().layout()
       this.$refs.editorSource.getMonaco().layout()
@@ -97,6 +115,7 @@ export default {
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.updateDimensions)
+    this.closeLoaded()
   }
 }
 </script>

@@ -4,6 +4,7 @@ import { API } from 'aws-amplify'
 import config from '@/config'
 import difference from '@/lib/difference'
 import mergeDeep from '@/lib/mergeDeep'
+import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
@@ -27,11 +28,35 @@ const mutations = {
     state.loaded = mergeDeep(state.loaded, payload)
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_COMMIT_LOADED] (state) {
+  [t.DASHBOARD_COMMIT_LOADED] (state, nullify = false) {
     const { loaded } = state
     let index = state.list.findIndex(i => i.id === loaded.id)
     state.list[index] = _.cloneDeep(loaded)
     state.list = _.cloneDeep(state.list)
+
+    // Used when closing / exiting 'loaded'
+    if (nullify)
+      state.loaded = null
+  },
+  [t.DASHBOARD_ADD_WIDGET] (state, id) {
+    // Generate widget ID
+    let n = 0
+    let i = `_${n}`
+    while (typeof state.loaded.widgets.find(w => w.i === i) !== 'undefined') {
+      n++
+      i = `_${n}`
+    }
+
+    state.loaded.widgets.push({
+      x: 0,
+      y: 0,
+      w: 4,
+      h: 4,
+      i,
+      id,
+      config: {} // Parse config definition here, this.widgetById(id)
+    })
+    state.loaded = _.cloneDeep(state.loaded)
   }
 }
 
@@ -73,9 +98,20 @@ const actions = {
     commit(t.DASHBOARD_SET_LOADED, getters.dashboardById(id))
   },
   // Update a loaded local dashboard
-  updateLoaded ({ commit, dispatch }, payload) {
+  updateLoaded ({ commit, dispatch }, payload = {}) {
     payload.updatedAt = +new Date()
     commit(t.DASHBOARD_CONCAT_LOADED, payload)
+  },
+  async closeLoaded ({ commit, dispatch, getters }) {
+    dispatch('updateLoaded') // To add timestamp
+    try {
+      const id = getters.loaded.id
+      const diff = cloneDeep(getters.loadedDiff)
+      commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
+      await API.put(config.env, `/dashboard/${id}`, { body: diff })
+    } catch (e) {
+      throw e
+    }
   },
   // Commit a loaded local dashboard
   async commitLoaded ({ commit, getters }) {
@@ -84,7 +120,7 @@ const actions = {
       commit(t.DASHBOARD_COMMIT_LOADED)
     } catch (e) {
       throw e
-    } finally {}
+    }
   }
 }
 
@@ -102,7 +138,9 @@ const getters = {
   loadedDiff (state, getters) {
     try {
       const loaded = state.loaded
-      return difference(loaded, getters.dashboardById(loaded.id))
+      let diff = difference(loaded, getters.dashboardById(loaded.id))
+      diff.widgets = loaded.widgets // Cannot take diff on widgets
+      return diff
     } catch (e) {
       return {}
     }

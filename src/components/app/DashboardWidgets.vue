@@ -17,24 +17,18 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 
 export default {
   name: 'DashboardWidgets',
-  computed: mapGetters('Widget', ['list']),
+  computed: {
+    ...mapGetters('Widget', ['list']),
+    ...mapGetters('Dashboard', ['loaded'])
+  },
   methods: {
-    ...mapActions('Dashboard', ['updateLoaded']),
+    ...mapMutations('Dashboard', ['DASHBOARD_ADD_WIDGET']),
     addWidget (id) {
-      const config = {} // Parse config definition here, this.widgetById(id)
-      const newWidget = {
-        x: 0,
-        y: 0,
-        w: 4,
-        h: 4,
-        i: id, // Make unique ID here (need to check if DB already has ID)
-        config
-      }
-      this.updateLoaded({ widgets: [newWidget] })
+      this.DASHBOARD_ADD_WIDGET(id)
     }
   }
 }

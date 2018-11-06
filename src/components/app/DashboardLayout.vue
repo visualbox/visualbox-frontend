@@ -1,11 +1,11 @@
 <template lang="pug">
 grid-layout#dashboard-layout(
-  :layout.sync="layout"
-  :row-height="30"
+  :layout="layout"
+  :col-num="24"
+  :row-height="15"
   :margin="[10, 10]"
   :is-draggable="true"
   :is-resizable="true"
-  :vertical-compact="false"
   :use-css-transforms="true"
   :auto-size="false"
   @layout-updated="layoutUpdatedEvent"
@@ -18,46 +18,52 @@ grid-layout#dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
-  ) {{ item.i }}
+  )
+    base-card {{ item.i }}
 </template>
 
 <script>
+import * as _ from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import cloneDeep from '@/lib/cloneDeep'
+import { BaseCard } from '@/components/base'
 
 export default {
   name: 'DashboardLayout',
   components: {
     GridLayout,
-    GridItem
+    GridItem,
+    BaseCard
   },
   data: () => ({
     layout: []
   }),
-  computed: mapGetters('Dashboard', ['loaded']),
+  computed: {
+    ...mapGetters('Dashboard', ['loaded']),
+    widgets () {
+      return _.get(this, 'loaded.widgets', [])
+    }
+  },
   methods: {
     ...mapActions('Dashboard', ['updateLoaded']),
-    layoutUpdatedEvent (layout) {
-      console.log('new layout')
-      this.updateLoaded({ widgets: layout })
+    layoutUpdatedEvent (widgets) {
+      console.log('new layout', widgets)
+      this.updateLoaded({ widgets })
     }
   },
   watch: {
-    loaded: {
-      handler: function (loaded) {
-        console.log('loaded', loaded.widgets)
-        this.layout = cloneDeep(loaded.widgets)
+    widgets: {
+      handler: function (widgets) {
+        console.log('hasChanged')
+        this.layout = cloneDeep(widgets)
       },
       deep: true
     }
   },
-  mounted () {
-    if (this.loaded !== null) {
-      const foo = cloneDeep(this.loaded.widgets)
-      console.log(foo)
-      this.layout = foo
-    }
+  created () {
+    console.log(cloneDeep(this.widgets))
+    this.layout = cloneDeep(this.widgets)
   }
 }
 </script>
@@ -69,4 +75,7 @@ export default {
 
   .vue-grid-item
     background-color #FFF
+
+    .v-card
+      height 100%
 </style>

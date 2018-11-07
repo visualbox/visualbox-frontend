@@ -28,30 +28,22 @@
     v-tab-item
       dashboard-settings
 
-  #dashboard-ctx-edit(v-if="focusedWidget")
-    app-context-toolbar
-      .subheading Edit Widget
-      v-spacer
-      v-btn(
-        icon
-        @click="DASHBOARD_SET_FOCUSED(null)"
-      )
-        v-icon mdi-close
-    .pa-3 {{ focusedWidget }}
+  dashboard-widget-config
 </template>
 
 <script>
 import * as _ from 'lodash'
 import moment from 'moment'
-import { mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, DashboardWidgets, DashboardSettings } from '@/components/app'
+import { mapActions, mapGetters } from 'vuex'
+import { AppContextToolbar, DashboardWidgets, DashboardSettings, DashboardWidgetConfig } from '@/components/app'
 
 export default {
   name: 'DashboardCtx',
   components: {
     AppContextToolbar,
     DashboardWidgets,
-    DashboardSettings
+    DashboardSettings,
+    DashboardWidgetConfig
   },
   computed: {
     ...mapGetters('Widget', ['list']),
@@ -69,10 +61,7 @@ export default {
       return moment(updatedAt).format('DD/MM HH:mm:ss')
     }
   },
-  methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED']),
-    ...mapActions('Dashboard', ['updateLoaded'])
-  }
+  methods: mapActions('Dashboard', ['updateLoaded'])
 }
 </script>
 
@@ -81,8 +70,4 @@ export default {
   .v-tabs
     &.hidden
       display none
-
-  #dashboard-ctx-edit
-    .v-toolbar
-      background transparent
 </style>

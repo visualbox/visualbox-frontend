@@ -18,6 +18,7 @@ grid-layout#dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
+    :style="getWidgetStyle(item.config)"
     @click.native="selectWidget(item.i)"
   ) {{ item.i }}
 </template>
@@ -49,6 +50,11 @@ export default {
     ...mapActions('Dashboard', ['updateLoaded']),
     layoutUpdatedEvent (widgets) {
       this.updateLoaded({ widgets })
+    },
+    getWidgetStyle (config) {
+      const { r, g, b, a } = config.rgba
+      const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
+      return { 'background-color': bgc }
     },
     selectWidget (i) {
       if (!this.isEditing)

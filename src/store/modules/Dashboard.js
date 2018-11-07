@@ -50,6 +50,10 @@ const mutations = {
   [t.DASHBOARD_SET_FOCUSED] (state, payload) {
     state.focusedWidget = payload
   },
+  [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
+    focused = mergeDeep(focused, payload)
+    console.log(focused)
+  },
   [t.DASHBOARD_ADD_WIDGET] (state, id) {
     // Generate widget ID
     let n = 0
@@ -66,7 +70,15 @@ const mutations = {
       h: 4,
       i,
       id,
-      config: {} // Parse config definition here, this.widgetById(id)
+      config: {
+        variables: {},
+        rgba: {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1
+        }
+      }
     })
     state.loaded = _.cloneDeep(state.loaded)
   }
@@ -133,6 +145,14 @@ const actions = {
     } catch (e) {
       throw e
     }
+  },
+  updateFocused ({ commit, getters }, payload = {}) {
+    const focused = getters.focusedWidget
+
+    if (focused === null)
+      return
+
+    commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
   }
 }
 
@@ -157,7 +177,7 @@ const getters = {
       return {}
     }
   },
-  focusedWidget (state, getters) {
+  focusedWidget (state) {
     if (state.focusedWidget === null)
       return null
 

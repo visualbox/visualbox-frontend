@@ -32,9 +32,7 @@
                 :color="bgc"
               )
               | Background Color
-            color-picker(
-              v-model="bgc"
-            )
+            color-picker(v-model="bgc")
 </template>
 
 <script>
@@ -92,25 +90,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#dashboard-settings
-  >>> .vc-chrome
-    width unset
-    font-family inherit
-
-    .vc-chrome-body
-      background-color #424242
-
-      .vc-checkerboard
-        background-repeat repeat
-
-      .vc-chrome-fields
-        .vc-input__input, .vc-input__label
-          color #FFF !important
-
-      .vc-chrome-toggle-icon
-        path
-          fill #FFF
-
-      .vc-chrome-toggle-icon-highlight
-        background #272727
 </style>

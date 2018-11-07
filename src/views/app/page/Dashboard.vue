@@ -1,28 +1,41 @@
 <template lang="pug">
-v-container#dashboard(
-  fluid
+v-container#dashboard.pa-0(
   v-if="loaded !== null && typeof loaded !== 'undefined'"
+  fluid
 )
+  app-context-toolbar
+    v-btn(
+      @click="DASHBOARD_SET_EDITING(!isEditing)"
+      icon
+    )
+      v-icon {{ editingIcon }}
+    v-spacer
+    v-btn(
+      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
+      icon
+    )
+      v-icon {{ fullscreenIcon }}
   v-layout(
     align-center
     justify-center
-    row
-    fill-height
+    row fill-height
   )
-    dashboard-layout.elevation-5(
-      :style="style"
-    )
+    dashboard-layout.elevation-5(:style="style")
 </template>
 
 <script>
 import * as _ from 'lodash'
-import { mapActions, mapGetters } from 'vuex'
-import { DashboardLayout } from '@/components/app'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { AppContextToolbar, DashboardLayout } from '@/components/app'
 
 export default {
   name: 'Dashboard',
-  components: { DashboardLayout },
+  components: {
+    AppContextToolbar,
+    DashboardLayout
+  },
   computed: {
+    ...mapState('Dashboard', ['isEditing', 'isFullscreen']),
     ...mapGetters('Dashboard', ['loaded']),
     style () {
       const { width, height } = this.loaded.settings
@@ -34,6 +47,12 @@ export default {
         'width': width,
         'height': height
       }
+    },
+    editingIcon () {
+      return this.isEditing ? 'mdi-pencil-off' : 'mdi-pencil'
+    },
+    fullscreenIcon () {
+      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
     }
   },
   watch: {
@@ -46,7 +65,7 @@ export default {
         try {
           await this.commitLoaded()
           this.setSnackbar({
-            type: 'info',
+            type: '',
             msg: `Saved changes`,
             timeout: 1500
           })
@@ -57,6 +76,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_EDITING', 'DASHBOARD_SET_FULLSCREEN']),
     ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded'])
   },
   mounted () {

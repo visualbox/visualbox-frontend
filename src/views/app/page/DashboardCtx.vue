@@ -9,6 +9,7 @@
     .subheading {{ label }}
 
   v-tabs(
+    :class="{ 'hidden' : focusedWidget }"
     color="rgba(0,0,0,0)"
     slider-color="primary"
     grow
@@ -26,12 +27,23 @@
       dashboard-widgets
     v-tab-item
       dashboard-settings
+
+  #dashboard-ctx-edit(v-if="focusedWidget")
+    app-context-toolbar
+      .subheading Edit Widget
+      v-spacer
+      v-btn(
+        icon
+        @click="DASHBOARD_SET_FOCUSED(null)"
+      )
+        v-icon mdi-close
+    .pa-3 {{ focusedWidget }}
 </template>
 
 <script>
 import * as _ from 'lodash'
 import moment from 'moment'
-import { mapActions, mapGetters } from 'vuex'
+import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, DashboardWidgets, DashboardSettings } from '@/components/app'
 
 export default {
@@ -43,7 +55,7 @@ export default {
   },
   computed: {
     ...mapGetters('Widget', ['list']),
-    ...mapGetters('Dashboard', ['loaded']),
+    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
     label: {
       get () {
         return _.get(this, 'loaded.label', '')
@@ -57,9 +69,20 @@ export default {
       return moment(updatedAt).format('DD/MM HH:mm:ss')
     }
   },
-  methods: mapActions('Dashboard', ['updateLoaded'])
+  methods: {
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED']),
+    ...mapActions('Dashboard', ['updateLoaded'])
+  }
 }
 </script>
 
 <style lang="stylus" scoped>
+#dashboard-ctx
+  .v-tabs
+    &.hidden
+      display none
+
+  #dashboard-ctx-edit
+    .v-toolbar
+      background transparent
 </style>

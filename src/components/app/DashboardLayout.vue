@@ -3,9 +3,9 @@ grid-layout#dashboard-layout(
   :layout="layout"
   :col-num="24"
   :row-height="15"
-  :margin="[10, 10]"
-  :is-draggable="true"
-  :is-resizable="true"
+  :margin="[16, 16]"
+  :is-draggable="isEditing"
+  :is-resizable="isEditing"
   :use-css-transforms="true"
   :auto-size="false"
   @layout-updated="layoutUpdatedEvent"
@@ -18,51 +18,52 @@ grid-layout#dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
-  )
-    base-card {{ item.i }}
+    @click.native="selectWidget(item.i)"
+  ) {{ item.i }}
 </template>
 
 <script>
 import * as _ from 'lodash'
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import cloneDeep from '@/lib/cloneDeep'
-import { BaseCard } from '@/components/base'
 
 export default {
   name: 'DashboardLayout',
   components: {
     GridLayout,
-    GridItem,
-    BaseCard
+    GridItem
   },
   data: () => ({
     layout: []
   }),
   computed: {
+    ...mapState('Dashboard', ['isEditing']),
     ...mapGetters('Dashboard', ['loaded']),
     widgets () {
       return _.get(this, 'loaded.widgets', [])
     }
   },
   methods: {
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED']),
     ...mapActions('Dashboard', ['updateLoaded']),
     layoutUpdatedEvent (widgets) {
-      console.log('new layout', widgets)
       this.updateLoaded({ widgets })
+    },
+    selectWidget (i) {
+      if (!this.isEditing)
+        this.DASHBOARD_SET_FOCUSED(i)
     }
   },
   watch: {
     widgets: {
       handler: function (widgets) {
-        console.log('hasChanged')
         this.layout = cloneDeep(widgets)
       },
       deep: true
     }
   },
   created () {
-    console.log(cloneDeep(this.widgets))
     this.layout = cloneDeep(this.widgets)
   }
 }
@@ -74,8 +75,10 @@ export default {
   background #FFF
 
   .vue-grid-item
-    background-color #FFF
+    &.vue-resizable:hover
+      -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
+      box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
 
-    .v-card
-      height 100%
+  >>> .vue-grid-placeholder
+    background #000
 </style>

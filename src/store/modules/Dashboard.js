@@ -8,7 +8,10 @@ import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
-  loaded: null
+  loaded: null,
+  isEditing: false,
+  isFullscreen: false,
+  focusedWidget: null
 }
 
 const mutations = {
@@ -37,6 +40,15 @@ const mutations = {
     // Used when closing / exiting 'loaded'
     if (nullify)
       state.loaded = null
+  },
+  [t.DASHBOARD_SET_EDITING] (state, payload) {
+    state.isEditing = payload
+  },
+  [t.DASHBOARD_SET_FULLSCREEN] (state, payload) {
+    state.isFullscreen = payload
+  },
+  [t.DASHBOARD_SET_FOCUSED] (state, payload) {
+    state.focusedWidget = payload
   },
   [t.DASHBOARD_ADD_WIDGET] (state, id) {
     // Generate widget ID
@@ -143,6 +155,16 @@ const getters = {
       return diff
     } catch (e) {
       return {}
+    }
+  },
+  focusedWidget (state, getters) {
+    if (state.focusedWidget === null)
+      return null
+
+    try {
+      return state.loaded.widgets.find(w => w.i === state.focusedWidget)
+    } catch (e) {
+      return null
     }
   }
 }

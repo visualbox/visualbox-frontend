@@ -70,8 +70,8 @@ const mutations = {
       h: 4,
       i,
       id,
-      config: {
-        variables: {},
+      settings: {
+        config: {},
         rgba: {
           r: 255,
           g: 255,

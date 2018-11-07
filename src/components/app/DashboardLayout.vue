@@ -9,6 +9,7 @@ grid-layout#dashboard-layout(
   :use-css-transforms="true"
   :auto-size="false"
   @layout-updated="layoutUpdatedEvent"
+  @click.native.capture="blurWidget"
 )
   grid-item(
     v-for="item in layout"
@@ -18,8 +19,8 @@ grid-layout#dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
-    :style="getWidgetStyle(item.config)"
-    @click.native="selectWidget(item.i)"
+    :style="getWidgetStyle(item.settings)"
+    @click.native="focusWidget(item.i)"
   ) {{ item.i }}
 </template>
 
@@ -51,14 +52,18 @@ export default {
     layoutUpdatedEvent (widgets) {
       this.updateLoaded({ widgets })
     },
-    getWidgetStyle (config) {
-      const { r, g, b, a } = config.rgba
+    getWidgetStyle (settings) {
+      const { r, g, b, a } = settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
       return { 'background-color': bgc }
     },
-    selectWidget (i) {
+    focusWidget (i) {
       if (!this.isEditing)
         this.DASHBOARD_SET_FOCUSED(i)
+    },
+    blurWidget () {
+      if (!this.isEditing)
+        this.DASHBOARD_SET_FOCUSED(null)
     }
   },
   watch: {

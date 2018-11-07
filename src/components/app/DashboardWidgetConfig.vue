@@ -18,6 +18,25 @@
           )
           | Background Color
         color-picker(v-model="bgc")
+    .mt-3(
+      v-for="(field, index) in config.variables"
+      :key="index"
+    )
+      v-text-field(
+        v-if="field.type === 'text'"
+        :label="field.label"
+        hide-details
+        outline
+      )
+
+    //- Widget config parse errors
+    v-alert.mt-3(
+      v-for="(item, index) in config.error"
+      :key="index"
+      :value="true"
+      type="error"
+      outline
+    ) {{ item }}
 </template>
 
 <script>
@@ -25,6 +44,7 @@ import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
+import parseWidgetConfig from '@/lib/parseWidgetConfig'
 
 export default {
   name: 'DashboardWidgetConfig',
@@ -34,17 +54,23 @@ export default {
   },
   computed: {
     ...mapGetters('Dashboard', ['focusedWidget']),
+    ...mapGetters('Widget', ['widgetById']),
 
     // Focused widget BGC
     bgc: {
       get () {
-        const { r, g, b, a } = this.focusedWidget.config.rgba
+        const { r, g, b, a } = this.focusedWidget.settings.rgba
         return `rgba(${r}, ${g}, ${b}, ${a})`
       },
       set: _.debounce(function (val) {
         const { rgba } = val
-        this.updateFocused({ config: { rgba } })
+        this.updateFocused({ settings: { rgba } })
       }, 20)
+    },
+    config () {
+      const { id } = this.focusedWidget
+      const widget = this.widgetById(id)
+      return parseWidgetConfig(widget.config)
     }
   },
   methods: {

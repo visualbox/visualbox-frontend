@@ -28,7 +28,8 @@
     v-tab-item
       dashboard-settings
 
-  dashboard-widget-config
+  v-scroll-x-transition
+    dashboard-widget-config
 </template>
 
 <script>

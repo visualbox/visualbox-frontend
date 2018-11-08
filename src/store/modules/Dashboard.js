@@ -52,7 +52,7 @@ const mutations = {
   },
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
-    console.log(focused)
+    state.loaded = _.cloneDeep(state.loaded)
   },
   [t.DASHBOARD_ADD_WIDGET] (state, id) {
     // Generate widget ID
@@ -132,6 +132,7 @@ const actions = {
       const id = getters.loaded.id
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
+      commit(t.DASHBOARD_SET_FOCUSED, null) // Close potentially open focused widget
       await API.put(config.env, `/dashboard/${id}`, { body: diff })
     } catch (e) {
       throw e

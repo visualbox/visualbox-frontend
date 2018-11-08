@@ -22,8 +22,11 @@
       v-for="(field, index) in config.variables"
       :key="index"
     )
+      //- Text type
       v-text-field(
         v-if="field.type === 'text'"
+        v-model="model[field.name]"
+        @input="v => updateDynamicModel(v, field.name)"
         :label="field.label"
         hide-details
         outline
@@ -52,6 +55,7 @@ export default {
     AppContextToolbar,
     'color-picker': Chrome
   },
+  data: () => ({ model: {} }),
   computed: {
     ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
@@ -73,9 +77,40 @@ export default {
       return parseWidgetConfig(widget.config)
     }
   },
+  watch: {
+    focusedWidget: {
+      handler: function (newVal, oldVal) {
+        // Don't load local config model if not changed
+        if (newVal === null)
+          return
+        if ((newVal !== null && oldVal !== null) && newVal.i === oldVal.i)
+          return
+
+        // Create local config model
+        let configModel = this.config.variables.reduce((acc, cur) => {
+          acc[cur.name] = null
+          return acc
+        }, {})
+
+        // Apply widget config model on local (true) model
+        for (let name in this.focusedWidget.settings.config) {
+          if (configModel.hasOwnProperty(name)) {
+            configModel[name] = this.focusedWidget.settings.config[name]
+          }
+        }
+        this.model = _.cloneDeep(configModel)
+      },
+      deep: true
+    }
+  },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED']),
-    ...mapActions('Dashboard', ['updateFocused'])
+    ...mapActions('Dashboard', ['updateFocused']),
+    updateDynamicModel (val, variableName) {
+      this.$set(this.model, variableName, val)
+      this.model = _.cloneDeep(this.model)
+      this.updateFocused({ settings: { config: this.model } })
+    }
   }
 }
 </script>

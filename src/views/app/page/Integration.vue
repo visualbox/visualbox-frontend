@@ -53,9 +53,9 @@ export default {
       this.updateDimensions()
     },
     loaded: {
-      handler: _.debounce(async function (oldVal, newVal) {
+      handler: _.debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing integration
-        if (oldVal === null || newVal === null || oldVal.id !== newVal.id)
+        if (newVal === null || oldVal === null || newVal.id !== oldVal.id)
           return
 
         try {

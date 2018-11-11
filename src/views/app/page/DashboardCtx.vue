@@ -9,7 +9,7 @@
     .subheading {{ label }}
 
   v-tabs(
-    :class="{ 'hidden' : focusedWidget }"
+    :class="{ 'hidden' : focusedIntegration || focusedWidget }"
     color="rgba(0,0,0,0)"
     slider-color="primary"
     grow
@@ -22,12 +22,14 @@
       v-icon settings
 
     v-tab-item
-      span Integrations
+      dashboard-integrations
     v-tab-item
       dashboard-widgets
     v-tab-item
       dashboard-settings
 
+  v-scroll-x-transition
+    dashboard-integration-config
   v-scroll-x-transition
     dashboard-widget-config
 </template>
@@ -36,19 +38,21 @@
 import * as _ from 'lodash'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, DashboardWidgets, DashboardSettings, DashboardWidgetConfig } from '@/components/app'
+import { AppContextToolbar, DashboardIntegrations, DashboardWidgets, DashboardSettings, DashboardIntegrationConfig, DashboardWidgetConfig } from '@/components/app'
 
 export default {
   name: 'DashboardCtx',
   components: {
     AppContextToolbar,
+    DashboardIntegrations,
     DashboardWidgets,
     DashboardSettings,
+    DashboardIntegrationConfig,
     DashboardWidgetConfig
   },
   computed: {
     ...mapGetters('Widget', ['list']),
-    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
+    ...mapGetters('Dashboard', ['loaded', 'focusedIntegration', 'focusedWidget']),
     label: {
       get () {
         return _.get(this, 'loaded.label', '')

@@ -1,24 +1,15 @@
 <template lang="pug">
-#dashboard-widget-config(v-if="focusedWidget")
+#dashboard-integration-config(v-if="focusedIntegration")
   app-context-toolbar
-    .subheading Edit Widget
+    .subheading Edit Integration
     v-spacer
     v-btn(
       icon
-      @click="DASHBOARD_SET_FOCUSED_WIDGET(null)"
+      @click="DASHBOARD_SET_FOCUSED_INTEGRATION(null)"
     )
       v-icon mdi-close
   .pa-3
-    v-expansion-panel
-      v-expansion-panel-content
-        div(slot="header")
-          v-avatar.mr-3(
-            :size="30"
-            :color="bgc"
-          )
-          | Background Color
-        color-picker(v-model="bgc")
-    .mt-3(
+    .mb-3(
       v-for="(field, index) in config.variables"
       :key="index"
     )
@@ -32,8 +23,8 @@
         outline
       )
 
-    //- Widget config parse errors
-    v-alert.mt-3(
+    //- Integration config parse errors
+    v-alert(
       v-for="(item, index) in config.error"
       :key="index"
       :value="true"
@@ -44,41 +35,25 @@
 
 <script>
 import * as _ from 'lodash'
-import { Chrome } from 'vue-color'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
-  name: 'DashboardWidgetConfig',
-  components: {
-    AppContextToolbar,
-    'color-picker': Chrome
-  },
+  name: 'DashboardIntegrationConfig',
+  components: { AppContextToolbar },
   data: () => ({ model: {} }),
   computed: {
-    ...mapGetters('Dashboard', ['focusedWidget']),
-    ...mapGetters('Widget', ['widgetById']),
-
-    // Focused widget BGC
-    bgc: {
-      get () {
-        const { r, g, b, a } = this.focusedWidget.settings.rgba
-        return `rgba(${r}, ${g}, ${b}, ${a})`
-      },
-      set: _.debounce(function (val) {
-        const { rgba } = val
-        this.updateFocusedWidget({ settings: { rgba } })
-      }, 20)
-    },
+    ...mapGetters('Dashboard', ['focusedIntegration']),
+    ...mapGetters('Integration', ['integrationById']),
     config () {
-      const { id } = this.focusedWidget
-      const widget = this.widgetById(id)
-      return parseConfig(widget.config)
+      const { id } = this.focusedIntegration
+      const integration = this.integrationById(id)
+      return parseConfig(integration.config)
     }
   },
   watch: {
-    focusedWidget: {
+    focusedIntegration: {
       handler: function (newVal, oldVal) {
         // Don't load local config model if not changed
         if (newVal === null)
@@ -92,10 +67,10 @@ export default {
           return acc
         }, {})
 
-        // Apply widget config model on local (true) model
-        for (let name in this.focusedWidget.settings.config) {
+        // Apply integration config model on local (true) model
+        for (let name in this.focusedIntegration.settings.config) {
           if (configModel.hasOwnProperty(name)) {
-            configModel[name] = this.focusedWidget.settings.config[name]
+            configModel[name] = this.focusedIntegration.settings.config[name]
           }
         }
         this.model = _.cloneDeep(configModel)
@@ -104,19 +79,19 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
-    ...mapActions('Dashboard', ['updateFocusedWidget']),
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
+    ...mapActions('Dashboard', ['updateFocusedIntegration']),
     updateDynamicModel (val, variableName) {
       this.$set(this.model, variableName, val)
       this.model = _.cloneDeep(this.model)
-      this.updateFocusedWidget({ settings: { config: this.model } })
+      this.updateFocusedIntegration({ settings: { config: this.model } })
     }
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-#dashboard-widget-config
+#dashboard-integration-config
   .v-toolbar
     background transparent
 </style>

@@ -11,7 +11,8 @@ const state = {
   loaded: null,
   isEditing: false,
   isFullscreen: false,
-  focusedWidget: null
+  focusedWidget: null,
+  focusedIntegration: null
 }
 
 const mutations = {
@@ -47,8 +48,11 @@ const mutations = {
   [t.DASHBOARD_SET_FULLSCREEN] (state, payload) {
     state.isFullscreen = payload
   },
-  [t.DASHBOARD_SET_FOCUSED] (state, payload) {
+  [t.DASHBOARD_SET_FOCUSED_WIDGET] (state, payload) {
     state.focusedWidget = payload
+  },
+  [t.DASHBOARD_SET_FOCUSED_INTEGRATION] (state, payload) {
+    state.focusedIntegration = payload
   },
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
@@ -80,6 +84,29 @@ const mutations = {
         }
       }
     })
+    state.loaded = _.cloneDeep(state.loaded)
+  },
+  [t.DASHBOARD_ADD_INTEGRATION] (state, id) {
+    // Generate integration ID
+    let n = 0
+    let i = `_${n}`
+    while (typeof state.loaded.integrations.find(a => a.i === i) !== 'undefined') {
+      n++
+      i = `_${n}`
+    }
+
+    state.loaded.integrations.push({
+      i,
+      id,
+      settings: {
+        config: {}
+      }
+    })
+    state.loaded = _.cloneDeep(state.loaded)
+  },
+  [t.DASHBOARD_REMOVE_INTEGRATION] (state, id) {
+    const index = state.loaded.integrations.findIndex(i => i.id === id)
+    state.loaded.integrations.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   }
 }
@@ -120,6 +147,7 @@ const actions = {
   // Load a dashboard by making a local copy
   load ({ commit, getters }, id) {
     commit(t.DASHBOARD_SET_LOADED, getters.dashboardById(id))
+    // TODO: Check widgets and integrations against local, if they are absent, remove
   },
   // Update a loaded local dashboard
   updateLoaded ({ commit, dispatch }, payload = {}) {
@@ -132,7 +160,8 @@ const actions = {
       const id = getters.loaded.id
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
-      commit(t.DASHBOARD_SET_FOCUSED, null) // Close potentially open focused widget
+      commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null) // Close potentially open focused widget
+      commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null) // Close potentially open focused integration
       await API.put(config.env, `/dashboard/${id}`, { body: diff })
     } catch (e) {
       throw e
@@ -147,8 +176,16 @@ const actions = {
       throw e
     }
   },
-  updateFocused ({ commit, getters }, payload = {}) {
+  updateFocusedWidget ({ commit, getters }, payload = {}) {
     const focused = getters.focusedWidget
+
+    if (focused === null)
+      return
+
+    commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
+  },
+  updateFocusedIntegration ({ commit, getters }, payload = {}) {
+    const focused = getters.focusedIntegration
 
     if (focused === null)
       return
@@ -172,6 +209,7 @@ const getters = {
     try {
       const loaded = state.loaded
       let diff = difference(loaded, getters.dashboardById(loaded.id))
+      diff.integrations = loaded.integrations // Cannot take diff on integrations
       diff.widgets = loaded.widgets // Cannot take diff on widgets
       return diff
     } catch (e) {
@@ -184,6 +222,16 @@ const getters = {
 
     try {
       return state.loaded.widgets.find(w => w.i === state.focusedWidget)
+    } catch (e) {
+      return null
+    }
+  },
+  focusedIntegration (state) {
+    if (state.focusedIntegration === null)
+      return null
+
+    try {
+      return state.loaded.integrations.find(a => a.i === state.focusedIntegration)
     } catch (e) {
       return null
     }

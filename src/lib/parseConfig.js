@@ -5,11 +5,11 @@ const VALID_TYPES = [
 ]
 
 /**
- * Parse widget JSON configuration string
- * @param  {String} config Widget configuration JSON string
+ * Parse JSON configuration string
+ * @param  {String} config Configuration JSON string
  * @return {Object}        Return an object with parsed config and error message(s)
  */
-const parseWidgetConfig = config => {
+const parseConfig = config => {
   try {
     const parsed = JSON.parse(config)
 
@@ -83,4 +83,4 @@ const parseWidgetConfig = config => {
   }
 }
 
-export default parseWidgetConfig
+export default parseConfig

@@ -47,7 +47,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED']),
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
     ...mapActions('Dashboard', ['updateLoaded']),
     layoutUpdatedEvent (widgets) {
       this.updateLoaded({ widgets })
@@ -59,11 +59,11 @@ export default {
     },
     focusWidget (i) {
       if (!this.isEditing)
-        this.DASHBOARD_SET_FOCUSED(i)
+        this.DASHBOARD_SET_FOCUSED_WIDGET(i)
     },
     blurWidget () {
       if (!this.isEditing)
-        this.DASHBOARD_SET_FOCUSED(null)
+        this.DASHBOARD_SET_FOCUSED_WIDGET(null)
     }
   },
   watch: {

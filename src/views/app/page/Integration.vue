@@ -30,7 +30,12 @@
         language="javascript"
       )
     .tab-item(:class="{ 'active' : tab === 3 }")
-      span EDIT CONFIG
+      monaco-editor(
+        class="editor"
+        ref="editorConfig"
+        v-model="config"
+        language="json"
+      )
 </template>
 
 <script>
@@ -96,6 +101,14 @@ export default {
       },
       set (source) {
         this.updateLoaded({ source })
+      }
+    },
+    config: {
+      get () {
+        return _.get(this, 'loaded.config', '')
+      },
+      set (config) {
+        this.updateLoaded({ config })
       }
     }
   },

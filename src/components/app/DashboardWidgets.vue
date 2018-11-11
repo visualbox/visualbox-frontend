@@ -1,6 +1,5 @@
 <template lang="pug">
 #dashboard-widgets
-
   v-container.pa-3(grid-list-xs)
     v-layout(row wrap)
       v-flex(

@@ -37,6 +37,14 @@ const mutations = {
     // Used when closing / exiting 'loaded'
     if (nullify)
       state.loaded = null
+  },
+  [t.WIDGET_CLEAN_DASHBOARD] (state, widgets) {
+    // Remove every integration that does not exist in list
+    widgets.forEach(w => {
+      const index = state.list.findIndex(a => a.id === w.id)
+      if (index < 0)
+        widgets.splice(index, 1)
+    })
   }
 }
 

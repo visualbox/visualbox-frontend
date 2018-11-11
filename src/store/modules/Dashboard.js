@@ -146,8 +146,10 @@ const actions = {
   },
   // Load a dashboard by making a local copy
   load ({ commit, getters }, id) {
-    commit(t.DASHBOARD_SET_LOADED, getters.dashboardById(id))
-    // TODO: Check widgets and integrations against local, if they are absent, remove
+    let dashboard = getters.dashboardById(id)
+    commit(`Integration/${t.INTEGRATION_CLEAN_DASHBOARD}`, dashboard.integrations, { root: true })
+    commit(`Widget/${t.WIDGET_CLEAN_DASHBOARD}`, dashboard.widgets, { root: true })
+    commit(t.DASHBOARD_SET_LOADED, dashboard)
   },
   // Update a loaded local dashboard
   updateLoaded ({ commit, dispatch }, payload = {}) {

@@ -43,6 +43,7 @@
 <script>
 import * as _ from 'lodash'
 import { mapMutations, mapGetters } from 'vuex'
+import WorkerHandler from '@/lib/workerHandler'
 
 export default {
   name: 'DashboardIntegrations',
@@ -63,12 +64,29 @@ export default {
       })
     }
   },
+  watch: {
+    // TODO: mechanism to register currently edited integration
+    // so that its config gets updated
+    dashboardIntegrations (newVal, oldVal) {
+      if (_.isEqual(newVal, oldVal))
+        return
+
+      WorkerHandler.register(newVal)
+    }
+  },
   methods: {
     ...mapMutations('Dashboard', [
       'DASHBOARD_ADD_INTEGRATION',
       'DASHBOARD_REMOVE_INTEGRATION',
       'DASHBOARD_SET_FOCUSED_INTEGRATION'
     ])
+  },
+  mounted () {
+    WorkerHandler.init(this.integrationById)
+    WorkerHandler.register(this.dashboardIntegrations)
+  },
+  beforeDestroy () {
+    WorkerHandler.end()
   }
 }
 </script>

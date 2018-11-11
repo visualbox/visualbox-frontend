@@ -121,6 +121,7 @@ export default {
     updateDimensions () {
       this.$refs.editorReadme.getMonaco().layout()
       this.$refs.editorSource.getMonaco().layout()
+      this.$refs.editorConfig.getMonaco().layout()
     }
   },
   mounted () {

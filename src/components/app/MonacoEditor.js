@@ -82,19 +82,14 @@ export default {
       )
 
       this.editor = monaco.editor.create(this.$el, options)
+      this.editor.getModel().updateOptions({ tabSize: 2 })
       this.$emit('editorDidMount', this.editor)
       this.editor.onContextMenu(event => this.$emit('contextMenu', event))
       this.editor.onDidBlurEditorText(() => this.$emit('blurText'))
       this.editor.onDidBlurEditorWidget(() => this.$emit('blurWidget'))
-      this.editor.onDidChangeConfiguration(event =>
-        this.$emit('configuration', event)
-      )
-      this.editor.onDidChangeCursorPosition(event =>
-        this.$emit('position', event)
-      )
-      this.editor.onDidChangeCursorSelection(event =>
-        this.$emit('selection', event)
-      )
+      this.editor.onDidChangeConfiguration(event => this.$emit('configuration', event))
+      this.editor.onDidChangeCursorPosition(event => this.$emit('position', event))
+      this.editor.onDidChangeCursorSelection(event => this.$emit('selection', event))
       this.editor.onDidChangeModel(event => this.$emit('model', event))
       this.editor.onDidChangeModelContent(event => {
         const value = this.editor.getValue()
@@ -102,15 +97,9 @@ export default {
           this.$emit('change', value, event)
         }
       })
-      this.editor.onDidChangeModelDecorations(event =>
-        this.$emit('modelDecorations', event)
-      )
-      this.editor.onDidChangeModelLanguage(event =>
-        this.$emit('modelLanguage', event)
-      )
-      this.editor.onDidChangeModelOptions(event =>
-        this.$emit('modelOptions', event)
-      )
+      this.editor.onDidChangeModelDecorations(event => this.$emit('modelDecorations', event))
+      this.editor.onDidChangeModelLanguage(event => this.$emit('modelLanguage', event))
+      this.editor.onDidChangeModelOptions(event => this.$emit('modelOptions', event))
       this.editor.onDidDispose(event => this.$emit('afterDispose', event))
       this.editor.onDidFocusEditorText(() => this.$emit('focusText'))
       this.editor.onDidFocusEditorWidget(() => this.$emit('focusWidget'))

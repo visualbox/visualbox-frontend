@@ -13,7 +13,9 @@ class WorkerHandler {
   register (integrations) {
     integrations.forEach(i => {
       const { id, source } = this.integrationById(i.id)
-      const workerBlob = URL.createObjectURL(new Blob([source], { type: 'application/javascript' }))
+      const { config } = i.settings
+      const injected = `const CONFIG = ${JSON.stringify(config)};`
+      const workerBlob = URL.createObjectURL(new Blob([injected + source], { type: 'application/javascript' }))
       const worker = new Worker(workerBlob)
       worker.onmessage = e => {
         console.log(id, 'Worker got msg', e.data)

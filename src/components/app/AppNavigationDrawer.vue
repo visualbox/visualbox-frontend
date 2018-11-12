@@ -49,7 +49,7 @@ export default {
       { title: 'Dashboards', to: '/app', icon: 'panorama_wide_angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'device_hub' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'widgets' },
-      { title: 'Settings', to: '/app/s', icon: 'settings' },
+      { title: 'Settings', to: '/app/s', icon: 'settings', class: 'bottom_upper' },
       { title: 'Logout', to: '/auth/signout', icon: 'power_settings_new', class: 'bottom' }
     ]
   })
@@ -77,6 +77,10 @@ export default {
         bottom 0
         left 0
         border-left 0 solid #FFF
+
+  .bottom_upper
+    position absolute
+    bottom 72px
 
   .bottom
     position absolute

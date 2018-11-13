@@ -10,6 +10,7 @@ import App from '@/store/modules/App'
 import Dashboard from '@/store/modules/Dashboard'
 import Widget from '@/store/modules/Widget'
 import Integration from '@/store/modules/Integration'
+import Data from '@/store/modules/Data'
 
 Vue.use(Vuex)
 
@@ -18,7 +19,8 @@ const store = new Vuex.Store({
     App,
     Dashboard,
     Widget,
-    Integration
+    Integration,
+    Data
   },
   // eslint-disable-next-line
   strict: process.env.NODE_ENV !== 'production'

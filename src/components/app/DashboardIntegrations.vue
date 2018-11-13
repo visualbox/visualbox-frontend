@@ -79,10 +79,14 @@ export default {
       'DASHBOARD_ADD_INTEGRATION',
       'DASHBOARD_REMOVE_INTEGRATION',
       'DASHBOARD_SET_FOCUSED_INTEGRATION'
+    ]),
+    ...mapMutations('Data', [
+      'DATA_SET_DATA',
+      'DATA_CLEAN_DATA'
     ])
   },
   mounted () {
-    WorkerHandler.init(this.integrationById)
+    WorkerHandler.init(this.integrationById, this.DATA_SET_DATA, this.DATA_CLEAN_DATA)
     WorkerHandler.register(this.dashboardIntegrations)
   },
   beforeDestroy () {

@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
 import * as t from '@/store/types'
 import cloneDeep from '@/lib/cloneDeep'
+import dataTree from '@/lib/dataTree'
 
 const state = {
   data: {}
@@ -22,6 +23,17 @@ const actions = {
 }
 
 const getters = {
+  dataTree (state, gettersm, rootStatem, rootGetters) {
+    // Convert top-leved ID's into integration names
+    let convertedId = {}
+    for (let id in state.data) {
+      // Try to get it, if 'undefined', use ID
+      const name = rootGetters['Integration/integrationById'](id).label || id
+      convertedId[name] = state.data[id]
+    }
+
+    return dataTree(convertedId)
+  }
 }
 
 export default {

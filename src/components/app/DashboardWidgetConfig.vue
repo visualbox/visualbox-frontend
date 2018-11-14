@@ -18,6 +18,20 @@
           )
           | Background Color
         color-picker(v-model="bgc")
+
+    //- Integration data tree
+    v-treeview(
+      activatable
+      :items="dataTree"
+      item-key="name"
+    )
+      template(
+        slot="prepend"
+        slot-scope="{ item }"
+      )
+        v-icon {{ item.icon }}
+
+    //- Widget config
     .mt-3(
       v-for="(field, index) in config.variables"
       :key="index"
@@ -55,10 +69,27 @@ export default {
     AppContextToolbar,
     'color-picker': Chrome
   },
-  data: () => ({ model: {} }),
+  data: () => ({
+    tree: [],
+    model: {},
+    items: [
+      {
+        name: 'Foo'
+      },
+      {
+        name: 'Bar',
+        children: [
+          {
+            name: 'baz'
+          }
+        ]
+      }
+    ]
+  }),
   computed: {
     ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
+    ...mapGetters('Data', ['dataTree']),
 
     // Focused widget BGC
     bgc: {

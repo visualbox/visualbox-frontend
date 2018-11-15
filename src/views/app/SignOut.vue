@@ -7,13 +7,14 @@ import { mapActions } from 'vuex'
 export default {
   name: 'SignOut',
   methods: {
-    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('App', ['setIsLoading', 'setSnackbar', 'reset']),
     ...mapActions('Cognito', ['signOut'])
   },
   async mounted () {
     this.setIsLoading(true)
     try {
-      this.signOut()
+      await this.signOut()
+      this.reset()
     } catch (e) {
       this.setSnackbar({
         type: 'error',
@@ -26,11 +27,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-.v-card
-  height 370px
-
-  .welcome
-    height 40px
-</style>

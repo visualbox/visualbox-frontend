@@ -50,7 +50,7 @@ export default {
       { title: 'Manage Integrations', to: '/app/i', icon: 'device_hub' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'widgets' },
       { title: 'Settings', to: '/app/s', icon: 'settings', class: 'bottom_upper' },
-      { title: 'Logout', to: '/auth/signout', icon: 'power_settings_new', class: 'bottom' }
+      { title: 'Logout', to: '/app/signout', icon: 'power_settings_new', class: 'bottom' }
     ]
   })
 }

@@ -8,7 +8,7 @@ v-app(dark)
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { BaseToolbar, BaseSnackbar } from '@/components/base'
 
 export default {
@@ -17,10 +17,7 @@ export default {
     BaseToolbar,
     BaseSnackbar
   },
-  computed: {
-    ...mapGetters('App', ['sessionIsReady']),
-    ...mapState('Route', ['path'])
-  },
+  computed: mapGetters('App', ['sessionIsReady']),
   methods: mapActions('App', ['initSession', 'setSnackbar']),
   async mounted () {
     try {

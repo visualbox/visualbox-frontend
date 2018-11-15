@@ -12,6 +12,10 @@ const state = {
 }
 
 const mutations = {
+  [t.INTEGRATION_RESET] (state) {
+    state.list = []
+    state.loaded = null
+  },
   [t.INTEGRATION_SET_LIST] (state, payload) {
     state.list = _.cloneDeep(payload)
   },

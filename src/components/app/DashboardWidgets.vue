@@ -6,7 +6,7 @@
         xs4
         v-for="(item, index) in list"
         :key="index"
-        @click="addWidget(item.id)"
+        @click="DASHBOARD_ADD_WIDGET(item.id)"
         justify-center
       )
         v-card.text-xs-center
@@ -24,22 +24,24 @@ export default {
     ...mapGetters('Widget', ['list']),
     ...mapGetters('Dashboard', ['loaded'])
   },
-  methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_ADD_WIDGET']),
-    addWidget (id) {
-      this.DASHBOARD_ADD_WIDGET(id)
-    }
-  }
+  methods: mapMutations('Dashboard', ['DASHBOARD_ADD_WIDGET'])
 }
 </script>
 
 <style lang="stylus" scoped>
 #dashboard-widgets
-  .v-card__text
-    height 80px
-    padding 6px
+  .v-card
+    border-radius 4px
 
-    div
-      overflow hidden
-      word-wrap break-word
+    .v-card__text
+      height 80px
+      padding 6px
+
+      &:hover
+        border 2px solid #FFF
+        cursor pointer
+
+      div
+        overflow hidden
+        word-wrap break-word
 </style>

@@ -11,6 +11,8 @@ const state = {
 }
 
 const mutations = {
+  [t.APP_RESET] (state) {
+  },
   [t.APP_SET_SESSION_IS_READY]: set('sessionIsReady'),
   [t.APP_SET_APP_IS_READY]: set('appIsReady'),
   [t.APP_SET_IS_LOADING]: set('isLoading'),
@@ -47,6 +49,13 @@ const actions = {
     } finally {
       commit(t.APP_SET_APP_IS_READY, true)
     }
+  },
+  reset ({ commit }) {
+    commit(t.APP_RESET)
+    commit(`Dashboard/${t.DASHBOARD_RESET}`, null, { root: true })
+    commit(`Widget/${t.WIDGET_RESET}`, null, { root: true })
+    commit(`Integration/${t.INTEGRATION_RESET}`, null, { root: true })
+    commit(`Data/${t.DATA_RESET}`, null, { root: true })
   }
 }
 

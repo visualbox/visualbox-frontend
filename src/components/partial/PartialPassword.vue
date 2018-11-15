@@ -40,7 +40,7 @@ export default {
   watch: {
     tab (n) {
       if (n === 1)
-        this.$refs.password.focus()
+        setTimeout(() => { this.$refs.password.focus() }, 300)
     }
   }
 }

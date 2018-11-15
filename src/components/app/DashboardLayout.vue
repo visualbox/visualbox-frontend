@@ -21,7 +21,16 @@ grid-layout#dashboard-layout(
     :i="item.i"
     :style="getWidgetStyle(item.settings)"
     @click.native="focusWidget(item.i)"
-  ) {{ item.i }}
+  )
+    iframe(
+      :ref="item.i"
+      sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-same-origin allow-scripts"
+      allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor"
+      scrolling="auto"
+      allowTransparency="true"
+      allowpaymentrequest="true"
+      allowfullscreen="true"
+    )
 </template>
 
 <script>
@@ -29,6 +38,7 @@ import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import cloneDeep from '@/lib/cloneDeep'
+import IFrameHandler from '@/lib/iframeHandler'
 
 export default {
   name: 'DashboardLayout',
@@ -42,6 +52,7 @@ export default {
   computed: {
     ...mapState('Dashboard', ['isEditing']),
     ...mapGetters('Dashboard', ['loaded']),
+    ...mapGetters('Widget', ['widgetById']),
     widgets () {
       return _.get(this, 'loaded.widgets', [])
     }
@@ -76,6 +87,10 @@ export default {
   },
   created () {
     this.layout = cloneDeep(this.widgets)
+  },
+  mounted () {
+    IFrameHandler.init(this.widgetById, this.$refs)
+    IFrameHandler.generate(this.widgets)
   }
 }
 </script>
@@ -89,6 +104,14 @@ export default {
     &.vue-resizable:hover
       -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
       box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
+
+    iframe
+      width 100%
+      height 100%
+      border 0
+      position absolute
+      top 0
+      left 0
 
   >>> .vue-grid-placeholder
     background #000

@@ -6,8 +6,8 @@ import Auth from '@/views/auth/Auth'
 import SignIn from '@/views/auth/SignIn'
 import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
-import SignOut from '@/views/auth/SignOut'
 import App from '@/views/app/App'
+import SignOut from '@/views/app/SignOut'
 
 // Index
 import DashboardsCtx from '@/views/app/index/DashboardsCtx'
@@ -45,22 +45,23 @@ export default new Router({
         {
           path: '',
           name: 'signin',
-          component: SignIn
+          component: SignIn,
+          meta: {
+            index: 0
+          }
         },
         {
           path: 'signup',
           name: 'signup',
-          component: SignUp
+          component: SignUp,
+          meta: {
+            index: 1
+          }
         },
         {
           path: 'verify',
           name: 'verify',
           component: Verify
-        },
-        {
-          path: 'signout',
-          name: 'signout',
-          component: SignOut
         }
       ]
     },
@@ -77,6 +78,11 @@ export default new Router({
           }
         },
 
+        {
+          path: 'signout',
+          name: 'signout',
+          component: SignOut
+        },
         {
           path: 'd/:id',
           name: 'dashboard',

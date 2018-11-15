@@ -16,6 +16,14 @@ const state = {
 }
 
 const mutations = {
+  [t.DASHBOARD_RESET] (state) {
+    state.list = []
+    state.loaded = null
+    state.isEditing = false
+    state.isFullscreen = false
+    state.focusedWidget = null
+    state.focusedIntegration = null
+  },
   [t.DASHBOARD_SET_LIST] (state, payload) {
     state.list = _.clone(payload)
   },
@@ -56,6 +64,12 @@ const mutations = {
   },
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
+    state.loaded = _.cloneDeep(state.loaded)
+  },
+  [t.DASHBOARD_REMOVE_WIDGET] (state) {
+    const index = state.loaded.widgets.findIndex(w => w.i === state.focusedWidget)
+    state.focusedWidget = null
+    state.loaded.widgets.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   },
   [t.DASHBOARD_ADD_WIDGET] (state, id) {

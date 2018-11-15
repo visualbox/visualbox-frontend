@@ -9,6 +9,12 @@ v-container#dashboard.pa-0(
       icon
     )
       v-icon {{ editingIcon }}
+    v-btn(
+      v-if="focusedWidget && !isEditing"
+      @click="DASHBOARD_REMOVE_WIDGET"
+      icon
+    )
+      v-icon mdi-delete
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
@@ -36,7 +42,7 @@ export default {
   },
   computed: {
     ...mapState('Dashboard', ['isEditing', 'isFullscreen']),
-    ...mapGetters('Dashboard', ['loaded']),
+    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
     style () {
       const { width, height } = this.loaded.settings
       const { r, g, b, a } = this.loaded.settings.rgba
@@ -76,8 +82,12 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_EDITING', 'DASHBOARD_SET_FULLSCREEN']),
-    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded'])
+    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded']),
+    ...mapMutations('Dashboard', [
+      'DASHBOARD_SET_EDITING',
+      'DASHBOARD_SET_FULLSCREEN',
+      'DASHBOARD_REMOVE_WIDGET'
+    ])
   },
   mounted () {
     this.load(this.$route.params.id)

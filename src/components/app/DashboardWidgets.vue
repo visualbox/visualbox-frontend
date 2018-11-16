@@ -38,7 +38,7 @@ export default {
       padding 6px
 
       &:hover
-        border 2px solid #FFF
+        border 2px solid #bebebe
         cursor pointer
 
       div

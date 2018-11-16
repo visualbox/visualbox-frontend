@@ -3,6 +3,16 @@
   v-container.pa-3(grid-list-lg)
     v-layout(row wrap)
       v-flex(xs12)
+        v-expansion-panel
+          v-expansion-panel-content
+            div(slot="header")
+              v-avatar.mr-3(
+                :size="30"
+                :color="bgc"
+              )
+              | Background Color
+            color-picker(v-model="bgc")
+      v-flex(xs12)
         v-text-field(
           v-model="label"
           label="Label"
@@ -23,16 +33,6 @@
           hide-details
           outline
         )
-      v-flex(xs12)
-        v-expansion-panel
-          v-expansion-panel-content
-            div(slot="header")
-              v-avatar.mr-3(
-                :size="30"
-                :color="bgc"
-              )
-              | Background Color
-            color-picker(v-model="bgc")
 </template>
 
 <script>
@@ -90,4 +90,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+#dashboard-settings
+  .v-expansion-panel, .v-expansion-panel__container
+    border-radius 4px
 </style>

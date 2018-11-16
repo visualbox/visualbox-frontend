@@ -68,4 +68,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+#widget-ctx
+  height 100%
+  overflow auto
 </style>

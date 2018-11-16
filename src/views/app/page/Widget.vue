@@ -28,7 +28,7 @@
         class="editor"
         ref="editorSource"
         v-model="source"
-        language="javascript"
+        language="html"
       )
     .tab-item(:class="{ 'active' : tab === 3 }")
       monaco-editor(

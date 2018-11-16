@@ -20,7 +20,7 @@ class IFrameHandler {
       const injected = `const CONFIG = ${JSON.stringify(config)};`
 
       // Create iframe content with injected config vars
-      const html = 'WIDGET' + source
+      const html = source
       this.refs[w.i][0].src = `data:text/html,${encodeURIComponent(html)}`
     })
   }

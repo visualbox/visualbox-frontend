@@ -72,6 +72,9 @@ export default {
 
 <style lang="stylus" scoped>
 #dashboard-ctx
+  height 100%
+  overflow auto
+
   .v-tabs
     &.hidden
       display none

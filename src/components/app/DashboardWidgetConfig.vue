@@ -19,18 +19,6 @@
           | Background Color
         color-picker(v-model="bgc")
 
-    //- Integration data tree
-    v-treeview(
-      activatable
-      :items="dataTree"
-      item-key="name"
-    )
-      template(
-        slot="prepend"
-        slot-scope="{ item }"
-      )
-        v-icon {{ item.icon }}
-
     //- Widget config
     .mt-3(
       v-for="(field, index) in config.variables"
@@ -54,6 +42,19 @@
       type="error"
       outline
     ) {{ item }}
+
+    //- Integration data tree
+    v-treeview.mt-3(
+      activatable
+      :items="dataTree"
+      item-key="key"
+      item-text="text"
+    )
+      template(
+        slot="prepend"
+        slot-scope="{ item }"
+      )
+        v-icon {{ item.icon }}
 </template>
 
 <script>
@@ -70,21 +71,7 @@ export default {
     'color-picker': Chrome
   },
   data: () => ({
-    tree: [],
-    model: {},
-    items: [
-      {
-        name: 'Foo'
-      },
-      {
-        name: 'Bar',
-        children: [
-          {
-            name: 'baz'
-          }
-        ]
-      }
-    ]
+    model: {}
   }),
   computed: {
     ...mapGetters('Dashboard', ['focusedWidget']),
@@ -150,4 +137,13 @@ export default {
 #dashboard-widget-config
   .v-toolbar
     background transparent
+
+  .v-expansion-panel, .v-expansion-panel__container
+    border-radius 4px
+
+  .v-treeview
+    max-height 600px
+    border 2px solid #bebebe
+    border-radius 4px
+    overflow auto
 </style>

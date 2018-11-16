@@ -6,19 +6,19 @@ v-container#dashboard.pa-0(
   app-context-toolbar
     v-btn(
       @click="DASHBOARD_SET_EDITING(!isEditing)"
-      icon
+      icon outline
     )
       v-icon {{ editingIcon }}
     v-btn(
-      v-if="focusedWidget && !isEditing"
+      v-if="focusedWidget"
       @click="DASHBOARD_REMOVE_WIDGET"
-      icon
+      icon outline
     )
       v-icon mdi-delete
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      icon
+      icon outline
     )
       v-icon {{ fullscreenIcon }}
   v-layout(
@@ -55,7 +55,7 @@ export default {
       }
     },
     editingIcon () {
-      return this.isEditing ? 'mdi-pencil-off' : 'mdi-pencil'
+      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
     },
     fullscreenIcon () {
       return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'

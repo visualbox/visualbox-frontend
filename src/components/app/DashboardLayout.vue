@@ -20,7 +20,7 @@ grid-layout#dashboard-layout(
     :h="item.h"
     :i="item.i"
     :style="getWidgetStyle(item.settings)"
-    @click.native="focusWidget(item.i)"
+    @click.native.stop="focusWidget(item.i)"
   )
     iframe(
       :ref="item.i"
@@ -101,6 +101,8 @@ export default {
   background #FFF
 
   .vue-grid-item
+    z-index 100
+
     &.vue-resizable:hover
       -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
       box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
@@ -109,9 +111,7 @@ export default {
       width 100%
       height 100%
       border 0
-      position absolute
-      top 0
-      left 0
+      pointer-events none
 
   >>> .vue-grid-placeholder
     background #000

@@ -68,4 +68,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+#integration-ctx
+  height 100%
+  overflow auto
 </style>

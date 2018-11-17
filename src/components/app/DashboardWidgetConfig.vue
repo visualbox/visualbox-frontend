@@ -9,7 +9,55 @@
     )
       v-icon mdi-close
   .pa-3
-    v-expansion-panel
+    v-dialog(
+      v-model="dialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    )
+      v-expansion-panel(slot="activator")
+        v-expansion-panel-content(expand-icon="")
+          div(slot="header")
+            v-icon(small).ml-2.mr-4 mdi-code-braces
+            | Data Source
+      v-card
+        v-toolbar(fixed)
+          v-btn(
+            icon
+            @click="dialog = false"
+          )
+            v-icon close
+          v-toolbar-title Data Source
+          v-spacer
+          v-toolbar-items
+            v-btn(
+              flat
+              @click="updateDataSource"
+            ) Save
+        v-container.mt-5(fluid)
+          v-layout(
+            row
+            align-center
+            justify-center
+            fill-height
+          )
+            v-flex(xs12 sm12 md10 lg8 xl6)
+              //- Integration data tree
+              v-treeview.mt-3(
+                :active.sync="dataSource"
+                :open="dataSourceOpen"
+                :items="dataTree"
+                item-key="key"
+                item-text="text"
+                activatable
+              )
+                template(
+                  slot="prepend"
+                  slot-scope="{ item }"
+                )
+                  v-icon {{ item.icon }}
+
+    v-expansion-panel.mt-3
       v-expansion-panel-content
         div(slot="header")
           v-avatar.mr-3(
@@ -42,19 +90,6 @@
       type="error"
       outline
     ) {{ item }}
-
-    //- Integration data tree
-    v-treeview.mt-3(
-      activatable
-      :items="dataTree"
-      item-key="key"
-      item-text="text"
-    )
-      template(
-        slot="prepend"
-        slot-scope="{ item }"
-      )
-        v-icon {{ item.icon }}
 </template>
 
 <script>
@@ -63,6 +98,7 @@ import { Chrome } from 'vue-color'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 import parseConfig from '@/lib/parseConfig'
+import IFrameHandler from '@/lib/iframeHandler'
 
 export default {
   name: 'DashboardWidgetConfig',
@@ -71,7 +107,10 @@ export default {
     'color-picker': Chrome
   },
   data: () => ({
-    model: {}
+    model: {},
+    dataSource: [],
+    dataSourceOpen: [],
+    dialog: false
   }),
   computed: {
     ...mapGetters('Dashboard', ['focusedWidget']),
@@ -117,6 +156,19 @@ export default {
           }
         }
         this.model = _.cloneDeep(configModel)
+
+        // Load data source
+        this.loadDataSource()
+      },
+      deep: true
+    },
+
+    // Re-apply dataSource on data tree when it changes (aka. is loaded)
+    dataTree: {
+      handler: function () {
+        if (this.focusedWidget === null)
+          return
+        this.loadDataSource()
       },
       deep: true
     }
@@ -128,6 +180,31 @@ export default {
       this.$set(this.model, variableName, val)
       this.model = _.cloneDeep(this.model)
       this.updateFocusedWidget({ settings: { config: this.model } })
+
+      // Send config updates to IFrame
+      IFrameHandler.postMessage(this.focusedWidget.i, this.model)
+    },
+
+    // Convenience method for instructing dataTree how to open
+    loadDataSource () {
+      const { source } = this.focusedWidget.settings
+      this.dataSource = [ source ]
+
+      // Open tree all the way to the source leaf
+      this.dataSourceOpen = source.split('.').reduce((a, b) => {
+        const path = a.length > 0
+          ? a[a.length - 1] + '.' + b
+          : b
+        a.push(path)
+        return a
+      }, [])
+    },
+
+    // Update data source path when dialog is closed
+    updateDataSource () {
+      this.dialog = false
+      const source = this.dataSource[0]
+      this.updateFocusedWidget({ settings: { source } })
     }
   }
 }
@@ -138,12 +215,9 @@ export default {
   .v-toolbar
     background transparent
 
+  .v-dialog__container
+    display block !important
+
   .v-expansion-panel, .v-expansion-panel__container
     border-radius 4px
-
-  .v-treeview
-    max-height 600px
-    border 2px solid #bebebe
-    border-radius 4px
-    overflow auto
 </style>

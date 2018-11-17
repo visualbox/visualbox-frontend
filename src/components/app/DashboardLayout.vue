@@ -20,6 +20,7 @@ grid-layout#dashboard-layout(
     :h="item.h"
     :i="item.i"
     :style="getWidgetStyle(item.settings)"
+    :class="{ 'focused' : isFocused(item.i) }"
     @click.native.stop="focusWidget(item.i)"
   )
     iframe(
@@ -51,7 +52,7 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['isEditing']),
-    ...mapGetters('Dashboard', ['loaded']),
+    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     widgets () {
       return _.get(this, 'loaded.widgets', [])
@@ -75,6 +76,9 @@ export default {
     blurWidget () {
       if (!this.isEditing)
         this.DASHBOARD_SET_FOCUSED_WIDGET(null)
+    },
+    isFocused (wI) {
+      return wI === _.get(this, 'focusedWidget.i', null)
     }
   },
   watch: {
@@ -102,6 +106,9 @@ export default {
 
   .vue-grid-item
     z-index 100
+
+    &.focused
+      outline 2px solid #FFF
 
     &.vue-resizable:hover
       -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;

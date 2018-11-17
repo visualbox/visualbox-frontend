@@ -89,6 +89,7 @@ const mutations = {
       i,
       id,
       settings: {
+        source: null,
         config: {},
         rgba: {
           r: 255,

@@ -16,7 +16,7 @@
           flat icon
           @click.stop="DASHBOARD_ADD_INTEGRATION(item.id)"
         )
-          v-icon(small) mdi-arrow-down
+          v-icon(small) mdi-plus
 
   v-divider
 
@@ -37,7 +37,7 @@
           flat icon
           @click.stop="DASHBOARD_REMOVE_INTEGRATION(item.id)"
         )
-          v-icon(small) mdi-arrow-up
+          v-icon(small) mdi-minus-circle-outline
 </template>
 
 <script>

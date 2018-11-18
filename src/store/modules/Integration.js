@@ -8,13 +8,18 @@ import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
-  loaded: null
+  loaded: null,
+  tab: 0
 }
 
 const mutations = {
   [t.INTEGRATION_RESET] (state) {
     state.list = []
     state.loaded = null
+    state.tab = 0
+  },
+  [t.INTEGRATION_SET_TAB] (state, payload) {
+    state.tab = payload
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
     state.list = _.cloneDeep(payload)

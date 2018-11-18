@@ -25,13 +25,50 @@
           hide-details
         )
       v-flex(xs12)
-        .body-1.font-weight-thin.text-xs-right.grey--text Updated: {{ updatedAt }}
+        //- README
+        v-alert(
+          v-if="tab === 1"
+          :value="true"
+          color="warning"
+          outline
+        )
+          .title.mb-3 Markdown
+          p An integration should explain <strong>what it does</strong>, <strong>how it's configured</strong> and <strong>what the output looks like</strong>.<br>
+          p.mb-0 You can use standard <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_new">markdown</a> syntax here.
+
+        //- Source
+        v-alert(
+          v-if="tab === 2"
+          :value="true"
+          color="warning"
+          outline
+        )
+          .title.mb-3 JavaScript
+          p <strong>CONFIG</strong> is a constant variable you can use within your integration to access user configurations. Each property is its <strong>name</strong> counterpart of the integration configuration.
+          p.mb-0 Use the method <strong>postMessage()</strong> to send data back to VisualBox from your integration.
+
+        //- Config
+        v-alert(
+          v-if="tab === 3"
+          :value="true"
+          color="warning"
+          outline
+        )
+          .title.mb-3 JSON
+          p The integration coniguration is a <strong>JSON</strong> array containing configuration objects.
+          p Object configuration:
+          pre
+            | {
+            |   "type": String (required),
+            |   "name": String (required),
+            |   "label": String (required),
+            |   "default": String
+            | }
 </template>
 
 <script>
 import * as _ from 'lodash'
-import moment from 'moment'
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 
 export default {
@@ -42,6 +79,7 @@ export default {
     ...mapActions('App', ['setSnackbar'])
   },
   computed: {
+    ...mapState('Integration', ['tab']),
     ...mapGetters('Integration', ['loaded']),
     label: {
       get () {
@@ -58,10 +96,6 @@ export default {
       set (isPublic) {
         this.updateLoaded({ public: isPublic })
       }
-    },
-    updatedAt () {
-      const { updatedAt } = this.loaded
-      return moment(updatedAt).format('DD/MM HH:mm:ss')
     }
   }
 }

@@ -2,7 +2,7 @@
 #integration(v-if="loaded !== null && typeof loaded !== 'undefined'")
   app-context-toolbar
     v-tabs.elevation-0(
-      v-model="tab"
+      v-model="localTab"
       color="rgba(0,0,0,0)"
       slider-color="primary"
       grow
@@ -41,7 +41,7 @@
 <script>
 import marked from 'marked'
 import * as _ from 'lodash'
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
 
 export default {
@@ -50,9 +50,6 @@ export default {
     AppContextToolbar,
     MonacoEditor
   },
-  data: () => ({
-    tab: 0
-  }),
   watch: {
     tab () {
       this.updateDimensions()
@@ -76,7 +73,16 @@ export default {
     }
   },
   computed: {
+    ...mapState('Integration', ['tab']),
     ...mapGetters('Integration', ['loaded']),
+    localTab: {
+      get () {
+        return this.tab
+      },
+      set: function (val) {
+        this.INTEGRATION_SET_TAB(val)
+      }
+    },
     compiledMarkdown () {
       try {
         return marked(this.readme, {
@@ -113,6 +119,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
     ...mapActions('App', ['setSnackbar']),
     ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
     updateDimensions () {

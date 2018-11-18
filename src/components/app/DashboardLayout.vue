@@ -39,6 +39,7 @@ import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import cloneDeep from '@/lib/cloneDeep'
+import difference from '@/lib/difference'
 import IFrameHandler from '@/lib/iframeHandler'
 
 export default {
@@ -52,6 +53,7 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['isEditing']),
+    ...mapState('Data', ['data']),
     ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     widgets () {
@@ -84,7 +86,28 @@ export default {
   watch: {
     widgets: {
       handler: function (widgets) {
+        // Find new widgets (newly added) by
+        // taking diff of layout and widgets.
+        // A widget is 'new' if it has property 'i' changed.
+        const diff = difference(widgets, this.layout)
+        const newWidgets = diff.filter(w => w.hasOwnProperty('i'))
+
+        // Copy new widgets to layout system and let them render
         this.layout = cloneDeep(widgets)
+
+        // Next tick to allow template to render.
+        // this.$refs is used in IFrameHandler.
+        if (newWidgets.length > 0) {
+          this.$nextTick(() => {
+            IFrameHandler.generate(newWidgets)
+          })
+        }
+      },
+      deep: true
+    },
+    data: {
+      handler: function (newVal) {
+        IFrameHandler.onDataChange(this.widgets, newVal)
       },
       deep: true
     }

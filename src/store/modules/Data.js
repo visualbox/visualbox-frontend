@@ -27,17 +27,19 @@ const actions = {
 
 const getters = {
   dataTree (state, getters, rootState, rootGetters) {
-    // Convert top-leved ID's into integration names
-    /*
-    let convertedId = {}
-    for (let id in state.data) {
-      // Try to get it, if 'undefined', use ID
-      const name = rootGetters['Integration/integrationById'](id).label || id
-      convertedId[name] = state.data[id]
-    }
-    */
+    let dt = dataTree(state.data)
 
-    return dataTree(state.data)
+    // Convert top-leved ID's into integration names
+    for (let i in dt) {
+      try {
+        let integration = dt[i]
+        const { key } = integration
+        integration.text = rootGetters['Integration/integrationById'](key).label || key
+      } catch (e) {
+        continue
+      }
+    }
+    return dt
   }
 }
 

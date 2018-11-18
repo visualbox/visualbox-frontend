@@ -95,7 +95,7 @@
 <script>
 import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
-import { mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 import parseConfig from '@/lib/parseConfig'
 import IFrameHandler from '@/lib/iframeHandler'
@@ -116,6 +116,7 @@ export default {
     ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     ...mapGetters('Data', ['dataTree']),
+    ...mapState('Data', ['data']),
 
     // Focused widget BGC
     bgc: {
@@ -182,12 +183,17 @@ export default {
       this.updateFocusedWidget({ settings: { config: this.model } })
 
       // Send config updates to IFrame
-      IFrameHandler.postMessage(this.focusedWidget.i, this.model)
+      IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, this.model)
     },
 
     // Convenience method for instructing dataTree how to open
     loadDataSource () {
-      const { source } = this.focusedWidget.settings
+      let { source } = this.focusedWidget.settings
+
+      // Source is not a String (defaul is null)
+      if (!_.isString(source))
+        source = ''
+
       this.dataSource = [ source ]
 
       // Open tree all the way to the source leaf
@@ -205,6 +211,9 @@ export default {
       this.dialog = false
       const source = this.dataSource[0]
       this.updateFocusedWidget({ settings: { source } })
+
+      // Send data source data updates to IFrame
+      IFrameHandler.onDataSourceChange(this.focusedWidget, this.data)
     }
   }
 }

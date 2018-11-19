@@ -72,14 +72,36 @@
       v-for="(field, index) in config.variables"
       :key="index"
     )
-      //- Text type
+      //- Text/password type
       v-text-field(
-        v-if="field.type === 'text'"
+        v-if="field.type === 'text' || field.type === 'password'"
         v-model="model[field.name]"
         @input="v => updateDynamicModel(v, field.name)"
         :label="field.label"
+        :type="field.type"
         hide-details
         outline
+      )
+      //- Switch type
+      v-switch(
+        v-if="field.type === 'switch'"
+        v-model="model[field.name]"
+        @change="v => updateDynamicModel(v, field.name)"
+        :label="field.label"
+        :type="field.type"
+        color="primary"
+        hide-details
+      )
+      v-slider(
+        v-if="field.type === 'slider'"
+        v-model="model[field.name]"
+        @change="v => updateDynamicModel(v, field.name)"
+        :hint="field.label"
+        :max="field.max"
+        :min="field.min"
+        :thumb-size="24"
+        thumb-label
+        persistent-hint
       )
 
     //- Widget config parse errors
@@ -146,7 +168,7 @@ export default {
 
         // Create local config model
         let configModel = this.config.variables.reduce((acc, cur) => {
-          acc[cur.name] = null
+          acc[cur.name] = cur.default || null
           return acc
         }, {})
 

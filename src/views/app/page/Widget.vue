@@ -2,7 +2,7 @@
 #widget(v-if="loaded !== null && typeof loaded !== 'undefined'")
   app-context-toolbar
     v-tabs.elevation-0(
-      v-model="tab"
+      v-model="localTab"
       color="rgba(0,0,0,0)"
       slider-color="primary"
       grow
@@ -14,37 +14,37 @@
       v-tab Preview
 
   .tabs-items
-    .tab-item.pa-3.scroll(:class="{ 'active' : tab === 0 }")
+    .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
       .markdown(v-html="compiledMarkdown")
-    .tab-item(:class="{ 'active' : tab === 1 }")
+    .tab-item(:class="{ 'active' : localTab === 1 }")
       monaco-editor(
         class="editor"
         ref="editorReadme"
         v-model="readme"
         language="markdown"
       )
-    .tab-item(:class="{ 'active' : tab === 2 }")
+    .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
         class="editor"
         ref="editorSource"
         v-model="source"
         language="html"
       )
-    .tab-item(:class="{ 'active' : tab === 3 }")
+    .tab-item(:class="{ 'active' : localTab === 3 }")
       monaco-editor(
         class="editor"
         ref="editorConfig"
         v-model="config"
         language="json"
       )
-    .tab-item(:class="{ 'active' : tab === 4 }")
+    .tab-item(:class="{ 'active' : localTab === 4 }")
       span PREVIEW
 </template>
 
 <script>
 import marked from 'marked'
 import * as _ from 'lodash'
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
 
 export default {
@@ -53,13 +53,7 @@ export default {
     AppContextToolbar,
     MonacoEditor
   },
-  data: () => ({
-    tab: 0
-  }),
   watch: {
-    tab () {
-      this.updateDimensions()
-    },
     loaded: {
       handler: _.debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing widget
@@ -79,7 +73,16 @@ export default {
     }
   },
   computed: {
+    ...mapState('Widget', ['tab']),
     ...mapGetters('Widget', ['loaded']),
+    localTab: {
+      get () {
+        return this.tab
+      },
+      set: function (val) {
+        this.WIDGET_SET_TAB(val)
+      }
+    },
     compiledMarkdown () {
       try {
         return marked(this.readme, {
@@ -116,6 +119,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations('Widget', ['WIDGET_SET_TAB']),
     ...mapActions('App', ['setSnackbar']),
     ...mapActions('Widget', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
     updateDimensions () {

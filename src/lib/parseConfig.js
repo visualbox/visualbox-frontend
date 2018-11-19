@@ -1,8 +1,17 @@
 import * as _ from 'lodash'
 
 const VALID_TYPES = [
-  'text'
+  'text',
+  'password',
+  'switch',
+  'slider'
 ]
+
+/*
+const OPTIONAL_PROPS = [
+  'default'
+]
+*/
 
 /**
  * Parse JSON configuration string
@@ -34,7 +43,7 @@ const parseConfig = config => {
         continue
       }
       // Field 'type' is string
-      if (typeof field.type !== 'string') {
+      if (!_.isString(field.type)) {
         out.error.push(`Property 'type' must be a string, in field #${i}`)
         continue
       }
@@ -49,8 +58,13 @@ const parseConfig = config => {
         continue
       }
       // Field 'name' is string
-      if (typeof field.name !== 'string') {
+      if (!_.isString(field.name)) {
         out.error.push(`Property 'name' must be a string, in field #${i}`)
+        continue
+      }
+      // Field 'name' is unique
+      if (out.variables.findIndex(v => v.name === field.name) > -1) {
+        out.error.push(`Property 'name' must be unique, in field #${i}`)
         continue
       }
       // Contains required field 'label'
@@ -59,18 +73,45 @@ const parseConfig = config => {
         continue
       }
       // Field 'label' is string
-      if (typeof field.label !== 'string') {
+      if (!_.isString(field.label)) {
         out.error.push(`Property 'label' must be a string, in field #${i}`)
         continue
       }
-      // Field 'name' is unique
-      // Optional field '' is supported
-      // ...
+
+      let optionals = {}
+      // Optional field 'default' is supported
+      if (_.has(field, 'default')) {
+        optionals.default = field.default
+      }
+      // Optional fields 'min' and 'max' is supported
+      if (field.type === 'slider') {
+        // Contains required field 'min'
+        if (!_.has(field, 'min')) {
+          out.error.push(`Missing required property 'min', in field #${i}`)
+          continue
+        }
+        // Field 'min' is number
+        if (!_.isNumber(field.min)) {
+          out.error.push(`Property 'min' must be a number, in field #${i}`)
+          continue
+        }
+        // Contains required field 'max'
+        if (!_.has(field, 'max')) {
+          out.error.push(`Missing required property 'max', in field #${i}`)
+          continue
+        }
+        // Field 'max' is number
+        if (!_.isNumber(field.max)) {
+          out.error.push(`Property 'min' must be a number, in field #${i}`)
+          continue
+        }
+      }
 
       out.variables.push({
         type: field.type.toLowerCase(),
         name: field.name,
-        label: field.label
+        label: field.label,
+        ...optionals
       })
     }
 

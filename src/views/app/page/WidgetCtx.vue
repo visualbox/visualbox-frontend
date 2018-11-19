@@ -25,23 +25,80 @@
           hide-details
         )
       v-flex(xs12)
-        .body-1.font-weight-thin.text-xs-right.grey--text Updated: {{ updatedAt }}
+        .text-xs-right(v-if="tab !== 0")
+          v-btn.mr-0(
+            flat icon
+            @click="showInfo = !showInfo"
+          )
+            v-icon {{ showInfo ? 'close' : 'help' }}
+        //- README
+        v-alert(
+          v-if="tab === 1"
+          :value="showInfo"
+          color="success"
+        )
+          p A widget should explain what it does, how it's configured and what the output looks like.
+          p.mb-0 You can use standard <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_new">markdown</a> syntax here.
+
+        //- Source
+        v-alert(
+          v-if="tab === 2"
+          :value="showInfo"
+          color="success"
+        )
+          .title.mb-3 CONFIG
+          p <strong>CONFIG</strong> is a constant variable you can use within your widget to access user configurations. Each property is its <strong>name</strong> counterpart of the widget configuration.
+
+          .title.mb-3 DATA
+          p The <strong>DATA</strong> variable is pointing to the selected data source from an integration output.
+
+          .title.mb-3 onMessage(event)
+          p.mb-0 The <strong>onMessage(event)</strong> function is called whenever updated data is provided to the widget.
+          p The <strong>event</strong> argument takes the following form:
+          pre
+            | {
+            |   type: 'CONFIG_CHANGED'|'DATA_CHANGED',
+            |   value: &lt;new data&gt;
+            | }
+          p.mb-0.mt-3 Whenever <strong>onMessage()</strong> is called, <strong>CONFIG</strong> and <strong>DATA</strong> is automatically updated.
+
+        //- Config
+        v-alert(
+          v-if="tab === 3"
+          :value="showInfo"
+          color="success"
+        )
+          p The integration configuration is a <strong>JSON</strong> array containing configuration objects.
+          p Object configuration:
+          pre
+            | [
+            |   {
+            |     "type": String (required),
+            |     "name": String (required),
+            |     "label": String (required),
+            |     "default": String
+            |   },
+            |   { ... }
+            | ]
 </template>
 
 <script>
-import moment from 'moment'
 import * as _ from 'lodash'
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 
 export default {
   name: 'WidgetCtx',
   components: { AppContextToolbar },
+  data: () => ({
+    showInfo: false
+  }),
   methods: {
     ...mapActions('Widget', ['updateLoaded']),
     ...mapActions('App', ['setSnackbar'])
   },
   computed: {
+    ...mapState('Widget', ['tab']),
     ...mapGetters('Widget', ['loaded']),
     label: {
       get () {
@@ -58,10 +115,6 @@ export default {
       set (isPublic) {
         this.updateLoaded({ public: isPublic })
       }
-    },
-    updatedAt () {
-      const { updatedAt } = this.loaded
-      return moment(updatedAt).format('DD/MM HH:mm:ss')
     }
   }
 }
@@ -71,4 +124,11 @@ export default {
 #widget-ctx
   height 100%
   overflow auto
+
+  >>> .v-alert > div
+    width 100%
+    overflow hidden
+
+    pre
+      font-size 10px
 </style>

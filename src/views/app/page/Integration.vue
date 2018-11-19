@@ -13,23 +13,23 @@
       v-tab Edit Config
 
   .tabs-items
-    .tab-item.pa-3.scroll(:class="{ 'active' : tab === 0 }")
+    .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
       .markdown(v-html="compiledMarkdown")
-    .tab-item(:class="{ 'active' : tab === 1 }")
+    .tab-item(:class="{ 'active' : localTab === 1 }")
       monaco-editor(
         class="editor"
         ref="editorReadme"
         v-model="readme"
         language="markdown"
       )
-    .tab-item(:class="{ 'active' : tab === 2 }")
+    .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
         class="editor"
         ref="editorSource"
         v-model="source"
         language="javascript"
       )
-    .tab-item(:class="{ 'active' : tab === 3 }")
+    .tab-item(:class="{ 'active' : localTab === 3 }")
       monaco-editor(
         class="editor"
         ref="editorConfig"

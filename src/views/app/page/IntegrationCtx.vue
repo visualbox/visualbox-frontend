@@ -17,7 +17,7 @@
           hide-details
           outline
         )
-      v-flex(xs12)
+      v-flex(xs10)
         v-switch(
           v-model="public"
           label="Public"
@@ -25,45 +25,50 @@
           hide-details
         )
       v-flex(xs12)
+        .text-xs-right(v-if="tab !== 0")
+          v-btn.mr-0(
+            flat icon
+            @click="showInfo = !showInfo"
+          )
+            v-icon {{ showInfo ? 'close' : 'help' }}
         //- README
         v-alert(
           v-if="tab === 1"
-          :value="true"
-          color="warning"
-          outline
+          :value="showInfo"
+          color="success"
         )
-          .title.mb-3 Markdown
-          p An integration should explain <strong>what it does</strong>, <strong>how it's configured</strong> and <strong>what the output looks like</strong>.<br>
+          p An integration should explain what it does, how it's configured and what the output looks like.
           p.mb-0 You can use standard <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_new">markdown</a> syntax here.
 
         //- Source
         v-alert(
           v-if="tab === 2"
-          :value="true"
-          color="warning"
-          outline
+          :value="showInfo"
+          color="success"
         )
-          .title.mb-3 JavaScript
+          .title.mb-3 CONFIG
           p <strong>CONFIG</strong> is a constant variable you can use within your integration to access user configurations. Each property is its <strong>name</strong> counterpart of the integration configuration.
-          p.mb-0 Use the method <strong>postMessage()</strong> to send data back to VisualBox from your integration.
+          .title.mb-3 postMessage()
+          p.mb-0 Use the <strong>postMessage()</strong> function to send data back to VisualBox from your integration.
 
         //- Config
         v-alert(
           v-if="tab === 3"
-          :value="true"
-          color="warning"
-          outline
+          :value="showInfo"
+          color="success"
         )
-          .title.mb-3 JSON
-          p The integration coniguration is a <strong>JSON</strong> array containing configuration objects.
+          p The integration configuration is a <strong>JSON</strong> array containing configuration objects.
           p Object configuration:
           pre
-            | {
-            |   "type": String (required),
-            |   "name": String (required),
-            |   "label": String (required),
-            |   "default": String
-            | }
+            | [
+            |   {
+            |     "type": String (required),
+            |     "name": String (required),
+            |     "label": String (required),
+            |     "default": String
+            |   },
+            |   { ... }
+            | ]
 </template>
 
 <script>
@@ -74,6 +79,9 @@ import { AppContextToolbar } from '@/components/app'
 export default {
   name: 'IntegrationCtx',
   components: { AppContextToolbar },
+  data: () => ({
+    showInfo: false
+  }),
   methods: {
     ...mapActions('Integration', ['updateLoaded']),
     ...mapActions('App', ['setSnackbar'])
@@ -105,4 +113,11 @@ export default {
 #integration-ctx
   height 100%
   overflow auto
+
+  >>> .v-alert > div
+    width 100%
+    overflow hidden
+
+    pre
+      font-size 10px
 </style>

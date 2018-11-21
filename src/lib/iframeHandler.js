@@ -46,7 +46,7 @@ class IFrameHandler {
               }
             }
           } catch (e) {
-            consol.error('Widget error:', e);
+            console.warn('Widget error:', e);
           }
         }, false);
       </script>`

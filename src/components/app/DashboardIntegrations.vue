@@ -68,10 +68,8 @@ export default {
     // TODO: mechanism to register currently edited integration
     // so that its config gets updated
     dashboardIntegrations (newVal, oldVal) {
-      if (_.isEqual(newVal, oldVal))
-        return
 
-      WorkerHandler.register(newVal)
+      // WorkerHandler.register(newVal)
     }
   },
   methods: {

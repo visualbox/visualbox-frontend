@@ -44,10 +44,31 @@ class WorkerHandler {
     })
   }
 
-  end () {
-    this.workers.forEach(w => w.worker.terminate())
-    this.DATA_CLEAN_DATA(this.workers.map(w => w.id))
-    this.workers = []
+  end (id = null) {
+    // End all
+    if (id === null) {
+      this.workers.forEach(w => w.worker.terminate())
+      this.DATA_CLEAN_DATA(this.workers.reduce((a, b) => {
+        a.push(b.id)
+        return a
+      }, []))
+      this.workers = []
+
+    // End single
+    } else {
+      const index = this.workers.findIndex(w => w.id === id)
+
+      // Not found
+      if (index < 0)
+        return
+
+      try {
+        const worker = this.workers[index]
+        worker.worker.terminate()
+        this.DATA_CLEAN_DATA([ worker.id ])
+        this.workers.splice(index, 1)
+      } catch (e) {}
+    }
   }
 }
 

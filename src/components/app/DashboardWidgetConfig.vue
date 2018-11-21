@@ -104,6 +104,16 @@
         thumb-label
         persistent-hint
       )
+      //- Select type
+      v-select(
+        v-if="field.type === 'select'"
+        v-model="model[field.name]"
+        @change="v => updateDynamicModel(v, field.name)"
+        :items="field.options"
+        :label="field.label"
+        item-text="label"
+        item-value="value"
+      )
 
     //- Widget config parse errors
     v-alert.mt-3(

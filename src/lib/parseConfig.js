@@ -4,7 +4,8 @@ const VALID_TYPES = [
   'text',
   'password',
   'switch',
-  'slider'
+  'slider',
+  'select'
 ]
 
 /*
@@ -109,6 +110,35 @@ const parseConfig = config => {
         // Add min/max
         optionals.min = field.min
         optionals.max = field.max
+      }
+      // Optional field 'options' is supported
+      if (field.type === 'select') {
+        // Contains required field 'options'
+        if (!_.has(field, 'options')) {
+          out.error.push(`Missing required property 'options', in field #${i}`)
+          continue
+        }
+        // Field 'options' is array
+        if (!_.isArray(field.options)) {
+          out.error.push(`Property 'options' must be an array, in field #${i}`)
+          continue
+        }
+        // Field 'options' contains valid entries
+        let optionsErrorFlag = false
+        for (let i in field.options) {
+          const option = field.options[i]
+          if (!_.has(option, 'label') || !_.has(option, 'value') || !_.isString(option.label)) {
+            optionsErrorFlag = true
+            break
+          }
+        }
+        if (optionsErrorFlag === true) {
+          out.error.push(`Property 'options' contains malformed entries, in field #${i}`)
+          continue
+        }
+
+        // Add select options
+        optionals.options = field.options
       }
 
       out.variables.push({

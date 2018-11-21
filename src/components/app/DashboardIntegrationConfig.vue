@@ -33,6 +33,28 @@
         color="primary"
         hide-details
       )
+      //- Slider type
+      v-slider(
+        v-if="field.type === 'slider'"
+        v-model="model[field.name]"
+        @change="v => updateDynamicModel(v, field.name)"
+        :hint="field.label"
+        :max="field.max"
+        :min="field.min"
+        :thumb-size="24"
+        thumb-label
+        persistent-hint
+      )
+      //- Select type
+      v-select(
+        v-if="field.type === 'select'"
+        v-model="model[field.name]"
+        @change="v => updateDynamicModel(v, field.name)"
+        :items="field.options"
+        :label="field.label"
+        item-text="label"
+        item-value="value"
+      )
 
     //- Integration config parse errors
     v-alert(
@@ -48,6 +70,7 @@
 import * as _ from 'lodash'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
+import WorkerHandler from '@/lib/workerHandler'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
@@ -96,7 +119,16 @@ export default {
       this.$set(this.model, variableName, val)
       this.model = _.cloneDeep(this.model)
       this.updateFocusedIntegration({ settings: { config: this.model } })
-    }
+
+      // Send argument bcs debounce may fire when this.focusedIntegration value is gone
+      this.restartFocusedWorker(this.focusedIntegration)
+    },
+    restartFocusedWorker: _.debounce(function (integration) {
+      console.log('restart')
+      // Restart worker
+      WorkerHandler.end(integration.id)
+      WorkerHandler.register([ integration ])
+    }, 3000)
   }
 }
 </script>

@@ -3,7 +3,7 @@ v-container#dashboard.pa-0(
   v-if="loaded !== null && typeof loaded !== 'undefined'"
   fluid
 )
-  app-context-toolbar
+  app-context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
     v-btn(
       @click="DASHBOARD_SET_EDITING(!isEditing)"
       icon outline
@@ -25,6 +25,7 @@ v-container#dashboard.pa-0(
     align-center
     justify-center
     row fill-height
+    :class="{ 'fullscreen' : isFullscreen }"
   )
     dashboard-layout.elevation-5(:style="style")
 </template>
@@ -101,4 +102,16 @@ export default {
 <style lang="stylus" scoped>
 #dashboard
   height 100%
+
+  .v-toolbar.fullscreen, .layout.fullscreen
+    position fixed
+    left 0
+    right 0
+    z-index 100
+
+  .v-toolbar.fullscreen
+    top 0
+  .layout.fullscreen
+    top 48px
+    bottom 0
 </style>

@@ -92,6 +92,7 @@
         color="primary"
         hide-details
       )
+      //- Slider type
       v-slider(
         v-if="field.type === 'slider'"
         v-model="model[field.name]"

@@ -11,7 +11,6 @@
       v-tab Edit Info
       v-tab Edit Source
       v-tab Edit Config
-      v-tab Preview
 
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")

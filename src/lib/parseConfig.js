@@ -105,6 +105,10 @@ const parseConfig = config => {
           out.error.push(`Property 'min' must be a number, in field #${i}`)
           continue
         }
+
+        // Add min/max
+        optionals.min = field.min
+        optionals.max = field.max
       }
 
       out.variables.push({

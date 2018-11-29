@@ -1,4 +1,5 @@
-import * as _ from 'lodash'
+// import * as _ from 'lodash'
+import getNestedSource from '@/lib/getNestedSource'
 
 class IFrameHandler {
   constructor () {
@@ -67,7 +68,8 @@ class IFrameHandler {
     widgets.forEach(w => {
       try {
         const { source } = w.settings
-        const value = _.get(data, source, null)
+        // const value = _.get(data, source, null)
+        const value = getNestedSource(data, source.split('.'))
 
         if (value !== null)
           this.postMessage('sendData', w.i, value)
@@ -86,7 +88,8 @@ class IFrameHandler {
   onDataSourceChange (widget, data) {
     try {
       const { source } = widget.settings
-      const value = _.get(data, source, null)
+      // const value = _.get(data, source, null)
+      const value = getNestedSource(data, source.split('.'))
 
       if (value !== null)
         this.postMessage('sendData', widget.i, value)

@@ -2,7 +2,7 @@
 v-container(fluid fill-height)
   v-layout(column)
     .display-1 Help Center
-    p Welcome to VisualBox, and integration and visualization toolbox.
+    p Welcome to VisualBox, an integration and visualization toolbox.
 </template>
 
 <script>

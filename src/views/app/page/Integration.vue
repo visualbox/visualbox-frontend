@@ -7,10 +7,10 @@
       slider-color="primary"
       grow
     )
+      v-tab Integration
       v-tab Info
-      v-tab Edit Info
-      v-tab Edit Source
-      v-tab Edit Config
+      v-tab Source
+      v-tab Config
 
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")

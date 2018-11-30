@@ -13,13 +13,10 @@ const dataTree = (target, accKey = null) => {
       const accumulativeKey = accKey === null
         ? key
         : `${accKey}.${key}`
-      const text = _.isObject(target[key])
-        ? key
-        : `${key}: ${target[key]}`
       out.push({
-        text,
+        text: `<b>${key}</b>: ${target[key].constructor.name}`,
         key: accumulativeKey,
-        icon: 'mdi-json',
+        // icon: 'mdi-json',
         children: dataTree(target[key], accumulativeKey)
       })
 
@@ -28,13 +25,10 @@ const dataTree = (target, accKey = null) => {
       const accumulativeKey = accKey === null
         ? key
         : `${accKey}.${key}`
-      const text = _.isObject(target[key])
-        ? key
-        : `${key}: ${target[key]}`
       out.push({
-        text,
-        key: accumulativeKey,
-        icon: 'mdi-text-short'
+        text: `<b>${key}</b>: ${target[key]}`,
+        key: accumulativeKey
+        // icon: 'mdi-text-short'
       })
     }
   }

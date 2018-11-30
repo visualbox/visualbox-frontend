@@ -46,11 +46,12 @@ export default {
   name: 'AppNavigationDrawer',
   data: () => ({
     items: [
-      { title: 'Dashboards', to: '/app', icon: 'panorama_wide_angle' },
-      { title: 'Manage Integrations', to: '/app/i', icon: 'device_hub' },
-      { title: 'Manage Widgets', to: '/app/w', icon: 'widgets' },
-      { title: 'Settings', to: '/app/s', icon: 'settings', class: 'bottom_upper' },
-      { title: 'Logout', to: '/app/signout', icon: 'power_settings_new', class: 'bottom' }
+      { title: 'Dashboards', to: '/app', icon: 'mdi-panorama-wide-angle' },
+      { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
+      { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-widgets' },
+      { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' },
+      { title: 'Settings', to: '/app/s', icon: 'mdi-settings', class: 'bottom_upper' },
+      { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
     ]
   })
 }

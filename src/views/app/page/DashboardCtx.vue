@@ -15,11 +15,11 @@
     grow
   )
     v-tab
-      v-icon device_hub
+      v-icon mdi-source-fork
     v-tab
-      v-icon widgets
+      v-icon mdi-widgets
     v-tab
-      v-icon settings
+      v-icon mdi-settings
 
     v-tab-item
       dashboard-integrations

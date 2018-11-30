@@ -30,7 +30,7 @@
             flat icon
             @click="showInfo = !showInfo"
           )
-            v-icon {{ showInfo ? 'close' : 'help' }}
+            v-icon {{ showInfo ? 'mdi-close' : 'mdi-help-circle' }}
         //- README
         v-alert(
           v-if="tab === 1"

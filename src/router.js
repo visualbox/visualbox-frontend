@@ -27,6 +27,10 @@ import Widget from '@/views/app/page/Widget'
 import IntegrationCtx from '@/views/app/page/IntegrationCtx'
 import Integration from '@/views/app/page/Integration'
 
+// Help
+import HelpCtx from '@/views/app/help/HelpCtx'
+import HelpIndex from '@/views/app/help/HelpIndex'
+
 Vue.use(Router)
 
 export default new Router({
@@ -45,21 +49,15 @@ export default new Router({
         {
           path: '',
           name: 'signin',
-          component: SignIn,
-          meta: {
-            index: 0
-          }
+          component: SignIn
         },
         {
           path: 'signup',
           name: 'signup',
-          component: SignUp,
-          meta: {
-            index: 1
-          }
+          component: SignUp
         },
         {
-          path: 'verify',
+          path: 'verify/:email',
           name: 'verify',
           component: Verify
         }
@@ -123,6 +121,24 @@ export default new Router({
             default: Widget
           }
         },
+        {
+          path: 'h',
+          name: 'help-index',
+          components: {
+            context: HelpCtx,
+            default: HelpIndex
+          }
+        },
+        /*
+        {
+          path: 'h/:id',
+          name: 'help',
+          components: {
+            context: WidgetCtx,
+            default: Widget
+          }
+        },
+        */
         {
           path: 's',
           name: 'settings-index',

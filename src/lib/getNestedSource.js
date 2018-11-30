@@ -7,7 +7,7 @@
 const getNestedSource = (object, property) => {
   let current = object
   for (var i = 0, l = property.length; i < l; ++i) {
-    if (Object(current) === current){
+    if (Object(current) === current) {
       current = current[property[i]]
     } else {
       current = undefined

@@ -6,12 +6,6 @@ base-card
       .subheading with the code sent to your email
 
     div
-      v-text-field(
-        v-model="email"
-        :rules="[rules.required('Enter your email address')]"
-        label="Email"
-      )
-    div
       v-text-field.mb-3(
         v-model="code"
         :rules="[rules.required('Enter verification code')]"
@@ -25,10 +19,12 @@ base-card
       justify-space-between
     )
       v-btn.ma-0(
+        v-if="false"
         to="/auth/resend"
         color="primary"
         outline
       ) Resend verification
+      v-spacer
       v-btn.ma-0(
         :disabled="!code"
         :loading="isLoading"
@@ -40,9 +36,11 @@ base-card
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { BaseCard } from '@/components/base'
 
 export default {
   name: 'Verify',
+  components: { BaseCard },
   data: () => ({
     email: undefined,
     code: undefined,
@@ -75,6 +73,9 @@ export default {
         this.setIsLoading(false)
       }
     }
+  },
+  mounted () {
+    this.email = this.$route.params.email
   }
 }
 </script>

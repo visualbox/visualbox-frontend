@@ -35,7 +35,7 @@ base-card
           v-flex(xs12 sm6)
             v-text-field(
               v-model="password"
-              :rules="[rules.required('Enter a password')]"
+              :rules="[rules.required('Enter a password'), rules.pwdLength]"
               label="Password"
               type="password"
             )
@@ -43,12 +43,11 @@ base-card
             v-text-field(
               v-model="confirmPassword"
               :rules="[rules.required('Confirm your password'), rules.confirm]"
-              append-outer-icon="remove_red_eye"
               label="Confirm password"
               type="password"
             )
           v-flex.pa-0(xs12)
-            v-messages(:value="['Use 8 or more characters with a mix of letters, numbers & symbols']")
+            v-messages(:value="['Use a password with 6 or more characters']")
 
         v-layout.pt-5(
           alig-center
@@ -85,6 +84,7 @@ export default {
       confirmPassword: undefined,
       rules: {
         required: msg => v => !!v || msg,
+        pwdLength: v => (!!v && v.length > 5) || 'Minimum 6 characters',
         confirm: v => (!!v && v === this.password) || 'Passwords do not match'
       }
     }
@@ -113,7 +113,7 @@ export default {
           type: 'success',
           msg: 'Account created. Check your email for verification'
         })
-        this.$router.push('/auth/verify')
+        this.$router.push(`/auth/verify/${encodeURIComponent(this.email)}`)
       } catch (e) {
         this.setSnackbar({
           type: 'error',

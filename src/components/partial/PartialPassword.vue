@@ -1,6 +1,7 @@
 <template lang="pug">
 div
   v-text-field.mb-3(
+    autofocus
     v-model="internalValue"
     label="Password"
     name="password"
@@ -15,10 +16,12 @@ div
     justify-space-between
   )
     v-btn.ma-0(
+      v-if="false"
       to="/auth/forgot"
       color="primary"
       outline
     ) Forgot password?
+    v-spacer
     v-btn.ma-0(
       :disabled="!value"
       :loading="isLoading"
@@ -35,10 +38,10 @@ import ProxyValue from '@/mixins/proxyValue'
 export default {
   name: 'PartialPassword',
   mixins: [ ProxyValue ],
-  props: ['tab'],
+  props: ['current'],
   computed: mapGetters('App', ['isLoading']),
   watch: {
-    tab (n) {
+    current (n) {
       if (n === 1)
         setTimeout(() => { this.$refs.password.focus() }, 300)
     }

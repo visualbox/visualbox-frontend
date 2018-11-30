@@ -13,6 +13,7 @@ v-container#dashboard.pa-0(
       v-if="focusedWidget"
       @click="DASHBOARD_REMOVE_WIDGET"
       icon outline
+      color="red"
     )
       v-icon mdi-delete
     v-spacer

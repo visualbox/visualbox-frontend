@@ -2,37 +2,41 @@
 base-card
   v-card-text.pa-5
     .text-xs-center.mb-5
-      h1.headline.mb-3 {{ tab ? 'Welcome' : 'Sign In' }}
+      h1.headline.mb-3 {{ model ? 'Welcome' : 'Sign In' }}
 
       .welcome
         v-slide-y-transition(mode="out-in")
           v-chip(
-            v-if="tab"
+            v-if="model"
             outline
             color="white"
-            @click.native="tab = 0"
+            @click.native="model--"
           )
             v-icon(
               color="white"
               left
-            ) account_circle
+            ) mdi-account-circle
             span.body-2 {{ email }}
             v-icon(
               color="white"
               right
-            ) keyboard_arrow_down
+            ) mdi-menu-down
           .subheading(v-else) with your VisualBox account
 
-    v-tabs-items(v-model="tab")
-      v-tab-item
+    v-window(
+      v-model="model"
+      lazy
+    )
+      v-window-item
         partial-email(
           v-model="email"
-          @next="tab = 1"
+          @next="model++"
         )
-      v-tab-item
+      v-window-item
         partial-password(
           v-model="password"
-          :tab="tab"
+          :current="model"
+          @prev="model--"
           @next="submit"
         )
 </template>
@@ -40,19 +44,18 @@ base-card
 <script>
 import { mapActions } from 'vuex'
 import { BaseCard } from '@/components/base'
-import { PartialEmail, PartialPassword } from '@/components/partial'
 
 export default {
   name: 'SignIn',
   components: {
     BaseCard,
-    PartialEmail,
-    PartialPassword
+    PartialEmail: () => import('@/components/partial/PartialEmail'),
+    PartialPassword: () => import('@/components/partial/PartialPassword')
   },
   data: () => ({
+    model: 0,
     email: undefined,
-    password: undefined,
-    tab: 0
+    password: undefined
   }),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
@@ -85,6 +88,9 @@ export default {
 <style lang="stylus" scoped>
 .v-card
   height 352px
+
+  .v-card__text
+    overflow hidden
 
   .welcome
     height 40px

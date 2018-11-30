@@ -26,7 +26,7 @@
             icon
             @click="dialog = false"
           )
-            v-icon close
+            v-icon mdi-close
           v-toolbar-title Data Source
           v-spacer
           v-toolbar-items

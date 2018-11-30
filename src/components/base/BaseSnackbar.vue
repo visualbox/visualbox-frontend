@@ -19,10 +19,10 @@ v-snackbar(
 import { mapGetters } from 'vuex'
 
 const ICON_MAP = {
-  error: 'error',
-  info: 'info',
-  success: 'check_circle',
-  warning: 'warning'
+  error: 'mdi-alert',
+  info: 'mdi-information',
+  success: 'mdi-check',
+  warning: 'mdi-alert'
 }
 
 export default {
@@ -34,7 +34,7 @@ export default {
   computed: {
     ...mapGetters('App', ['snackbar']),
     icon () {
-      return ICON_MAP[this.snackbar.type] || 'check'
+      return ICON_MAP[this.snackbar.type] || 'mdi-check'
     }
   },
   watch: {

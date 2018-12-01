@@ -20,11 +20,24 @@
   //- Search
   .pa-2(v-if="showSearch")
     v-text-field.search(
-      clearable solo flat
-      single-line autofocus
+      @input="search"
+      :loading="loadingSearch"
       label="Search widgets"
-      :loading="false"
+      solo flat
+      single-line autofocus
+      hide-details
     )
+  .text-xs-center(v-if="showSearch && showNoHitsSearch")
+    v-icon.mb-3.mt-3 mdi-package-variant
+    .caption No results. Try a different phrase.
+  v-list(v-if="showSearch")
+    v-list-tile(
+      v-for="(item, index) in listSearch"
+      :key="index"
+      @click="$router.push(`/app/w#${item.objectID}`)"
+    )
+      v-list-tile-content
+        v-list-tile-sub-title {{ item.label }}
 
   //- List
   v-list(v-if="!showSearch")
@@ -46,7 +59,10 @@
 </template>
 
 <script>
+import * as _ from 'lodash'
+import { Auth } from 'aws-amplify'
 import { mapActions, mapGetters } from 'vuex'
+import { widgetsIndex } from '@/lib/algoliasearch'
 import { AppContextToolbar } from '@/components/app'
 
 export default {
@@ -54,7 +70,11 @@ export default {
   components: { AppContextToolbar },
   data: () => ({
     showSearch: false,
-    hoverIndex: null
+    loadingSearch: false,
+    listSearch: [],
+    showNoHitsSearch: false,
+    hoverIndex: null,
+    identityId: null
   }),
   computed: {
     ...mapGetters('App', ['isLoading']),
@@ -75,7 +95,35 @@ export default {
       } finally {
         this.setIsLoading(false)
       }
-    }
+    },
+    search: _.debounce(function (query) {
+      if (!query || query === '')
+        return
+
+      this.loadingSearch = true
+      this.showNoHitsSearch = false
+
+      widgetsIndex.search({
+        query,
+        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt'],
+        // filters: `-uid:'${this.identityId}'`
+      }, (err, result) => {
+        this.loadingSearch = false
+
+        if (err) {
+          this.showNoHitsSearch = true
+          return
+        }
+
+        if (result.hits.length <= 0)
+          this.showNoHitsSearch = true
+        this.listSearch = result.hits
+      })
+    }, process.env.VUE_APP_SEARCH_DEBOUNCE)
+  },
+  async mounted () {
+    const { identityId } = await Auth.currentCredentials()
+    this.identityId = identityId
   }
 }
 </script>

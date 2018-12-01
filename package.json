@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vuetify/vuex-cognito-module": "^0.2.0",
+    "algoliasearch": "^3.30.0",
     "aws-amplify": "^1.0.8",
     "lodash": "^4.17.10",
     "marked": "^0.5.1",

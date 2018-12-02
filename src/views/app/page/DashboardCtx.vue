@@ -17,7 +17,7 @@
     v-tab
       v-icon mdi-source-fork
     v-tab
-      v-icon mdi-widgets
+      v-icon mdi-hexagon-multiple
     v-tab
       v-icon mdi-settings
 

@@ -19,13 +19,29 @@ input:-webkit-autofill
   color rgba(255, 255, 255, .05) !important // rgba(76, 175, 80, .05) !important
 
 .markdown
-  h1, h2
+  hr
     margin-bottom 16px
-    padding 8px 0
-  code
+    border-color hsla(0, 0%, 100%, .12) !important
+    height 0
+    max-height 0
+    border solid
+    border-width thin 0 0
+  h1, h2, h3, h4, h5, h6
+    margin-bottom 16px
+    font-weight 400
+  ul, ol
+    margin-bottom 16px
+  code, kbd
+    padding 1px 5px
     background #242424
     color #4caf50
-    border-radius 0
+    font-weight unset
+    box-shadow none
+    -webkit-box-shadow none
+
+    &:after, &:before
+      content unset
+      letter-spacing unset
   pre code
     width 100%
     padding 16px

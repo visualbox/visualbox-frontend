@@ -3,7 +3,7 @@
   app-context-toolbar
     v-btn(
       icon
-      @click="$router.go(-1)"
+      @click="$router.push('/app/w')"
     )
       v-icon mdi-menu-left
     .subheading {{ label }}
@@ -38,7 +38,7 @@
           color="success"
         )
           p A widget should explain what it does, how it's configured and what the output looks like.
-          p.mb-0 You can use standard <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_new">markdown</a> syntax here.
+          p.mb-0 You can use standard Markdown syntax here.
 
         //- Source
         v-alert(
@@ -60,7 +60,7 @@
             |   type: 'CONFIG_CHANGED'|'DATA_CHANGED',
             |   value: &lt;new data&gt;
             | }
-          p.mb-0.mt-3 Whenever <strong>onMessage()</strong> is called, <strong>CONFIG</strong> and <strong>DATA</strong> is automatically updated.
+          p.mb-0.mt-3 Whenever <strong>onMessage()</strong> is called, <strong>CONFIG</strong> and <strong>DATA</strong> are automatically updated.
 
         //- Config
         v-alert(

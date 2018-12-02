@@ -27,6 +27,9 @@ import Widget from '@/views/app/page/Widget'
 import IntegrationCtx from '@/views/app/page/IntegrationCtx'
 import Integration from '@/views/app/page/Integration'
 
+// Public
+import WidgetPublic from '@/views/app/public/WidgetPublic'
+
 // Help
 import HelpCtx from '@/views/app/help/HelpCtx'
 import HelpIndex from '@/views/app/help/HelpIndex'
@@ -122,7 +125,15 @@ export default new Router({
           }
         },
         {
-          path: 'h',
+          path: 'w/:id/public',
+          name: 'widget-public',
+          components: {
+            context: WidgetsCtx,
+            default: WidgetPublic
+          }
+        },
+        {
+          path: 'h/:page?',
           name: 'help-index',
           components: {
             context: HelpCtx,

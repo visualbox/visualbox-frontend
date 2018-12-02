@@ -38,7 +38,7 @@
           color="success"
         )
           p An integration should explain what it does, how it's configured and what the output looks like.
-          p.mb-0 You can use standard <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_new">markdown</a> syntax here.
+          p.mb-0 You can use standard Markdown syntax here.
 
         //- Source
         v-alert(

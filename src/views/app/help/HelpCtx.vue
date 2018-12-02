@@ -9,9 +9,12 @@
       v-for="(item, index) in list"
       :key="index"
       :to="item.to"
+      exact
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
+      v-list-tile-action
+        v-icon {{ item.icon }}
 </template>
 
 <script>
@@ -22,8 +25,10 @@ export default {
   components: { AppContextToolbar },
   data: () => ({
     list: [
-      { label: 'Index', to: 'h/' },
-      { label: 'Widgets', to: 'h/widgets' }
+      { label: 'Home', icon: 'mdi-home', to: '/app/h' },
+      { label: 'Integrations', icon: 'mdi-source-fork', to: '/app/h/integrations' },
+      { label: 'Widgets', icon: 'mdi-hexagon-multiple', to: '/app/h/widgets' },
+      { label: 'Configuration Types', icon: 'mdi-json', to: '/app/h/config-types' }
     ]
   })
 }

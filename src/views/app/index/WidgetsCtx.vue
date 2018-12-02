@@ -1,7 +1,7 @@
 <template lang="pug">
 #widgets-ctx
   app-context-toolbar
-    .subheading Widgets
+    .subheading Manage Widgets
     v-spacer
     v-btn(
       icon
@@ -34,7 +34,7 @@
     v-list-tile(
       v-for="(item, index) in listSearch"
       :key="index"
-      @click="$router.push(`/app/w#${item.objectID}`)"
+      :to="`/app/w/${item.objectID}/public`"
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
@@ -84,6 +84,7 @@ export default {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Widget', ['create', 'del']),
     async submit () {
+      this.showSearch = false
       this.setIsLoading(true)
       try {
         await this.create()

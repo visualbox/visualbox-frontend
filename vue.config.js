@@ -14,5 +14,13 @@ module.exports = {
         'process.platform': 0 // bypass process check by Monaco
       })
     ]
+  },
+  chainWebpack: config => {
+    config.module
+      .rule('raw')
+      .test(/\.md$/)
+      .use('raw-loader')
+      .loader('raw-loader')
+      .end()
   }
 }

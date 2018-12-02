@@ -1,7 +1,7 @@
 <template lang="pug">
 #integrations-ctx
   app-context-toolbar
-    .subheading Integrations
+    .subheading Manage Integrations
     v-spacer
     v-btn(
       icon

@@ -8,6 +8,7 @@ import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
+  public: [],
   loaded: null,
   tab: 0
 }
@@ -54,6 +55,16 @@ const mutations = {
       if (index < 0)
         widgets.splice(index, 1)
     })
+  },
+  [t.WIDGET_SET_PUBLIC] (state, payload) {
+    // Try to find existing
+    const index = state.public.findIndex(item => item.id === payload.id)
+
+    if (index < 0)
+      state.public.push(payload)
+    else
+      state.public[index] = _.cloneDeep(payload)
+    state.public = _.cloneDeep(state.public)
   }
 }
 
@@ -117,6 +128,17 @@ const actions = {
       commit(t.WIDGET_COMMIT_LOADED)
     } catch (e) {
       throw e
+    }
+  },
+  async loadPublic ({ commit }, id) {
+    let result = null // Default value
+
+    try {
+      result = await API.get(config.env, `/widget/${id}`)
+    } catch (e) {
+      throw e
+    } finally {
+      commit(t.WIDGET_SET_PUBLIC, result)
     }
   }
 }

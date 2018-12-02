@@ -18,7 +18,7 @@ v-container(fluid fill-height)
       .subheading They fetch, process and format data to be displayed by widgets.
       .subheading You can create your own integration, or search for already existing integrations.
       .subheading Existing integrations can be modified to your own needs.
-      v-icon.index-icon mdi-lan
+      v-icon.index-icon mdi-source-fork
 </template>
 
 <script>

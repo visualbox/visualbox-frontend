@@ -80,6 +80,11 @@ export default {
     ...mapGetters('App', ['isLoading']),
     ...mapGetters('Widget', ['list'])
   },
+  watch: {
+    list () {
+      this.showSearch = false
+    }
+  },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Widget', ['create', 'del']),

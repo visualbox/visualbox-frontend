@@ -8,6 +8,7 @@ import cloneDeep from '@/lib/cloneDeep'
 
 const state = {
   list: [],
+  public: [],
   loaded: null,
   tab: 0
 }
@@ -15,6 +16,7 @@ const state = {
 const mutations = {
   [t.INTEGRATION_RESET] (state) {
     state.list = []
+    state.public = []
     state.loaded = null
     state.tab = 0
   },
@@ -54,6 +56,16 @@ const mutations = {
       if (index < 0)
         integrations.splice(index, 1)
     })
+  },
+  [t.INTEGRATION_SET_PUBLIC] (state, payload) {
+    // Try to find existing
+    const index = state.public.findIndex(item => item.id === payload.id)
+
+    if (index < 0)
+      state.public.push(payload)
+    else
+      state.public[index] = _.cloneDeep(payload)
+    state.public = _.cloneDeep(state.public)
   }
 }
 
@@ -69,11 +81,13 @@ const actions = {
       commit(t.INTEGRATION_SET_LIST, result)
     }
   },
-  async create ({ commit }) {
+  async create ({ commit }, id = null) {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/integration'))
+      result.push(await API.post(config.env, '/integration', {
+        body: { id }
+      }))
     } catch (e) {
       throw e
     } finally {
@@ -117,6 +131,17 @@ const actions = {
       commit(t.INTEGRATION_COMMIT_LOADED)
     } catch (e) {
       throw e
+    }
+  },
+  async loadPublic ({ commit }, id) {
+    let result = null // Default value
+
+    try {
+      result = await API.get(config.env, `/integration/${id}`)
+    } catch (e) {
+      throw e
+    } finally {
+      commit(t.INTEGRATION_SET_PUBLIC, result)
     }
   }
 }

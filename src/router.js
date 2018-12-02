@@ -29,6 +29,7 @@ import Integration from '@/views/app/page/Integration'
 
 // Public
 import WidgetPublic from '@/views/app/public/WidgetPublic'
+import IntegrationPublic from '@/views/app/public/IntegrationPublic'
 
 // Help
 import HelpCtx from '@/views/app/help/HelpCtx'
@@ -106,6 +107,14 @@ export default new Router({
           components: {
             context: IntegrationCtx,
             default: Integration
+          }
+        },
+        {
+          path: 'i/:id/public',
+          name: 'integration-public',
+          components: {
+            context: IntegrationsCtx,
+            default: IntegrationPublic
           }
         },
         {

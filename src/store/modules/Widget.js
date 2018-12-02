@@ -16,6 +16,7 @@ const state = {
 const mutations = {
   [t.WIDGET_RESET] (state) {
     state.list = []
+    state.public = []
     state.loaded = null
     state.tab = 0
   },
@@ -80,11 +81,13 @@ const actions = {
       commit(t.WIDGET_SET_LIST, result)
     }
   },
-  async create ({ commit }) {
+  async create ({ commit }, id = null) {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/widget'))
+      result.push(await API.post(config.env, '/widget', {
+        body: { id }
+      }))
     } catch (e) {
       throw e
     } finally {

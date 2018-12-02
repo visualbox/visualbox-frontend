@@ -1,5 +1,5 @@
 <template lang="pug">
-#widget-public(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#integration-public(v-if="loaded !== null && typeof loaded !== 'undefined'")
   app-context-toolbar
     v-tabs.elevation-0(
       v-model="tab"
@@ -24,7 +24,7 @@
             :disabled="isLoading"
           )
             v-icon(left) mdi-content-copy
-            | Copy widget
+            | Copy integration
         v-divider
       .markdown(v-html="compiledMarkdown")
     .tab-item(:class="{ 'active' : tab === 1 }")
@@ -32,7 +32,7 @@
         class="editor"
         ref="editorSource"
         v-model="loaded.source"
-        language="html"
+        language="javascript"
         :options="monacoOptions"
       )
     .tab-item(:class="{ 'active' : tab === 2 }")
@@ -51,7 +51,7 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
 
 export default {
-  name: 'WidgetPublic',
+  name: 'IntegrationPublic',
   components: {
     AppContextToolbar,
     MonacoEditor
@@ -74,7 +74,7 @@ export default {
   },
   computed: {
     ...mapGetters('App', ['isLoading']),
-    ...mapState('Widget', ['public']),
+    ...mapState('Integration', ['public']),
     loaded () {
       try {
         const item = this.public.find(item => item.id === this.$route.params.id)
@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Widget', ['loadPublic', 'create']),
+    ...mapActions('Integration', ['loadPublic', 'create']),
     updateDimensions () {
       this.$refs.editorSource.getMonaco().layout()
       this.$refs.editorConfig.getMonaco().layout()
@@ -105,7 +105,7 @@ export default {
       this.setIsLoading(true)
       try {
         await this.create(this.$route.params.id)
-        this.$router.push('/app/w')
+        this.$router.push('/app/i')
       } catch (e) {
         this.setSnackbar({
           type: 'error',
@@ -124,7 +124,7 @@ export default {
     try {
       await this.loadPublic(this.$route.params.id)
     } catch (e) {
-      this.$router.push('/app/w')
+      this.$router.push('/app/i')
     }
   },
   beforeDestroy () {
@@ -134,7 +134,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#widget-public
+#integration-public
   height 100%
 
   >>> .tabs-items

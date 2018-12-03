@@ -15,10 +15,11 @@ class WorkerHandler {
   }
 
   register (integrations) {
-    integrations.forEach(i => {
+    integrations.forEach(integration => {
       // Get ID, source code and config vars from integration
-      const { id, source } = this.integrationById(i.id)
-      const { config } = i.settings
+      const { id, i, settings } = integration
+      const { config } = settings
+      const { source } = this.integrationById(integration.id)
 
       // Create injectable JS code containing config vars
       const injected = `const CONFIG = ${JSON.stringify(config)};`
@@ -28,35 +29,37 @@ class WorkerHandler {
 
       // Create worker and hook onmessage callback
       const worker = new Worker(workerBlob)
+      console.log('created worker', i)
       worker.onmessage = e => {
         // Vuex mutation
+        console.log('GOT MSG', i, e.data)
         this.DATA_SET_DATA({
-          id,
+          i,
           data: e.data
         })
       }
 
       // Push worker to worker list
       this.workers.push({
-        id,
+        i,
         worker: new Worker(workerBlob)
       })
     })
   }
 
-  end (id = null) {
+  end (i = null) {
     // End all
-    if (id === null) {
+    if (i === null) {
       this.workers.forEach(w => w.worker.terminate())
       this.DATA_CLEAN_DATA(this.workers.reduce((a, b) => {
-        a.push(b.id)
+        a.push(b.i)
         return a
       }, []))
       this.workers = []
 
     // End single
     } else {
-      const index = this.workers.findIndex(w => w.id === id)
+      const index = this.workers.findIndex(w => w.i === i)
 
       // Not found
       if (index < 0)
@@ -65,7 +68,7 @@ class WorkerHandler {
       try {
         const worker = this.workers[index]
         worker.worker.terminate()
-        this.DATA_CLEAN_DATA([ worker.id ])
+        this.DATA_CLEAN_DATA([ worker.i ])
         this.workers.splice(index, 1)
       } catch (e) {}
     }

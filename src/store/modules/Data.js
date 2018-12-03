@@ -11,13 +11,13 @@ const mutations = {
   [t.DATA_RESET] (state) {
     state.data = {}
   },
-  [t.DATA_SET_DATA] (state, { id, data }) {
-    state.data[id] = cloneDeep(data)
+  [t.DATA_SET_DATA] (state, { i, data }) {
+    state.data[i] = cloneDeep(data)
     state.data = _.cloneDeep(state.data)
   },
-  [t.DATA_CLEAN_DATA] (state, ids) {
-    ids.forEach(id => {
-      delete state.data[id]
+  [t.DATA_CLEAN_DATA] (state, is) {
+    is.forEach(i => {
+      state.data[i] = null
     })
   }
 }
@@ -34,7 +34,7 @@ const getters = {
       try {
         let integration = dt[i]
         const { key } = integration
-        integration.text = rootGetters['Integration/integrationById'](key).label || key
+        integration.text = rootGetters['Dashboard/integrationByI'](key).settings.label || key
       } catch (e) {
         continue
       }

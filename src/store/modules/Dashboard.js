@@ -123,7 +123,7 @@ const mutations = {
     state.loaded = _.cloneDeep(state.loaded)
   },
   [t.DASHBOARD_REMOVE_INTEGRATION] (state, i) {
-    const index = state.loaded.integrations.findIndex(i => i.i === i)
+    const index = state.loaded.integrations.findIndex(addedIntegration => addedIntegration.i === i)
     state.loaded.integrations.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   }
@@ -221,6 +221,9 @@ const getters = {
   },
   dashboardById: state => id => {
     return state.list.find(i => i.id === id)
+  },
+  integrationByI: (_, getters) => i => {
+    return getters.loaded.integrations.find(addedIntegration => addedIntegration.i === i)
   },
   loaded (state) {
     return state.loaded

@@ -9,7 +9,7 @@
     .subheading {{ label }}
 
   v-tabs(
-    :class="{ 'hidden' : focusedIntegration || focusedWidget }"
+    :class="{ 'hidden' : focusedIntegration || focusedWidget || isAddingIntegration }"
     color="rgba(0,0,0,0)"
     slider-color="primary"
     grow
@@ -21,15 +21,27 @@
     v-tab
       v-icon mdi-settings
 
+    //- Integrations tab content
     v-tab-item
       dashboard-integrations
+
+    //- Widgets tab content
     v-tab-item
       dashboard-widgets
+
+    //- Settings tab content
     v-tab-item
       dashboard-settings
 
+  //- Adding integration menu
+  v-scroll-x-transition
+    dashboard-add-integration
+
+  //- Integration config menu
   v-scroll-x-transition
     dashboard-integration-config
+
+  //- Widet config menu
   v-scroll-x-transition
     dashboard-widget-config
 </template>
@@ -37,8 +49,16 @@
 <script>
 import * as _ from 'lodash'
 import moment from 'moment'
-import { mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, DashboardIntegrations, DashboardWidgets, DashboardSettings, DashboardIntegrationConfig, DashboardWidgetConfig } from '@/components/app'
+import { mapState, mapActions, mapGetters } from 'vuex'
+import {
+  AppContextToolbar,
+  DashboardIntegrations,
+  DashboardWidgets,
+  DashboardSettings,
+  DashboardAddIntegration,
+  DashboardIntegrationConfig,
+  DashboardWidgetConfig
+} from '@/components/app'
 
 export default {
   name: 'DashboardCtx',
@@ -47,12 +67,14 @@ export default {
     DashboardIntegrations,
     DashboardWidgets,
     DashboardSettings,
+    DashboardAddIntegration,
     DashboardIntegrationConfig,
     DashboardWidgetConfig
   },
   computed: {
     ...mapGetters('Widget', ['list']),
     ...mapGetters('Dashboard', ['loaded', 'focusedIntegration', 'focusedWidget']),
+    ...mapState('Dashboard', ['isAddingIntegration']),
     label: {
       get () {
         return _.get(this, 'loaded.label', '')

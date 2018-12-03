@@ -9,7 +9,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import unauthGuard from '@/mixins/unauthGuard'
-import AppNavigationDrawer from '@/components/app/AppNavigationDrawer'
+import { AppNavigationDrawer } from '@/components/app'
 
 export default {
   name: 'App',

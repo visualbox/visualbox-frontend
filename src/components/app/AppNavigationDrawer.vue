@@ -46,7 +46,7 @@ export default {
   name: 'AppNavigationDrawer',
   data: () => ({
     items: [
-      { title: 'Dashboards', to: '/app', icon: 'mdi-panorama-wide-angle' },
+      { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-hexagon-multiple' },
       { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' },

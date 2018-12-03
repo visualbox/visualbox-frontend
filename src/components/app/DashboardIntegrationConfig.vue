@@ -9,74 +9,37 @@
     )
       v-icon mdi-close
   .pa-3
-    .mb-3(
-      v-for="(field, index) in config.variables"
-      :key="index"
+    v-text-field.mb-3(
+      v-model="label"
+      :rules="[v => !!v || 'Required']"
+      label="Name"
+      color="primary"
+      required outline
+      hide-details
     )
-      //- Text/password type
-      v-text-field(
-        v-if="field.type === 'text' || field.type === 'password'"
-        v-model="model[field.name]"
-        @input="v => updateDynamicModel(v, field.name)"
-        :label="field.label"
-        :type="field.type"
-        hide-details
-        outline
-      )
-      //- Switch type
-      v-switch(
-        v-if="field.type === 'switch'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :label="field.label"
-        :type="field.type"
-        color="primary"
-        hide-details
-      )
-      //- Slider type
-      v-slider(
-        v-if="field.type === 'slider'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :hint="field.label"
-        :max="field.max"
-        :min="field.min"
-        :thumb-size="24"
-        thumb-label
-        persistent-hint
-      )
-      //- Select type
-      v-select(
-        v-if="field.type === 'select'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :items="field.options"
-        :label="field.label"
-        item-text="label"
-        item-value="value"
-      )
-
-    //- Integration config parse errors
-    v-alert(
-      v-for="(item, index) in config.error"
-      :key="index"
-      :value="true"
-      type="error"
-      outline
-    ) {{ item }}
+    input-types(
+      v-model="model"
+      :config="config"
+    )
 </template>
 
 <script>
 import * as _ from 'lodash'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar } from '@/components/app'
+import { AppContextToolbar, InputTypes } from '@/components/app'
 import WorkerHandler from '@/lib/workerHandler'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
   name: 'DashboardIntegrationConfig',
-  components: { AppContextToolbar },
-  data: () => ({ model: {} }),
+  components: {
+    AppContextToolbar,
+    InputTypes
+  },
+  data: () => ({
+    model: {},
+    label: ''
+  }),
   computed: {
     ...mapGetters('Dashboard', ['focusedIntegration']),
     ...mapGetters('Integration', ['integrationById']),
@@ -84,6 +47,12 @@ export default {
       const { id } = this.focusedIntegration
       const integration = this.integrationById(id)
       return parseConfig(integration.config)
+    },
+    settings () {
+      return {
+        label: this.label,
+        config: this.model
+      }
     }
   },
   watch: {
@@ -108,6 +77,15 @@ export default {
           }
         }
         this.model = _.cloneDeep(configModel)
+        this.label = _.cloneDeep(this.focusedIntegration.settings.label)
+      },
+      deep: true
+    },
+    settings: {
+      handler: function (settings) {
+        this.updateFocusedIntegration({ settings })
+        // Send argument bcs debounce may fire when this.focusedIntegration value is gone
+        this.restartFocusedWorker(this.focusedIntegration)
       },
       deep: true
     }
@@ -115,16 +93,7 @@ export default {
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
-    updateDynamicModel (val, variableName) {
-      this.$set(this.model, variableName, val)
-      this.model = _.cloneDeep(this.model)
-      this.updateFocusedIntegration({ settings: { config: this.model } })
-
-      // Send argument bcs debounce may fire when this.focusedIntegration value is gone
-      this.restartFocusedWorker(this.focusedIntegration)
-    },
     restartFocusedWorker: _.debounce(function (integration) {
-      console.log('restart')
       // Restart worker
       WorkerHandler.end(integration.id)
       WorkerHandler.register([ integration ])

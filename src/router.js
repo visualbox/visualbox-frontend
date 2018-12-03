@@ -69,6 +69,7 @@ export default new Router({
     },
     {
       path: '/app',
+      alias: '/app/d',
       component: App,
       children: [
         {

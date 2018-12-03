@@ -67,69 +67,17 @@
           | Background Color
         color-picker(v-model="bgc")
 
-    //- Widget config
-    .mt-3(
-      v-for="(field, index) in config.variables"
-      :key="index"
+    input-types.mt-3(
+      v-model="model"
+      :config="config"
     )
-      //- Text/password type
-      v-text-field(
-        v-if="field.type === 'text' || field.type === 'password'"
-        v-model="model[field.name]"
-        @input="v => updateDynamicModel(v, field.name)"
-        :label="field.label"
-        :type="field.type"
-        hide-details
-        outline
-      )
-      //- Switch type
-      v-switch(
-        v-if="field.type === 'switch'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :label="field.label"
-        :type="field.type"
-        color="primary"
-        hide-details
-      )
-      //- Slider type
-      v-slider(
-        v-if="field.type === 'slider'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :hint="field.label"
-        :max="field.max"
-        :min="field.min"
-        :thumb-size="24"
-        thumb-label
-        persistent-hint
-      )
-      //- Select type
-      v-select(
-        v-if="field.type === 'select'"
-        v-model="model[field.name]"
-        @change="v => updateDynamicModel(v, field.name)"
-        :items="field.options"
-        :label="field.label"
-        item-text="label"
-        item-value="value"
-      )
-
-    //- Widget config parse errors
-    v-alert.mt-3(
-      v-for="(item, index) in config.error"
-      :key="index"
-      :value="true"
-      type="error"
-      outline
-    ) {{ item }}
 </template>
 
 <script>
 import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar } from '@/components/app'
+import { AppContextToolbar, InputTypes } from '@/components/app'
 import parseConfig from '@/lib/parseConfig'
 import IFrameHandler from '@/lib/iframeHandler'
 
@@ -137,6 +85,7 @@ export default {
   name: 'DashboardWidgetConfig',
   components: {
     AppContextToolbar,
+    InputTypes,
     'color-picker': Chrome
   },
   data: () => ({
@@ -205,20 +154,19 @@ export default {
         this.loadDataSource()
       },
       deep: true
+    },
+    model: {
+      handler: function (config) {
+        this.updateFocusedWidget({ settings: { config } })
+        // Send config updates to IFrame
+        IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, config)
+      },
+      deep: true
     }
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
     ...mapActions('Dashboard', ['updateFocusedWidget']),
-    updateDynamicModel (val, variableName) {
-      this.$set(this.model, variableName, val)
-      this.model = _.cloneDeep(this.model)
-      this.updateFocusedWidget({ settings: { config: this.model } })
-
-      // Send config updates to IFrame
-      IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, this.model)
-    },
-
     // Convenience method for instructing dataTree how to open
     loadDataSource () {
       let { source } = this.focusedWidget.settings

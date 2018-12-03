@@ -1,28 +1,16 @@
 <template lang="pug">
 #dashboard-integrations
   //- Available
-  v-list(dense)
-    v-subheader Available Integrations
-    v-list-tile(
-      v-for="(item, index) in availableIntegrations"
-      :key="index"
-      @mouseover="hoverAvailableIndex = index"
-      @mouseout="hoverAvailableIndex = null"
-    )
-      v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action(v-if="index === hoverAvailableIndex")
-        v-btn(
-          flat icon
-          @click.stop="DASHBOARD_ADD_INTEGRATION(item.id)"
-        )
-          v-icon(small) mdi-plus
+  v-btn.ma-0(
+    flat block large
+    color="primary"
+    @click="DASHBOARD_SET_ADDING_INTEGRATION(true)"
+  ) Add Integration
 
   v-divider
 
   //- Added
-  v-list(dense)
-    v-subheader Added to Dashboard
+  v-list.pa-0(dense)
     v-list-tile(
       v-for="(item, index) in dashboardIntegrations"
       :key="index"
@@ -31,11 +19,11 @@
       @click="DASHBOARD_SET_FOCUSED_INTEGRATION(item.i)"
     )
       v-list-tile-content
-        v-list-tile-sub-title {{ integrationById(item.id).label }}
+        v-list-tile-sub-title {{ item.settings.label }}
       v-list-tile-action(v-if="index === hoverDashboardIndex")
         v-btn(
           flat icon
-          @click.stop="DASHBOARD_REMOVE_INTEGRATION(item.id)"
+          @click.stop="DASHBOARD_REMOVE_INTEGRATION(item.i)"
         )
           v-icon(small) mdi-minus-circle-outline
 </template>
@@ -48,33 +36,18 @@ import WorkerHandler from '@/lib/workerHandler'
 export default {
   name: 'DashboardIntegrations',
   data: () => ({
-    hoverAvailableIndex: null,
     hoverDashboardIndex: null
   }),
   computed: {
     ...mapGetters('Dashboard', ['loaded']),
-    ...mapGetters('Integration', ['list', 'integrationById']),
+    ...mapGetters('Integration', ['integrationById']),
     dashboardIntegrations () {
       return _.get(this, 'loaded.integrations', [])
-    },
-    availableIntegrations () {
-      return this.list.filter(i => {
-        // Return true if not found (available)
-        return (typeof this.dashboardIntegrations.find(j => j.id === i.id) === 'undefined')
-      })
-    }
-  },
-  watch: {
-    // TODO: mechanism to register currently edited integration
-    // so that its config gets updated
-    dashboardIntegrations (newVal, oldVal) {
-
-      // WorkerHandler.register(newVal)
     }
   },
   methods: {
     ...mapMutations('Dashboard', [
-      'DASHBOARD_ADD_INTEGRATION',
+      'DASHBOARD_SET_ADDING_INTEGRATION',
       'DASHBOARD_REMOVE_INTEGRATION',
       'DASHBOARD_SET_FOCUSED_INTEGRATION'
     ]),

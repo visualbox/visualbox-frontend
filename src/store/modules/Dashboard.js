@@ -11,6 +11,7 @@ const state = {
   loaded: null,
   isEditing: false,
   isFullscreen: false,
+  isAddingIntegration: false,
   focusedWidget: null,
   focusedIntegration: null
 }
@@ -21,6 +22,7 @@ const mutations = {
     state.loaded = null
     state.isEditing = false
     state.isFullscreen = false
+    state.isAddingIntegration = false
     state.focusedWidget = null
     state.focusedIntegration = null
   },
@@ -55,6 +57,9 @@ const mutations = {
   },
   [t.DASHBOARD_SET_FULLSCREEN] (state, payload) {
     state.isFullscreen = payload
+  },
+  [t.DASHBOARD_SET_ADDING_INTEGRATION] (state, payload) {
+    state.isAddingIntegration = payload
   },
   [t.DASHBOARD_SET_FOCUSED_WIDGET] (state, payload) {
     state.focusedWidget = payload
@@ -101,7 +106,7 @@ const mutations = {
     })
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_ADD_INTEGRATION] (state, id) {
+  [t.DASHBOARD_ADD_INTEGRATION] (state, { id, settings }) {
     // Generate integration ID
     let n = 0
     let i = `_${n}`
@@ -113,14 +118,12 @@ const mutations = {
     state.loaded.integrations.push({
       i,
       id,
-      settings: {
-        config: {}
-      }
+      settings
     })
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_REMOVE_INTEGRATION] (state, id) {
-    const index = state.loaded.integrations.findIndex(i => i.id === id)
+  [t.DASHBOARD_REMOVE_INTEGRATION] (state, i) {
+    const index = state.loaded.integrations.findIndex(i => i.i === i)
     state.loaded.integrations.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   }
@@ -177,6 +180,7 @@ const actions = {
       const id = getters.loaded.id
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
+      commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false) // Close potentially open adding integration
       commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null) // Close potentially open focused widget
       commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null) // Close potentially open focused integration
       await API.put(config.env, `/dashboard/${id}`, { body: diff })

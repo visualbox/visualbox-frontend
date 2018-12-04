@@ -14,17 +14,18 @@ div
       outline
     )
     //- Color type
-    v-expansion-panel.mt-3(
-      v-if="field.type === 'color' || field.type === 'password'"
-    )
+    v-expansion-panel.mt-3(v-if="field.type === 'color'")
       v-expansion-panel-content
         div(slot="header")
           v-avatar.mr-3(
             :size="30"
-            :color="bgc"
+            :color="internalValue[field.name]"
           )
-          | Background Color
-        color-picker(v-model="bgc")
+          | {{ field.label }}
+        color-picker(
+          :value="internalValue[field.name]"
+          @input="v => inputColor(field.name, v)"
+        )
     //- Switch type
     v-switch(
       v-if="field.type === 'switch'"
@@ -37,16 +38,18 @@ div
     //- Slider type
     //- :value="internalValue[field.name]"
     //- @change="v => internalValue[field.name] = v"
-    v-slider(
-      v-if="field.type === 'slider'"
-      v-model="internalValue[field.name]"
-      :label="field.label"
-      :max="field.max"
-      :min="field.min"
-      :thumb-size="32"
-      thumb-label
-      hide-details
-    )
+    template(v-if="field.type === 'slider'")
+      .ma-0 {{ field.label }}
+      v-slider.mt-0(
+        v-model="internalValue[field.name]"
+        :label="String(internalValue[field.name])"
+        :max="field.max"
+        :min="field.min"
+        :thumb-size="32"
+        inverse-label
+        thumb-label
+        hide-details
+      )
     //- Select type
     v-select(
       v-if="field.type === 'select'"
@@ -69,15 +72,22 @@ div
 
 <script>
 import * as _ from 'lodash'
+import { Chrome } from 'vue-color'
 import ProxyValue from '@/mixins/proxyValue'
 
 export default {
   name: 'InputTypes',
   mixins: [ ProxyValue ],
+  components: { 'color-picker': Chrome },
   props: {
     config: {
       type: Object,
       required: true
+    }
+  },
+  methods: {
+    inputColor (fieldName, { hex }) {
+      this.internalValue[fieldName] = hex
     }
   }
 }

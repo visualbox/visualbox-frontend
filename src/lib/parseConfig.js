@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 const VALID_TYPES = [
   'text',
   'password',
+  'color',
   'switch',
   'slider',
   'select'

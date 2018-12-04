@@ -15,6 +15,7 @@ class WorkerHandler {
   }
 
   register (integrations) {
+    console.warn('WorkerHandler register()', integrations)
     integrations.forEach(integration => {
       // Get ID, source code and config vars from integration
       const { id, i, settings } = integration
@@ -28,28 +29,26 @@ class WorkerHandler {
       const workerBlob = URL.createObjectURL(new Blob([injected + source], { type: 'application/javascript' }))
 
       // Create worker and hook onmessage callback
-      const worker = new Worker(workerBlob)
-      console.log('created worker', i)
-      worker.onmessage = e => {
+      let worker = new Worker(workerBlob)
+      worker.onmessage = ({ data }) => {
+        console.warn('WorkerHandler got message', i, data)
         // Vuex mutation
-        console.log('GOT MSG', i, e.data)
-        this.DATA_SET_DATA({
-          i,
-          data: e.data
-        })
+        this.DATA_SET_DATA({ i, data })
       }
+      worker.onerror = e => {
+        console.warn('WorkerHandler got ERROR', e)
+      }
+      console.warn('WorkerHandler created worker', worker)
 
       // Push worker to worker list
-      this.workers.push({
-        i,
-        worker: new Worker(workerBlob)
-      })
+      this.workers.push({ i, worker })
     })
   }
 
   end (i = null) {
     // End all
     if (i === null) {
+      console.warn('WorkerHandler terminate all')
       this.workers.forEach(w => w.worker.terminate())
       this.DATA_CLEAN_DATA(this.workers.reduce((a, b) => {
         a.push(b.i)
@@ -59,6 +58,7 @@ class WorkerHandler {
 
     // End single
     } else {
+      console.warn('WorkerHandler terminate', i)
       const index = this.workers.findIndex(w => w.i === i)
 
       // Not found

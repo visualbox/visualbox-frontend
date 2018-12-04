@@ -13,6 +13,18 @@ div
       hide-details
       outline
     )
+    //- Color type
+    v-expansion-panel.mt-3(
+      v-if="field.type === 'color' || field.type === 'password'"
+    )
+      v-expansion-panel-content
+        div(slot="header")
+          v-avatar.mr-3(
+            :size="30"
+            :color="bgc"
+          )
+          | Background Color
+        color-picker(v-model="bgc")
     //- Switch type
     v-switch(
       v-if="field.type === 'switch'"
@@ -23,15 +35,17 @@ div
       hide-details
     )
     //- Slider type
+    //- :value="internalValue[field.name]"
+    //- @change="v => internalValue[field.name] = v"
     v-slider(
       v-if="field.type === 'slider'"
       v-model="internalValue[field.name]"
-      :hint="field.label"
+      :label="field.label"
       :max="field.max"
       :min="field.min"
-      :thumb-size="24"
+      :thumb-size="32"
       thumb-label
-      persistent-hint
+      hide-details
     )
     //- Select type
     v-select(

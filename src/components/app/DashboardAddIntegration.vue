@@ -39,8 +39,9 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, InputTypes } from '@/components/app'
+import WorkerHandler from '@/lib/workerHandler'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
@@ -95,18 +96,22 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('Dashboard', [
-      'DASHBOARD_SET_ADDING_INTEGRATION',
-      'DASHBOARD_ADD_INTEGRATION'
-    ]),
-    submit () {
-      if (!this.label || this.label === '')
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_ADDING_INTEGRATION']),
+    ...mapActions('Dashboard', ['addIntegration']),
+    async submit () {
+      try {
+        if (!this.label || this.label === '')
+          return
+        const integration = await this.addIntegration({
+          id: this.selectedId,
+          settings: this.settings
+        })
+        console.log('Adding ', integration)
+        WorkerHandler.register([ integration ])
+        this.DASHBOARD_SET_ADDING_INTEGRATION(false)
+      } catch (e) {
         return
-      this.DASHBOARD_ADD_INTEGRATION({
-        id: this.selectedId,
-        settings: this.settings
-      })
-      this.DASHBOARD_SET_ADDING_INTEGRATION(false)
+      }
     }
   }
 }

@@ -65,17 +65,8 @@ class IFrameHandler {
    * @param {Object} data   Updated data source.
    */
   onDataChange (widgets, data) {
-    widgets.forEach(w => {
-      try {
-        const { source } = w.settings
-        // const value = _.get(data, source, null)
-        const value = getNestedSource(data, source.split('.'))
-
-        if (value !== null)
-          this.postMessage('sendData', w.i, value)
-      } catch (e) {
-        console.warning('Failed to send updated data to widgets', e)
-      }
+    widgets.forEach(widget => {
+      this.onDataSourceChange(widget, data)
     })
   }
 
@@ -88,13 +79,18 @@ class IFrameHandler {
   onDataSourceChange (widget, data) {
     try {
       const { source } = widget.settings
+
+      // Widget has no source
+      if (!source)
+        return
+
       // const value = _.get(data, source, null)
       const value = getNestedSource(data, source.split('.'))
 
       if (value !== null)
         this.postMessage('sendData', widget.i, value)
     } catch (e) {
-      console.warning('Failed to send updated data to widget', e)
+      console.warn('Failed to send updated data to widget', e)
     }
   }
 

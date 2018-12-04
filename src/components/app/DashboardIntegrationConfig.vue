@@ -95,7 +95,7 @@ export default {
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
     restartFocusedWorker: _.debounce(function (integration) {
       // Restart worker
-      WorkerHandler.end(integration.id)
+      WorkerHandler.end(integration.i)
       WorkerHandler.register([ integration ])
     }, 3000)
   }

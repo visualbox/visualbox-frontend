@@ -46,9 +46,9 @@
           :value="showInfo"
           color="success"
         )
-          .title.mb-3 CONFIG
+          .title.mb-3 Variables
           p <strong>CONFIG</strong> is a constant variable you can use within your integration to access user configurations. Each property is its <strong>name</strong> counterpart of the integration configuration.
-          .title.mb-3 postMessage()
+          .title.mb-3 Functions
           p.mb-0 Use the <strong>postMessage()</strong> function to send data back to VisualBox from your integration.
 
         //- Config
@@ -69,6 +69,7 @@
             |   },
             |   { ... }
             | ]
+          p.mb-0.mt-3 You can find a list of valid configuration types in the Help Center.
 </template>
 
 <script>

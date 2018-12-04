@@ -5,6 +5,7 @@ import config from '@/config'
 import difference from '@/lib/difference'
 import mergeDeep from '@/lib/mergeDeep'
 import cloneDeep from '@/lib/cloneDeep'
+import parseConfig from '@/lib/parseConfig'
 
 const state = {
   list: [],
@@ -77,49 +78,12 @@ const mutations = {
     state.loaded.widgets.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_ADD_WIDGET] (state, id) {
-    // Generate widget ID
-    let n = 0
-    let i = `_${n}`
-    while (typeof state.loaded.widgets.find(w => w.i === i) !== 'undefined') {
-      n++
-      i = `_${n}`
-    }
-
-    state.loaded.widgets.push({
-      x: 0,
-      y: 0,
-      w: 4,
-      h: 4,
-      i,
-      id,
-      settings: {
-        source: null,
-        config: {},
-        rgba: {
-          r: 255,
-          g: 255,
-          b: 255,
-          a: 1
-        }
-      }
-    })
+  [t.DASHBOARD_ADD_WIDGET] (state, widget) {
+    state.loaded.widgets.push(widget)
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_ADD_INTEGRATION] (state, { id, settings }) {
-    // Generate integration ID
-    let n = 0
-    let i = `_${n}`
-    while (typeof state.loaded.integrations.find(a => a.i === i) !== 'undefined') {
-      n++
-      i = `_${n}`
-    }
-
-    state.loaded.integrations.push({
-      i,
-      id,
-      settings
-    })
+  [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
+    state.loaded.integrations.push(integration)
     state.loaded = _.cloneDeep(state.loaded)
   },
   [t.DASHBOARD_REMOVE_INTEGRATION] (state, i) {
@@ -212,6 +176,62 @@ const actions = {
       return
 
     commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
+  },
+  /**
+   * Made as an action so that we can get
+   * widget configuration defaults.
+   */
+  addWidget ({ commit, rootGetters }, id) {
+    // Generate widget ID
+    let n = 0
+    let i = `_${n}`
+    while (typeof state.loaded.widgets.find(w => w.i === i) !== 'undefined') {
+      n++
+      i = `_${n}`
+    }
+
+    // Fetch widget config
+    const w = rootGetters['Widget/widgetById'](id)
+    const config = parseConfig(w.config)
+    // Create default config model
+    const defaultConfig = config.variables.reduce((acc, cur) => {
+      acc[cur.name] = cur.default || null
+      return acc
+    }, {})
+
+    const widget = {
+      x: 0, y: 0,
+      w: 4, h: 4,
+      i, id,
+      settings: {
+        source: null,
+        config: defaultConfig,
+        rgba: {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1
+        }
+      }
+    }
+    commit(t.DASHBOARD_ADD_WIDGET, widget)
+  },
+  /**
+   * Made as an action since we need to return
+   * the integration, so that we can register
+   * in in WorkerHandler.
+   */
+  addIntegration ({ commit, state }, { id, settings }) {
+    // Generate integration ID
+    let n = 0
+    let i = `_${n}`
+    while (typeof state.loaded.integrations.find(a => a.i === i) !== 'undefined') {
+      n++
+      i = `_${n}`
+    }
+    const integration = { i, id, settings }
+    commit(t.DASHBOARD_ADD_INTEGRATION, integration)
+    return integration
   }
 }
 

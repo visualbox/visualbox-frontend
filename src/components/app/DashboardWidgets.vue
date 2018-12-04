@@ -6,7 +6,7 @@
         xs4
         v-for="(item, index) in list"
         :key="index"
-        @click="DASHBOARD_ADD_WIDGET(item.id)"
+        @click="addWidget(item.id)"
         justify-center
       )
         v-card.text-xs-center
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'DashboardWidgets',
@@ -24,7 +24,7 @@ export default {
     ...mapGetters('Widget', ['list']),
     ...mapGetters('Dashboard', ['loaded'])
   },
-  methods: mapMutations('Dashboard', ['DASHBOARD_ADD_WIDGET'])
+  methods: mapActions('Dashboard', ['addWidget'])
 }
 </script>
 

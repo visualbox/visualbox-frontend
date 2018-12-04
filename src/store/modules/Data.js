@@ -17,7 +17,7 @@ const mutations = {
   },
   [t.DATA_CLEAN_DATA] (state, is) {
     is.forEach(i => {
-      state.data[i] = null
+      delete state.data[i]
     })
   }
 }

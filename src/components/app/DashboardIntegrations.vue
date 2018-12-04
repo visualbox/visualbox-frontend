@@ -23,7 +23,7 @@
       v-list-tile-action(v-if="index === hoverDashboardIndex")
         v-btn(
           flat icon
-          @click.stop="DASHBOARD_REMOVE_INTEGRATION(item.i)"
+          @click.stop="removeIntegration(item.i)"
         )
           v-icon(small) mdi-minus-circle-outline
 </template>
@@ -54,7 +54,11 @@ export default {
     ...mapMutations('Data', [
       'DATA_SET_DATA',
       'DATA_CLEAN_DATA'
-    ])
+    ]),
+    removeIntegration (i) {
+      this.DASHBOARD_REMOVE_INTEGRATION(i)
+      WorkerHandler.end(i)
+    }
   },
   mounted () {
     WorkerHandler.init(this.integrationById, this.DATA_SET_DATA, this.DATA_CLEAN_DATA)

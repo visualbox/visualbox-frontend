@@ -46,13 +46,12 @@
           :value="showInfo"
           color="success"
         )
-          .title.mb-3 CONFIG
+          .title.mb-3 Variables
           p <strong>CONFIG</strong> is a constant variable you can use within your widget to access user configurations. Each property is its <strong>name</strong> counterpart of the widget configuration.
 
-          .title.mb-3 DATA
           p The <strong>DATA</strong> variable is pointing to the selected data source from an integration output.
 
-          .title.mb-3 onMessage(event)
+          .title.mb-3 Functions
           p.mb-0 The <strong>onMessage(event)</strong> function is called whenever updated data is provided to the widget.
           p The <strong>event</strong> argument takes the following form:
           pre
@@ -80,6 +79,7 @@
             |   },
             |   { ... }
             | ]
+          p.mb-0.mt-3 You can find a list of valid configuration types in the Help Center.
 </template>
 
 <script>

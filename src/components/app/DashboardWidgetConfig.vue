@@ -45,7 +45,7 @@
               //- Integration data tree
               v-treeview.mt-3(
                 :active.sync="dataSource"
-                :open="dataSourceOpen"
+                :open.sync="dataSourceOpen"
                 :items="dataTree"
                 item-key="key"
                 item-text="text"
@@ -178,13 +178,19 @@ export default {
       this.dataSource = [ source ]
 
       // Open tree all the way to the source leaf
-      this.dataSourceOpen = source.split('.').reduce((a, b) => {
+      const dataSourceOpen = source.split('.').reduce((a, b) => {
         const path = a.length > 0
           ? a[a.length - 1] + '.' + b
           : b
         a.push(path)
         return a
       }, [])
+
+      /**
+       * Merge with existing open-tree (so not to confuse user when
+       * browsing tree & update happens).
+       */
+      this.dataSourceOpen = _.union(this.dataSourceOpen, dataSourceOpen)
     },
 
     // Update data source path when dialog is closed

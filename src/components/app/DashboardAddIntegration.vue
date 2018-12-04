@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, InputTypes } from '@/components/app'
 import WorkerHandler from '@/lib/workerHandler'
@@ -96,6 +97,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('App', ['setSnackbar']),
     ...mapMutations('Dashboard', ['DASHBOARD_SET_ADDING_INTEGRATION']),
     ...mapActions('Dashboard', ['addIntegration']),
     async submit () {
@@ -106,11 +108,13 @@ export default {
           id: this.selectedId,
           settings: this.settings
         })
-        console.log('Adding ', integration)
         WorkerHandler.register([ integration ])
         this.DASHBOARD_SET_ADDING_INTEGRATION(false)
       } catch (e) {
-        return
+        this.setSnackbar({
+          type: 'warning',
+          msg: `Unable to add integration`
+        })
       }
     }
   }

@@ -1,6 +1,5 @@
-import * as _ from 'lodash'
+import Vue from 'vue'
 import * as t from '@/store/types'
-import cloneDeep from '@/lib/cloneDeep'
 import dataTree from '@/lib/dataTree'
 
 const state = {
@@ -12,8 +11,7 @@ const mutations = {
     state.data = {}
   },
   [t.DATA_SET_DATA] (state, { i, data }) {
-    state.data[i] = cloneDeep(data)
-    state.data = _.cloneDeep(state.data)
+    Vue.set(state.data, i, data)
   },
   [t.DATA_CLEAN_DATA] (state, is) {
     is.forEach(i => {

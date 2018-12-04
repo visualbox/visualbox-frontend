@@ -21,6 +21,16 @@
 }
 ```
 
+## Color
+```
+{
+  "type": "color",
+  "name": String (required),
+  "label": String (required),
+  "default": String (optional, #<hex>)
+}
+```
+
 ## Switch
 ```
 {

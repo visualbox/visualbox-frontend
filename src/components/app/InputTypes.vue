@@ -71,7 +71,6 @@ div
 </template>
 
 <script>
-import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
 import ProxyValue from '@/mixins/proxyValue'
 

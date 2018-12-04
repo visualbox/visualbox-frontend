@@ -21,13 +21,13 @@ class IFrameHandler {
       // Create injectable JS code containing config vars
       const injected = `
       <script type="text/javascript">
-        let CONFIG = ${JSON.stringify(config)};
-        let DATA = null;
+        window.CONFIG = ${JSON.stringify(config)};
+        window.DATA = null;
 
         window.addEventListener('message', function (event) {
           try {
             if (typeof event.data == 'object' && event.data.call=='sendConfig') {
-              CONFIG = event.data.value;
+              window.CONFIG = event.data.value;
 
               if (typeof onMessage === 'function') {
                 onMessage({
@@ -37,7 +37,7 @@ class IFrameHandler {
               }
             }
             if (typeof event.data == 'object' && event.data.call=='sendData') {
-              DATA = event.data.value;
+              window.DATA = event.data.value;
 
               if (typeof onMessage === 'function') {
                 onMessage({

@@ -6,6 +6,7 @@ import Auth from '@/views/auth/Auth'
 import SignIn from '@/views/auth/SignIn'
 import SignUp from '@/views/auth/SignUp'
 import Verify from '@/views/auth/Verify'
+import Forgot from '@/views/auth/Forgot'
 import App from '@/views/app/App'
 import SignOut from '@/views/app/SignOut'
 
@@ -64,6 +65,11 @@ export default new Router({
           path: 'verify/:email',
           name: 'verify',
           component: Verify
+        },
+        {
+          path: 'forgot',
+          name: 'forgot',
+          component: Forgot
         }
       ]
     },

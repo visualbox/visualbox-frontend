@@ -2,14 +2,14 @@
 base-card
   v-card-text.pa-5
     .text-xs-center.mb-5
-      h1.headline.mb-3 Verify
-      .subheading with the code sent to your email
+      h1.headline.mb-3 Forgot Password
+      .subheading provide your email and get a new password
 
     div
       v-text-field.mb-3(
-        v-model="code"
-        :rules="[rules.required('Enter verification code')]"
-        label="Code"
+        v-model="email"
+        :rules="[rules.required('Enter your email')]"
+        label="Email"
         autofocus
         @keydown.enter="submit"
       )
@@ -26,7 +26,7 @@ base-card
       ) Resend verification
       v-spacer
       v-btn.ma-0(
-        :disabled="!code"
+        :disabled="!email"
         :loading="isLoading"
         @click="submit"
         color="primary"
@@ -43,7 +43,6 @@ export default {
   components: { BaseCard },
   data: () => ({
     email: undefined,
-    code: undefined,
     rules: {
       required: msg => v => !!v || msg
     }
@@ -51,17 +50,16 @@ export default {
   computed: mapGetters('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Cognito', ['confirmUser']),
+    ...mapActions('Cognito', ['forgotPassword']),
     async submit () {
       this.setIsLoading(true)
       try {
-        await this.confirmUser({
-          username: this.email,
-          code: this.code
+        await this.forgotPassword({
+          username: this.email
         })
         this.setSnackbar({
           type: 'success',
-          msg: `Account verified. You may now login`
+          msg: `A new password has been sent to your email`
         })
         this.$router.push('/auth')
       } catch (e) {
@@ -73,9 +71,6 @@ export default {
         this.setIsLoading(false)
       }
     }
-  },
-  mounted () {
-    this.email = this.$route.params.email
   }
 }
 </script>

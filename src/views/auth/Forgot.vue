@@ -59,7 +59,7 @@ export default {
         })
         this.setSnackbar({
           type: 'success',
-          msg: `A new password has been sent to your email`
+          msg: `Instructions has been sent to your email`
         })
         this.$router.push('/auth')
       } catch (e) {

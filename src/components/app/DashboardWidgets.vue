@@ -33,13 +33,22 @@ export default {
   .v-card
     border-radius 4px
 
+    &:hover
+      z-index 2
+      cursor pointer
+      box-shadow 0 0 5px rgba(0, 0, 0, 1)
+      -webkit-transition all 50ms ease-in
+      -webkit-transform scale(1.05)
+      -ms-transition all 50ms ease-in
+      -ms-transform scale(1.05)
+      -moz-transition all 50ms ease-in
+      -moz-transform scale(1.05)
+      transition all 50ms ease-in
+      transform scale(1.05)
+
     .v-card__text
       height 80px
       padding 6px
-
-      &:hover
-        border 2px solid #bebebe
-        cursor pointer
 
       div
         overflow hidden

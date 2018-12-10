@@ -34,7 +34,9 @@ export default {
         this.setIsLoading(false)
         this.$router.push('/auth')
       }
-    } catch (e) {}
+    } catch (e) {
+      this.$router.push('/auth')
+    }
   }
 }
 </script>

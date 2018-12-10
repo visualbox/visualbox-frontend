@@ -13,6 +13,12 @@ div
     justify-space-between
   )
     v-btn.ma-0(
+      to="/auth/forgot"
+      color="warning"
+      outline
+    ) Forgot password?
+    v-spacer
+    v-btn.ma-0.mr-3(
       to="/auth/signup"
       color="primary"
       outline

@@ -32,6 +32,7 @@ grid-layout#dashboard-layout(
       allowpaymentrequest="true"
       allowfullscreen="true"
     )
+  #blur-overlay(v-if="!!focusedWidget && false")
 </template>
 
 <script>
@@ -128,9 +129,8 @@ export default {
   background #FFF
 
   .vue-grid-item
-    z-index 100
-
     &.focused
+      // z-index 3
       outline 2px solid #FFF
 
     &.vue-resizable:hover
@@ -145,4 +145,13 @@ export default {
 
   >>> .vue-grid-placeholder
     background #000
+
+  #blur-overlay
+    position absolute
+    top 0
+    left 0
+    right 0
+    bottom 0
+    z-index 2
+    backdrop-filter blur(5px)
 </style>

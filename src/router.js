@@ -62,7 +62,7 @@ export default new Router({
           component: SignUp
         },
         {
-          path: 'verify/:code/:email',
+          path: 'verify/:code?/:email?',
           name: 'verify',
           component: Verify
         },

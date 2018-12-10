@@ -16,9 +16,8 @@ div
     justify-space-between
   )
     v-btn.ma-0(
-      v-if="false"
       to="/auth/forgot"
-      color="primary"
+      color="warning"
       outline
     ) Forgot password?
     v-spacer

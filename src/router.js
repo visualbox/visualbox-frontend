@@ -62,12 +62,12 @@ export default new Router({
           component: SignUp
         },
         {
-          path: 'verify/:email',
+          path: 'verify/:code/:email',
           name: 'verify',
           component: Verify
         },
         {
-          path: 'forgot',
+          path: 'forgot/:code?',
           name: 'forgot',
           component: Forgot
         }

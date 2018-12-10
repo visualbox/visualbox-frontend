@@ -1,11 +1,15 @@
 <template lang="pug">
 base-card
   v-card-text.pa-5
-    .text-xs-center.mb-5
+    .text-xs-center.mb-5(v-if="!done")
       h2.headline.primary--text.mb-3 VisualBox
       .subheading.mb-5 Create an account to get started
+    .text-xs-center(v-if="done")
+      h1.headline.mb-3 Verify
+      .subheading check the message sent to your email
 
     v-form(
+      v-if="!done"
       v-model="form"
       ref="form"
     )
@@ -86,7 +90,8 @@ export default {
         required: msg => v => !!v || msg,
         pwdLength: v => (!!v && v.length > 5) || 'Minimum 6 characters',
         confirm: v => (!!v && v === this.password) || 'Passwords do not match'
-      }
+      },
+      done: false
     }
 
     return data
@@ -113,7 +118,7 @@ export default {
           type: 'success',
           msg: 'Account created. Check your email for verification'
         })
-        this.$router.push(`/auth/verify/${encodeURIComponent(this.email)}`)
+        this.done = true
       } catch (e) {
         this.setSnackbar({
           type: 'error',

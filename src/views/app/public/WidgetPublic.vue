@@ -29,7 +29,7 @@
       .markdown(v-html="compiledMarkdown")
     .tab-item(:class="{ 'active' : tab === 1 }")
       monaco-editor(
-        :theme="monacoTheme"
+        :theme="'vs-' + theme"
         :options="monacoOptions"
         class="editor"
         ref="editorSource"
@@ -38,7 +38,7 @@
       )
     .tab-item(:class="{ 'active' : tab === 2 }")
       monaco-editor(
-        :theme="monacoTheme"
+        :theme="'vs-' + theme"
         :options="monacoOptions"
         class="editor"
         ref="editorConfig"
@@ -78,9 +78,6 @@ export default {
     ...mapGetters('App', ['isLoading']),
     ...mapState('Widget', ['public']),
     ...mapGetters('App', ['theme']),
-    monacoTheme () {
-      return this.theme === 'dark' ? 'vc-dark' : 'vc-light'
-    },
     loaded () {
       try {
         const item = this.public.find(item => item.id === this.$route.params.id)

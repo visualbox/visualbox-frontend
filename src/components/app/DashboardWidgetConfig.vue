@@ -43,19 +43,20 @@
           )
             v-flex(xs12 sm12 md10 lg8 xl6)
               //- Integration data tree
-              v-treeview.mt-3(
+              v-treeview#data-source-tree.mt-3(
                 :active.sync="dataSource"
                 :open.sync="dataSourceOpen"
                 :items="dataTree"
                 item-key="key"
                 item-text="text"
+                selected-color="red"
                 activatable
               )
                 template(
-                  slot="prepend"
+                  slot="label"
                   slot-scope="{ item }"
                 )
-                  v-icon {{ item.icon }}
+                  span(v-html="item.text")
 
     v-expansion-panel.mt-3
       v-expansion-panel-content

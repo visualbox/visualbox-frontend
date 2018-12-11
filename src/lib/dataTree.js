@@ -14,7 +14,7 @@ const dataTree = (target, accKey = null) => {
         ? key
         : `${accKey}.${key}`
       out.push({
-        text: `<b>${key}</b>: ${target[key].constructor.name}`,
+        text: `<span class="property">${key}</span>: <span class="object">${target[key].constructor.name}</span>`,
         key: accumulativeKey,
         // icon: 'mdi-json',
         children: dataTree(target[key], accumulativeKey)
@@ -25,8 +25,10 @@ const dataTree = (target, accKey = null) => {
       const accumulativeKey = accKey === null
         ? key
         : `${accKey}.${key}`
+      const formattedvalue = (typeof target[key] === 'string') ? `"${target[key]}"` : target[key]
+
       out.push({
-        text: `<b>${key}</b>: ${target[key]}`,
+        text: `<span class="property">${key}</span>: <span class="${typeof target[key]}">${formattedvalue}</span>`,
         key: accumulativeKey
         // icon: 'mdi-text-short'
       })

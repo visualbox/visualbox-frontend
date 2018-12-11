@@ -91,4 +91,25 @@ export default {
     height 100%
     margin-left 80px
     background-color #272727 !important
+
+  &.theme--light
+    .v-navigation-drawer--mini-variant
+      background-color #444
+
+      >>> .v-list__tile
+        &--active
+          .v-icon
+            color #FFF !important
+
+    >>> .v-list__tile
+        &--link
+          .v-icon
+            color #9e9e9e !important
+
+        &--active
+          .v-icon
+            color #747474 !important
+
+    .context
+      background-color #f5f5f5 !important
 </style>

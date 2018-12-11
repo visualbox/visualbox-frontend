@@ -17,6 +17,7 @@
       .markdown(v-html="compiledMarkdown")
     .tab-item(:class="{ 'active' : localTab === 1 }")
       monaco-editor(
+        :theme="monacoTheme"
         class="editor"
         ref="editorReadme"
         v-model="readme"
@@ -24,6 +25,7 @@
       )
     .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
+        :theme="monacoTheme"
         class="editor"
         ref="editorSource"
         v-model="source"
@@ -31,6 +33,7 @@
       )
     .tab-item(:class="{ 'active' : localTab === 3 }")
       monaco-editor(
+        :theme="monacoTheme"
         class="editor"
         ref="editorConfig"
         v-model="config"
@@ -75,6 +78,10 @@ export default {
   computed: {
     ...mapState('Integration', ['tab']),
     ...mapGetters('Integration', ['loaded']),
+    ...mapGetters('App', ['theme']),
+    monacoTheme () {
+      return this.theme === 'dark' ? 'vc-dark' : 'vc-light'
+    },
     localTab: {
       get () {
         return this.tab

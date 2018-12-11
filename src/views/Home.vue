@@ -48,7 +48,7 @@ export default {
     this.vivus = new Vivus('visualbox-animation', {
       type: 'sync',
       duration: 100,
-      animTimingFunction: Vivus.EASE,
+      animTimingFunction: Vivus.EASE_IN,
       file: require('../assets/img/visualbox.svg')
     })
   }

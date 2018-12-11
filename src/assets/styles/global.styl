@@ -18,6 +18,10 @@ input:-webkit-autofill
   line-height 250px
   color rgba(255, 255, 255, .05) !important // rgba(76, 175, 80, .05) !important
 
+.theme--light
+  .index-icon
+    color rgba(0, 0, 0, .05) !important
+
 .markdown
   hr
     margin-bottom 16px
@@ -49,28 +53,42 @@ input:-webkit-autofill
   img
     max-width 100%
 
+.theme--light
+  .markdown
+    code, kbd
+      background rgba(0, 0, 0, .1)
+      color #333
+
 .vc-chrome
   width unset !important
   font-family inherit !important
   border-radius 0 0 8px 8px !important
 
   .vc-chrome-body
-    background-color #424242
     border-radius 0 0 4px 4px
 
     .vc-checkerboard
       background-repeat repeat
 
-    .vc-chrome-fields
-      .vc-input__input, .vc-input__label
-        color #FFF !important
+.theme--light
+  .vc-chrome
+    box-shadow unset
 
-    .vc-chrome-toggle-icon
-      path
-        fill #FFF
+.theme--dark
+  .vc-chrome
+    .vc-chrome-body
+      background-color #424242
 
-    .vc-chrome-toggle-icon-highlight
-      background #272727
+      .vc-chrome-fields
+        .vc-input__input, .vc-input__label
+          color #FFF !important
+
+      .vc-chrome-toggle-icon
+        path
+          fill #FFF
+
+      .vc-chrome-toggle-icon-highlight
+        background #272727
 
 #data-source-tree
   .v-treeview-node__root

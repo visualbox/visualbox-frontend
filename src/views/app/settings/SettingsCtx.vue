@@ -25,8 +25,8 @@ export default {
   components: { AppContextToolbar },
   data: () => ({
     list: [
-      { label: 'Account', icon: 'mdi-account-circle', to: '/app/s' }
-      // { label: 'Application', icon: 'mdi-settings', to: '/app/s/app' }
+      { label: 'Account', icon: 'mdi-account-circle', to: '/app/s' },
+      { label: 'Application', icon: 'mdi-settings', to: '/app/s/app' }
     ]
   })
 }

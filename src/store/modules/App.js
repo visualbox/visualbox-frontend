@@ -40,6 +40,7 @@ const actions = {
   async initApp ({ commit, dispatch }) {
     try {
       await Promise.all([
+        dispatch('Cognito/fetchSession', null, { root: true }),
         dispatch('Dashboard/list', null, { root: true }),
         dispatch('Widget/list', null, { root: true }),
         dispatch('Integration/list', null, { root: true })
@@ -71,6 +72,14 @@ const getters = {
   },
   snackbar (state) {
     return state.snackbar
+  },
+  theme (state, getters, rootState) {
+    try {
+      const { attributes: { 'custom:theme': theme } } = rootState.Cognito.user
+      return theme === 'dark' ? 'dark' : 'light'
+    } catch (e) {
+      return 'dark'
+    }
   }
 }
 

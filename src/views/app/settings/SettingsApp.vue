@@ -4,23 +4,46 @@ v-container(fluid fill-height)
 
     .headline.mb-3 Theme
     v-switch(
-      v-model="theme"
+      v-model="localTheme"
+      @change="changeTheme"
       label="Light"
       color="primary"
     )
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { Auth } from 'aws-amplify'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'SettingsApp',
   data: () => ({
-    theme: false
+    localTheme: false
   }),
-  computed: mapState('Cognito', ['user']),
+  computed: {
+    ...mapState('Cognito', ['user']),
+    ...mapGetters('App', ['theme'])
+  },
   methods: {
-    ...mapActions('App', ['setSnackbar'])
+    ...mapActions('Cognito', ['fetchSession']),
+    ...mapActions('App', ['setSnackbar']),
+    async changeTheme (val) {
+      try {
+        const theme = val ? 'light' : 'dark'
+        await Auth.updateUserAttributes(this.user, {
+          'custom:theme': theme
+        })
+        await this.fetchSession()
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      }
+    }
+  },
+  mounted () {
+    this.localTheme = this.theme !== 'dark'
   }
 }
 </script>

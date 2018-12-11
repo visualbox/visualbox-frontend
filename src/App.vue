@@ -1,5 +1,7 @@
 <template lang="pug">
-v-app(dark)
+v-app(
+  :dark="theme === 'dark'"
+)
   base-snackbar
   base-toolbar
 
@@ -17,7 +19,7 @@ export default {
     BaseToolbar,
     BaseSnackbar
   },
-  computed: mapGetters('App', ['sessionIsReady']),
+  computed: mapGetters('App', ['sessionIsReady', 'theme']),
   methods: mapActions('App', ['initSession', 'setSnackbar']),
   async mounted () {
     try {

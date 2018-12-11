@@ -17,8 +17,6 @@ import IntegrationsCtx from '@/views/app/index/IntegrationsCtx'
 import IntegrationsIndex from '@/views/app/index/IntegrationsIndex'
 import WidgetsCtx from '@/views/app/index/WidgetsCtx'
 import WidgetsIndex from '@/views/app/index/WidgetsIndex'
-import SettingsCtx from '@/views/app/index/SettingsCtx'
-import SettingsIndex from '@/views/app/index/SettingsIndex'
 
 // Page
 import DashboardCtx from '@/views/app/page/DashboardCtx'
@@ -35,6 +33,11 @@ import IntegrationPublic from '@/views/app/public/IntegrationPublic'
 // Help
 import HelpCtx from '@/views/app/help/HelpCtx'
 import HelpIndex from '@/views/app/help/HelpIndex'
+
+// Settings
+import SettingsCtx from '@/views/app/settings/SettingsCtx'
+import SettingsIndex from '@/views/app/settings/SettingsIndex'
+import SettingsApp from '@/views/app/settings/SettingsApp'
 
 Vue.use(Router)
 
@@ -156,22 +159,20 @@ export default new Router({
             default: HelpIndex
           }
         },
-        /*
         {
-          path: 'h/:id',
-          name: 'help',
-          components: {
-            context: WidgetCtx,
-            default: Widget
-          }
-        },
-        */
-        {
-          path: 's',
+          path: 's/',
           name: 'settings-index',
           components: {
             context: SettingsCtx,
             default: SettingsIndex
+          }
+        },
+        {
+          path: 's/app',
+          name: 'settings-app',
+          components: {
+            context: SettingsCtx,
+            default: SettingsApp
           }
         }
       ]

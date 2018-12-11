@@ -2,9 +2,9 @@
 v-container(fluid fill-height)
   v-layout(column)
 
-    .headline.mb-3 User Information
     v-container.pa-0.pb-5
-      v-layout(wrap)
+      .headline.mb-3 User Information
+      v-layout
         v-flex(xs12)
           v-text-field(
             v-model="name"
@@ -22,9 +22,9 @@ v-container(fluid fill-height)
           outline
         ) Update
 
-    .headline.mb-3 Change Email
     v-container.pa-0.pb-5
-      v-layout(wrap)
+      .headline.mb-3 Change Email
+      v-layout
         v-flex(xs12)
           v-text-field(
             v-model="email"
@@ -42,10 +42,10 @@ v-container(fluid fill-height)
           outline
         ) Change
 
-    .headline.mb-3 Change Password
     v-container.pa-0.pb-5
+      .headline.mb-3 Change Password
       v-layout(wrap)
-        v-flex.pr-2(xs6)
+        v-flex.pr-2(xs12 sm6)
           v-text-field(
             v-model="password"
             :disabled="loading.changePassword"
@@ -54,7 +54,7 @@ v-container(fluid fill-height)
             type="password"
             outline
           )
-        v-flex.pl-2(xs6)
+        v-flex.pl-2(xs12 sm6)
           v-text-field(
             v-model="newPassword"
             :disabled="loading.changePassword"
@@ -76,6 +76,7 @@ v-container(fluid fill-height)
 </template>
 
 <script>
+import * as _ from 'lodash'
 import { Auth } from 'aws-amplify'
 import { mapState, mapActions } from 'vuex'
 
@@ -169,8 +170,8 @@ export default {
   async mounted () {
     try {
       const { attributes: { name, email } } = this.user
-      this.name = name
-      this.email = email
+      this.name = _.clone(name)
+      this.email = _.clone(email)
     } catch (e) {}
   }
 }

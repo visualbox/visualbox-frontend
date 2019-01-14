@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import unauthGuard from '@/mixins/unauthGuard'
 import { AppNavigationDrawer } from '@/components/app'
 
@@ -15,7 +15,7 @@ export default {
   name: 'App',
   mixins: [ unauthGuard ],
   components: { AppNavigationDrawer },
-  computed: mapGetters('App', ['appIsReady']),
+  computed: mapState('App', ['appIsReady']),
   methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),
   async mounted () {
     this.setIsLoading(true)

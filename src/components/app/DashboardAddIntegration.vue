@@ -58,7 +58,8 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['isAddingIntegration']),
-    ...mapGetters('Integration', ['list', 'integrationById']),
+    ...mapState('Integration', ['list']),
+    ...mapGetters('Integration', ['integrationById']),
     config () {
       try {
         if (!this.selectedId)

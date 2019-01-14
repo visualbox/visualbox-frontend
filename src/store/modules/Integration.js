@@ -1,6 +1,6 @@
 import * as _ from 'lodash'
 import * as t from '@/store/types'
-import { API } from 'aws-amplify'
+import API from '@aws-amplify/api'
 import config from '@/config'
 import difference from '@/lib/difference'
 import mergeDeep from '@/lib/mergeDeep'
@@ -70,7 +70,7 @@ const mutations = {
 }
 
 const actions = {
-  async list ({ commit }, payload) {
+  async list ({ commit }) {
     let result = [] // Default value
 
     try {
@@ -113,10 +113,10 @@ const actions = {
     payload.updatedAt = +new Date()
     commit(t.INTEGRATION_CONCAT_LOADED, payload)
   },
-  async closeLoaded ({ commit, dispatch, getters }) {
+  async closeLoaded ({ commit, dispatch, state, getters }) {
     dispatch('updateLoaded') // To add timestamp
     try {
-      const id = getters.loaded.id
+      const { id } = state.loaded
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.INTEGRATION_COMMIT_LOADED, true) // Must come before API call
       await API.put(config.env, `/integration/${id}`, { body: diff })
@@ -125,9 +125,9 @@ const actions = {
     }
   },
   // Commit a loaded local integration
-  async commitLoaded ({ commit, getters }) {
+  async commitLoaded ({ commit, state, getters }) {
     try {
-      await API.put(config.env, `/integration/${getters.loaded.id}`, { body: getters.loadedDiff })
+      await API.put(config.env, `/integration/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.INTEGRATION_COMMIT_LOADED)
     } catch (e) {
       throw e
@@ -150,16 +150,12 @@ const getters = {
   list (state) {
     return state.list
   },
-  integrationById: state => id => {
-    return state.list.find(i => i.id === id)
-  },
-  loaded (state) {
-    return state.loaded
+  integrationById: ({ list }) => id => {
+    return list.find(i => i.id === id)
   },
   // Return diff between loaded and old item in list
-  loadedDiff (state, getters) {
+  loadedDiff ({ loaded }, getters) {
     try {
-      const loaded = state.loaded
       return difference(loaded, getters.integrationById(loaded.id))
     } catch (e) {
       return {}

@@ -1,10 +1,9 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/dist/vuetify.min.css'
-import '@/assets/styles/global.styl'
+import Vuetify from 'vuetify/lib'
+import 'vuetify/src/stylus/app.styl'
 
 Vue.use(Vuetify, {
+  iconfont: 'mdi',
   theme: {
     primary: '#4CAF50',
     secondary: '#5163ba',
@@ -13,6 +12,5 @@ Vue.use(Vuetify, {
     info: '#2196F3',
     success: '#4CAF50',
     warning: '#ffc200'
-  },
-  iconfont: 'mdi'
+  }
 })

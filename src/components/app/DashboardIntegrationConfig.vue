@@ -72,9 +72,8 @@ export default {
 
         // Apply integration config model on local (true) model
         for (let name in this.focusedIntegration.settings.config) {
-          if (configModel.hasOwnProperty(name)) {
+          if (configModel.hasOwnProperty(name))
             configModel[name] = this.focusedIntegration.settings.config[name]
-          }
         }
         this.model = _.cloneDeep(configModel)
         this.label = _.cloneDeep(this.focusedIntegration.settings.label)

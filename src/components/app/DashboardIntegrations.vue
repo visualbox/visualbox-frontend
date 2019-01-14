@@ -30,7 +30,7 @@
 
 <script>
 import * as _ from 'lodash'
-import { mapMutations, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 import WorkerHandler from '@/lib/workerHandler'
 
 export default {
@@ -39,7 +39,7 @@ export default {
     hoverDashboardIndex: null
   }),
   computed: {
-    ...mapGetters('Dashboard', ['loaded']),
+    ...mapState('Dashboard', ['loaded']),
     ...mapGetters('Integration', ['integrationById']),
     dashboardIntegrations () {
       return _.get(this, 'loaded.integrations', [])

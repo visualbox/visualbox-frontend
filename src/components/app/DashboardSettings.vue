@@ -38,7 +38,7 @@
 <script>
 import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'DashboardSettings',
@@ -49,7 +49,7 @@ export default {
     colors: '#FFF'
   }),
   computed: {
-    ...mapGetters('Dashboard', ['loaded']),
+    ...mapState('Dashboard', ['loaded']),
     label: {
       get () {
         return this.loaded.label

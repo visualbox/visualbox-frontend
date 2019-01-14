@@ -12,7 +12,7 @@ v-container(fluid fill-height)
 </template>
 
 <script>
-import { Auth } from 'aws-amplify'
+import Auth from '@aws-amplify/auth'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {

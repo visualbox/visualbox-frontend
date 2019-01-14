@@ -82,9 +82,8 @@ const parseConfig = config => {
 
       let optionals = {}
       // Optional field 'default' is supported
-      if (_.has(field, 'default')) {
+      if (_.has(field, 'default'))
         optionals.default = field.default
-      }
       // Optional fields 'min' and 'max' is supported
       if (field.type === 'slider') {
         // Contains required field 'min'

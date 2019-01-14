@@ -43,8 +43,8 @@ export default {
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['isEditing', 'isFullscreen']),
-    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
+    ...mapState('Dashboard', ['loaded', 'isEditing', 'isFullscreen']),
+    ...mapGetters('Dashboard', ['focusedWidget']),
     style () {
       const { width, height } = this.loaded.settings
       const { r, g, b, a } = this.loaded.settings.rgba

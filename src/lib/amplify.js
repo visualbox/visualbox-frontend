@@ -1,17 +1,13 @@
-import Amplify from '@aws-amplify/core'
+import API from '@aws-amplify/api'
+import Auth from '@aws-amplify/auth'
+import { Logger } from '@aws-amplify/core'
 import config from '@/config'
 
-Amplify.Logger.LOG_LEVEL = process.env.NODE_ENV === 'development'
+Logger.LOG_LEVEL = process.env.NODE_ENV === 'development'
   ? 'INFO'
   : 'ERROR'
 
-Amplify.configure({
-  Auth: {
-    identityPoolId: config.cognito.IDENTITY_POOL_ID,
-    region: config.cognito.REGION,
-    userPoolId: config.cognito.USER_POOL_ID,
-    userPoolWebClientId: config.cognito.CLIENT_ID
-  },
+API.configure({
   API: {
     endpoints: [
       {
@@ -20,5 +16,13 @@ Amplify.configure({
         region: config.apiGateway.REGION
       }
     ]
+  }
+})
+Auth.configure({
+  Auth: {
+    identityPoolId: config.cognito.IDENTITY_POOL_ID,
+    region: config.cognito.REGION,
+    userPoolId: config.cognito.USER_POOL_ID,
+    userPoolWebClientId: config.cognito.CLIENT_ID
   }
 })

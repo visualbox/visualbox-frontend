@@ -10,7 +10,7 @@ v-app(
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import { BaseToolbar, BaseSnackbar } from '@/components/base'
 
 export default {
@@ -19,7 +19,10 @@ export default {
     BaseToolbar,
     BaseSnackbar
   },
-  computed: mapGetters('App', ['sessionIsReady', 'theme']),
+  computed: {
+    ...mapState('App', ['sessionIsReady']),
+    ...mapGetters('App', ['theme'])
+  },
   methods: mapActions('App', ['initSession', 'setSnackbar']),
   async mounted () {
     try {

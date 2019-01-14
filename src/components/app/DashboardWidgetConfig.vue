@@ -135,9 +135,8 @@ export default {
 
         // Apply widget config model on local (true) model
         for (let name in this.focusedWidget.settings.config) {
-          if (configModel.hasOwnProperty(name)) {
+          if (configModel.hasOwnProperty(name))
             configModel[name] = this.focusedWidget.settings.config[name]
-          }
         }
         this.model = _.cloneDeep(configModel)
 

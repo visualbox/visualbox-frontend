@@ -84,7 +84,7 @@
 
 <script>
 import * as _ from 'lodash'
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 
 export default {
@@ -98,8 +98,7 @@ export default {
     ...mapActions('App', ['setSnackbar'])
   },
   computed: {
-    ...mapState('Widget', ['tab']),
-    ...mapGetters('Widget', ['loaded']),
+    ...mapState('Widget', ['loaded', 'tab']),
     label: {
       get () {
         return _.get(this, 'loaded.label', '')

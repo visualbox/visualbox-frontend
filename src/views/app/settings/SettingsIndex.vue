@@ -77,7 +77,7 @@ v-container(fluid fill-height)
 
 <script>
 import * as _ from 'lodash'
-import { Auth } from 'aws-amplify'
+import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 
 export default {

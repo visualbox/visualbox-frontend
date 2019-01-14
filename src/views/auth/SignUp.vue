@@ -72,7 +72,7 @@ base-card
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { BaseCard } from '@/components/base'
 
 export default {
@@ -96,7 +96,7 @@ export default {
 
     return data
   },
-  computed: mapGetters('App', ['isLoading']),
+  computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Cognito', ['registerUser']),

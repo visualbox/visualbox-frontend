@@ -29,30 +29,26 @@ export default {
     options: {
       deep: true,
       handler (options) {
-        if (this.editor) {
+        if (this.editor)
           this.editor.updateOptions(options)
-        }
       }
     },
 
     value (newValue) {
       if (this.editor) {
-        if (newValue !== this.editor.getValue()) {
+        if (newValue !== this.editor.getValue())
           this.editor.setValue(newValue)
-        }
       }
     },
 
     language (newVal) {
-      if (this.editor) {
+      if (this.editor)
         window.monaco.editor.setModelLanguage(this.editor.getModel(), newVal)
-      }
     },
 
     theme (newVal) {
-      if (this.editor) {
+      if (this.editor)
         window.monaco.editor.setTheme(newVal)
-      }
     }
   },
 
@@ -61,9 +57,8 @@ export default {
       this.require(['vs/editor/editor.main'], () => {
         this.initMonaco(window.monaco)
       })
-    } else {
+    } else
       this.initMonaco(monaco)
-    }
   },
 
   beforeDestroy () {
@@ -93,9 +88,8 @@ export default {
       this.editor.onDidChangeModel(event => this.$emit('model', event))
       this.editor.onDidChangeModelContent(event => {
         const value = this.editor.getValue()
-        if (this.value !== value) {
+        if (this.value !== value)
           this.$emit('change', value, event)
-        }
       })
       this.editor.onDidChangeModelDecorations(event => this.$emit('modelDecorations', event))
       this.editor.onDidChangeModelLanguage(event => this.$emit('modelLanguage', event))

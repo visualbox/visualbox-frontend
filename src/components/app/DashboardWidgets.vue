@@ -16,13 +16,13 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'DashboardWidgets',
   computed: {
-    ...mapGetters('Widget', ['list']),
-    ...mapGetters('Dashboard', ['loaded'])
+    ...mapState('Widget', ['list']),
+    ...mapState('Dashboard', ['loaded'])
   },
   methods: mapActions('Dashboard', ['addWidget'])
 }

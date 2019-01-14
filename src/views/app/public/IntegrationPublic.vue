@@ -75,7 +75,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('App', ['isLoading']),
+    ...mapState('App', ['isLoading']),
     ...mapState('Integration', ['public']),
     ...mapGetters('App', ['theme']),
     loaded () {

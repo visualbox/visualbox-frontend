@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 
 export default {
@@ -41,8 +41,8 @@ export default {
     hoverIndex: null
   }),
   computed: {
-    ...mapGetters('App', ['isLoading']),
-    ...mapGetters('Dashboard', ['list'])
+    ...mapState('App', ['isLoading']),
+    ...mapState('Dashboard', ['list'])
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),

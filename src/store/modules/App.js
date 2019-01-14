@@ -61,18 +61,6 @@ const actions = {
 }
 
 const getters = {
-  sessionIsReady (state) {
-    return state.sessionIsReady
-  },
-  appIsReady (state) {
-    return state.appIsReady
-  },
-  isLoading (state) {
-    return state.isLoading
-  },
-  snackbar (state) {
-    return state.snackbar
-  },
   theme (state, getters, rootState) {
     try {
       const { attributes: { 'custom:theme': theme } } = rootState.Cognito.user

@@ -53,9 +53,9 @@ export default {
     layout: []
   }),
   computed: {
-    ...mapState('Dashboard', ['isEditing']),
+    ...mapState('Dashboard', ['loaded', 'isEditing']),
     ...mapState('Data', ['data']),
-    ...mapGetters('Dashboard', ['loaded', 'focusedWidget']),
+    ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     widgets () {
       return _.get(this, 'loaded.widgets', [])

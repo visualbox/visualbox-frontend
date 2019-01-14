@@ -24,8 +24,8 @@ const actions = {
 }
 
 const getters = {
-  dataTree (state, getters, rootState, rootGetters) {
-    let dt = dataTree(state.data)
+  dataTree ({ data }, getters, rootState, rootGetters) {
+    let dt = dataTree(data)
 
     // Convert top-leved ID's into integration names
     for (let i in dt) {

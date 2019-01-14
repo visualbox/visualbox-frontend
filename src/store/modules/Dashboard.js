@@ -1,6 +1,6 @@
 import * as _ from 'lodash'
 import * as t from '@/store/types'
-import { API } from 'aws-amplify'
+import API from '@aws-amplify/api'
 import config from '@/config'
 import difference from '@/lib/difference'
 import mergeDeep from '@/lib/mergeDeep'
@@ -94,7 +94,7 @@ const mutations = {
 }
 
 const actions = {
-  async list ({ commit }, payload) {
+  async list ({ commit }) {
     let result = [] // Default value
 
     try {
@@ -138,10 +138,10 @@ const actions = {
     payload.updatedAt = +new Date()
     commit(t.DASHBOARD_CONCAT_LOADED, payload)
   },
-  async closeLoaded ({ commit, dispatch, getters }) {
+  async closeLoaded ({ commit, dispatch, state, getters }) {
     dispatch('updateLoaded') // To add timestamp
     try {
-      const id = getters.loaded.id
+      const { id } = state.loaded
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
       commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false) // Close potentially open adding integration
@@ -153,9 +153,9 @@ const actions = {
     }
   },
   // Commit a loaded local dashboard
-  async commitLoaded ({ commit, getters }) {
+  async commitLoaded ({ commit, state, getters }) {
     try {
-      await API.put(config.env, `/dashboard/${getters.loaded.id}`, { body: getters.loadedDiff })
+      await API.put(config.env, `/dashboard/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.DASHBOARD_COMMIT_LOADED)
     } catch (e) {
       throw e
@@ -239,23 +239,16 @@ const actions = {
 }
 
 const getters = {
-  list (state) {
-    return state.list
+  dashboardById: ({ list }) => id => {
+    return list.find(i => i.id === id)
   },
-  dashboardById: state => id => {
-    return state.list.find(i => i.id === id)
-  },
-  integrationByI: (_, getters) => i => {
-    return getters.loaded.integrations.find(addedIntegration => addedIntegration.i === i)
-  },
-  loaded (state) {
-    return state.loaded
+  integrationByI: ({ loaded }) => i => {
+    return loaded.integrations.find(addedIntegration => addedIntegration.i === i)
   },
   // Return diff between loaded and old item in list
-  loadedDiff (state, getters) {
+  loadedDiff ({ loaded }, { dashboardById }) {
     try {
-      const loaded = state.loaded
-      let diff = difference(loaded, getters.dashboardById(loaded.id))
+      let diff = difference(loaded, dashboardById(loaded.id))
       diff.integrations = loaded.integrations // Cannot take diff on integrations
       diff.widgets = loaded.widgets // Cannot take diff on widgets
       return diff
@@ -263,22 +256,22 @@ const getters = {
       return {}
     }
   },
-  focusedWidget (state) {
-    if (state.focusedWidget === null)
+  focusedWidget ({ loaded, focusedWidget }) {
+    if (focusedWidget === null)
       return null
 
     try {
-      return state.loaded.widgets.find(w => w.i === state.focusedWidget)
+      return loaded.widgets.find(w => w.i === focusedWidget)
     } catch (e) {
       return null
     }
   },
-  focusedIntegration (state) {
-    if (state.focusedIntegration === null)
+  focusedIntegration ({ loaded, focusedIntegration }) {
+    if (focusedIntegration === null)
       return null
 
     try {
-      return state.loaded.integrations.find(a => a.i === state.focusedIntegration)
+      return loaded.integrations.find(a => a.i === focusedIntegration)
     } catch (e) {
       return null
     }

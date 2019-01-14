@@ -60,8 +60,8 @@
 
 <script>
 import * as _ from 'lodash'
-import { Auth } from 'aws-amplify'
-import { mapActions, mapGetters } from 'vuex'
+import Auth from '@aws-amplify/auth'
+import { mapState, mapActions } from 'vuex'
 import { integrationsIndex } from '@/lib/algoliasearch'
 import { AppContextToolbar } from '@/components/app'
 
@@ -77,8 +77,8 @@ export default {
     identityId: null
   }),
   computed: {
-    ...mapGetters('App', ['isLoading']),
-    ...mapGetters('Integration', ['list'])
+    ...mapState('App', ['isLoading']),
+    ...mapState('Integration', ['list'])
   },
   watch: {
     list () {

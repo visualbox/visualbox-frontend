@@ -75,8 +75,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('Widget', ['tab']),
-    ...mapGetters('Widget', ['loaded']),
+    ...mapState('Widget', ['loaded', 'tab']),
     ...mapGetters('App', ['theme']),
     localTab: {
       get () {

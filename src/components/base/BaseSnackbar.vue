@@ -16,7 +16,7 @@ v-snackbar(
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 
 const ICON_MAP = {
   error: 'mdi-alert',
@@ -32,7 +32,7 @@ export default {
     message: null
   }),
   computed: {
-    ...mapGetters('App', ['snackbar']),
+    ...mapState('App', ['snackbar']),
     icon () {
       return ICON_MAP[this.snackbar.type] || 'mdi-check'
     }

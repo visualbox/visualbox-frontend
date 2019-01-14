@@ -72,9 +72,9 @@ export default {
     DashboardWidgetConfig
   },
   computed: {
-    ...mapGetters('Widget', ['list']),
-    ...mapGetters('Dashboard', ['loaded', 'focusedIntegration', 'focusedWidget']),
-    ...mapState('Dashboard', ['isAddingIntegration']),
+    ...mapState('Widget', ['list']),
+    ...mapState('Dashboard', ['loaded', 'isAddingIntegration']),
+    ...mapGetters('Dashboard', ['focusedIntegration', 'focusedWidget']),
     label: {
       get () {
         return _.get(this, 'loaded.label', '')

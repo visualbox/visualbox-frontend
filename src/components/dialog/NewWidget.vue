@@ -24,7 +24,7 @@ v-dialog(
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import ProxyValue from '@/mixins/proxyValue'
 
 export default {
@@ -33,7 +33,7 @@ export default {
   data: () => ({
     label: undefined
   }),
-  computed: mapGetters('App', ['isLoading']),
+  computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     // ...mapActions('Widget', ['create']),

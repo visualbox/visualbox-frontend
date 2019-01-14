@@ -31,14 +31,14 @@ div
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 import ProxyValue from '@/mixins/proxyValue'
 
 export default {
   name: 'PartialPassword',
   mixins: [ ProxyValue ],
   props: ['current'],
-  computed: mapGetters('App', ['isLoading']),
+  computed: mapState('App', ['isLoading']),
   watch: {
     current (n) {
       if (n === 1)

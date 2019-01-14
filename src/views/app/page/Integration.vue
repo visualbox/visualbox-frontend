@@ -76,8 +76,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('Integration', ['tab']),
-    ...mapGetters('Integration', ['loaded']),
+    ...mapState('Integration', ['loaded', 'tab']),
     ...mapGetters('App', ['theme']),
     localTab: {
       get () {

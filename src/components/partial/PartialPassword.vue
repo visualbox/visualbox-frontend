@@ -15,11 +15,6 @@ div
     align-center
     justify-space-between
   )
-    v-btn.ma-0(
-      to="/auth/forgot"
-      color="warning"
-      outline
-    ) Forgot password?
     v-spacer
     v-btn.ma-0(
       :disabled="!value"
@@ -27,7 +22,7 @@ div
       @click="$emit('next')"
       color="primary"
       prominent depressed
-    ) Next
+    ) Login
 </template>
 
 <script>

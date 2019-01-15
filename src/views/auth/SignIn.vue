@@ -39,6 +39,8 @@ base-card
           @prev="model--"
           @next="submit"
         )
+  v-layout.pt-5(justify-center)
+    router-link.grey--text.text--darken-1(to="/auth/forgot") Forgot password?
 </template>
 
 <script>

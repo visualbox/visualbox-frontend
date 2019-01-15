@@ -3,7 +3,7 @@
   app-context-toolbar
     v-btn(
       icon
-      @click="$router.go(-1)"
+      @click="goBack"
     )
       v-icon mdi-menu-left
     .subheading {{ label }}
@@ -49,7 +49,7 @@
 <script>
 import * as _ from 'lodash'
 import moment from 'moment'
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import {
   AppContextToolbar,
   DashboardIntegrations,
@@ -88,7 +88,21 @@ export default {
       return moment(updatedAt).format('DD/MM HH:mm:ss')
     }
   },
-  methods: mapActions('Dashboard', ['updateLoaded'])
+  methods: {
+    ...mapMutations('Dashboard', [
+      'DASHBOARD_SET_FOCUSED_WIDGET',
+      'DASHBOARD_SET_FOCUSED_INTEGRATION'
+    ]),
+    ...mapActions('Dashboard', ['updateLoaded']),
+    goBack () {
+      if (this.focusedWidget)
+        this.DASHBOARD_SET_FOCUSED_WIDGET(null)
+      else if (this.focusedIntegration)
+        this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+      else
+        this.$router.go(-1)
+    }
+  }
 }
 </script>
 

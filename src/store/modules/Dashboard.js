@@ -63,18 +63,23 @@ const mutations = {
     state.isAddingIntegration = payload
   },
   [t.DASHBOARD_SET_FOCUSED_WIDGET] (state, payload) {
+    state.focusedIntegration = null
     state.focusedWidget = payload
   },
   [t.DASHBOARD_SET_FOCUSED_INTEGRATION] (state, payload) {
+    state.focusedWidget = null
     state.focusedIntegration = payload
   },
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
     state.loaded = _.cloneDeep(state.loaded)
   },
-  [t.DASHBOARD_REMOVE_WIDGET] (state) {
-    const index = state.loaded.widgets.findIndex(w => w.i === state.focusedWidget)
-    state.focusedWidget = null
+  [t.DASHBOARD_REMOVE_WIDGET] (state, i) {
+    const index = state.loaded.widgets.findIndex(w => w.i === i)
+
+    if (state.focusedWidget === i)
+      state.focusedWidget = null
+
     state.loaded.widgets.splice(index, 1)
     state.loaded = _.cloneDeep(state.loaded)
   },
@@ -202,8 +207,8 @@ const actions = {
     const widget = {
       x: 0,
       y: 0,
-      w: 4,
-      h: 4,
+      w: 6,
+      h: 6,
       i,
       id,
       settings: {

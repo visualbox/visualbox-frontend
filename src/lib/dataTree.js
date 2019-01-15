@@ -1,13 +1,22 @@
 import * as _ from 'lodash'
 
+const MAX_LEVEL_COUNT = 15
+
 /**
  * Convert a nested object into a Vuetify data Tree.
  * @param target
  */
 const dataTree = (target, accKey = null) => {
   let out = []
+  let levelCount = 0
 
   for (const key in target) {
+    // Limit number of primitives per level
+    // to increase performance
+    levelCount++
+    if (levelCount > MAX_LEVEL_COUNT)
+      continue
+
     // Non-primitive, recurse
     if (_.isObject(target[key])) {
       const accumulativeKey = accKey === null
@@ -33,6 +42,15 @@ const dataTree = (target, accKey = null) => {
         // icon: 'mdi-text-short'
       })
     }
+  }
+
+  // Append explanation at the end of current level
+  // if the max count was hit
+  if (levelCount > MAX_LEVEL_COUNT) {
+    out.push({
+      text: `<span class="hidden">${levelCount} hidden</span>`,
+      key: 'null'
+    })
   }
 
   return out

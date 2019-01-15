@@ -2,13 +2,7 @@
 #dashboard-integration-config(v-if="focusedIntegration")
   app-context-toolbar
     .subheading Edit Integration
-    v-spacer
-    v-btn(
-      icon
-      @click="DASHBOARD_SET_FOCUSED_INTEGRATION(null)"
-    )
-      v-icon mdi-close
-  .pa-3
+  .pl-3.pr-3.pb-3
     v-text-field.mb-3(
       v-model="label"
       :rules="[v => !!v || 'Required']"

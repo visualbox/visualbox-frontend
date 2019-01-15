@@ -2,13 +2,7 @@
 #dashboard-widget-config(v-if="focusedWidget")
   app-context-toolbar
     .subheading Edit Widget
-    v-spacer
-    v-btn(
-      icon
-      @click="DASHBOARD_SET_FOCUSED_WIDGET(null)"
-    )
-      v-icon mdi-close
-  .pa-3
+  .pl-3.pr-3.pb-3
     v-dialog(
       v-model="dialog"
       fullscreen
@@ -146,11 +140,17 @@ export default {
       deep: true
     },
 
-    // Re-apply dataSource on data tree when it changes (aka. is loaded)
+    // Re-apply dataSource on data tree
+    // when dialog is opened
+    dialog: {
+      handler (newVal, oldVal) {
+        if (oldVal === false)
+          this.loadDataSource()
+      }
+    },
+    // Re-apply dataSource on data tree
     dataTree: {
-      handler: function () {
-        if (this.focusedWidget === null)
-          return
+      handler () {
         this.loadDataSource()
       },
       deep: true
@@ -169,6 +169,11 @@ export default {
     ...mapActions('Dashboard', ['updateFocusedWidget']),
     // Convenience method for instructing dataTree how to open
     loadDataSource () {
+      // Don't touch dataSource or dataSourceOpen when
+      // user in actively involved
+      if (this.dialog || this.focusedWidget === null)
+        return
+
       let { source } = this.focusedWidget.settings
 
       // Source is not a String (defaul is null)
@@ -178,19 +183,13 @@ export default {
       this.dataSource = [ source ]
 
       // Open tree all the way to the source leaf
-      const dataSourceOpen = source.split('.').reduce((a, b) => {
+      this.dataSourceOpen = source.split('.').reduce((a, b) => {
         const path = a.length > 0
           ? a[a.length - 1] + '.' + b
           : b
         a.push(path)
         return a
       }, [])
-
-      /**
-       * Merge with existing open-tree (so not to confuse user when
-       * browsing tree & update happens).
-       */
-      this.dataSourceOpen = _.union(this.dataSourceOpen, dataSourceOpen)
     },
 
     // Update data source path when dialog is closed

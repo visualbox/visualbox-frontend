@@ -6,20 +6,16 @@ v-container#dashboard.pa-0(
   app-context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
     v-btn(
       @click="DASHBOARD_SET_EDITING(!isEditing)"
-      icon outline
+      icon
     )
       v-icon {{ editingIcon }}
-    v-btn(
-      v-if="focusedWidget"
-      @click="DASHBOARD_REMOVE_WIDGET"
-      icon outline
-      color="error"
-    )
-      v-icon mdi-delete
+    template(v-if="isFullscreen")
+      v-spacer
+      span VisualBox.io
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      icon outline
+      icon
     )
       v-icon {{ fullscreenIcon }}
   v-layout(
@@ -33,7 +29,7 @@ v-container#dashboard.pa-0(
 
 <script>
 import * as _ from 'lodash'
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { AppContextToolbar, DashboardLayout } from '@/components/app'
 
 export default {
@@ -44,7 +40,6 @@ export default {
   },
   computed: {
     ...mapState('Dashboard', ['loaded', 'isEditing', 'isFullscreen']),
-    ...mapGetters('Dashboard', ['focusedWidget']),
     style () {
       const { width, height } = this.loaded.settings
       const { r, g, b, a } = this.loaded.settings.rgba
@@ -87,8 +82,7 @@ export default {
     ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded']),
     ...mapMutations('Dashboard', [
       'DASHBOARD_SET_EDITING',
-      'DASHBOARD_SET_FULLSCREEN',
-      'DASHBOARD_REMOVE_WIDGET'
+      'DASHBOARD_SET_FULLSCREEN'
     ])
   },
   mounted () {

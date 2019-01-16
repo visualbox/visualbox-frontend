@@ -62,12 +62,16 @@ const actions = {
 
 const getters = {
   theme (state, getters, rootState) {
+    return 'dark'
+
+    /*
     try {
       const { attributes: { 'custom:theme': theme } } = rootState.Cognito.user
       return theme === 'dark' ? 'dark' : 'light'
     } catch (e) {
       return 'dark'
     }
+    */
   }
 }
 

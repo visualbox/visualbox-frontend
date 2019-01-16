@@ -30,15 +30,9 @@ grid-layout#dashboard-layout(
     )
       v-btn(
         slot="activator"
+        @click.native.stop="focusWidget(item.i)"
         color="grey darken-3"
         dark fab small
-      )
-        v-icon mdi-dots-vertical
-        v-icon mdi-close
-      v-btn(
-        @click.native.stop="focusWidget(item.i)"
-        color="primary"
-        fab dark small
       )
         v-icon mdi-pencil
       v-btn(

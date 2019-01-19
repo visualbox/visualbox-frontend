@@ -111,7 +111,7 @@ export default {
 
       widgetsIndex.search({
         query,
-        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt'],
+        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt']
         // filters: `-uid:'${this.identityId}'`
       }, (err, result) => {
         this.loadingSearch = false

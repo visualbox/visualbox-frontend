@@ -91,7 +91,8 @@ export default {
   methods: {
     ...mapMutations('Dashboard', [
       'DASHBOARD_SET_FOCUSED_WIDGET',
-      'DASHBOARD_SET_FOCUSED_INTEGRATION'
+      'DASHBOARD_SET_FOCUSED_INTEGRATION',
+      'DASHBOARD_SET_ADDING_INTEGRATION'
     ]),
     ...mapActions('Dashboard', ['updateLoaded']),
     goBack () {
@@ -99,6 +100,8 @@ export default {
         this.DASHBOARD_SET_FOCUSED_WIDGET(null)
       else if (this.focusedIntegration)
         this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+      else if (this.isAddingIntegration)
+        this.DASHBOARD_SET_ADDING_INTEGRATION(false)
       else
         this.$router.go(-1)
     }
@@ -108,9 +111,6 @@ export default {
 
 <style lang="stylus" scoped>
 #dashboard-ctx
-  height 100%
-  overflow auto
-
   .v-tabs
     &.hidden
       display none

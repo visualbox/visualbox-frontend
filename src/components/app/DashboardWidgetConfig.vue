@@ -212,7 +212,4 @@ export default {
 
   .v-dialog__container
     display block !important
-
-  .v-expansion-panel, .v-expansion-panel__container
-    border-radius 4px
 </style>

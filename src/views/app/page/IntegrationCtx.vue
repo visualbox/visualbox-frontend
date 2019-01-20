@@ -8,9 +8,9 @@
       v-icon mdi-menu-left
     .subheading {{ label }}
 
-  v-list(dense)
+  v-list.editor-list(dense)
     //- Files
-    v-list-tile(@click="open.files = !open.files")
+    v-list-tile.no-style(@click="open.files = !open.files")
       v-list-tile-action
         v-icon {{ open.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
@@ -18,19 +18,21 @@
       v-if="open.files"
       v-for="(item, index) in listFiles"
       :key="index"
+      @click="INTEGRATION_SET_TAB(item.tab)"
+      :class="{ 'active' : tab === item.tab }"
     )
       v-list-tile-action
         v-icon(small :color="FILE_TYPES[item.file].color") {{ FILE_TYPES[item.file].icon }}
       v-list-tile-content {{ item.text }}
 
     //- Dependencies
-    v-list-tile(@click="open.dependencies = !open.dependencies")
+    v-list-tile.no-style(@click="open.dependencies = !open.dependencies")
       v-list-tile-action
         v-icon {{ open.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Dependencies
 
     //- Settings
-    v-list-tile(@click="open.settings = !open.settings")
+    v-list-tile.no-style(@click="open.settings = !open.settings")
       v-list-tile-action
         v-icon {{ open.settings ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Settings
@@ -57,7 +59,7 @@
 
 <script>
 import * as _ from 'lodash'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 import { FILE_TYPES } from '@/lib/fileTypes'
 
@@ -72,15 +74,16 @@ export default {
       settings: false
     },
     listFiles: [
-      { text: 'config.json', file: 'json' },
-      { text: 'index.js', file: 'js' },
-      { text: 'package.json', file: 'json' },
-      { text: 'README.md', file: 'md' }
+      { text: 'config.json', file: 'json', tab: 1 },
+      { text: 'index.js', file: 'js', tab: 2 },
+      { text: 'package.json', file: 'json', tab: 3 },
+      { text: 'README.md', file: 'md', tab: 4 }
     ]
   }),
   methods: {
     ...mapActions('Integration', ['updateLoaded']),
-    ...mapActions('App', ['setSnackbar'])
+    ...mapActions('App', ['setSnackbar']),
+    ...mapMutations('Integration', ['INTEGRATION_SET_TAB'])
   },
   computed: {
     ...mapState('Integration', ['loaded', 'tab']),
@@ -103,9 +106,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-#integration-ctx
-  height 100%
-  overflow auto
-</style>

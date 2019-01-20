@@ -2,13 +2,7 @@
 #dashboard-add-integration(v-if="isAddingIntegration")
   app-context-toolbar
     .subheading Add Integration
-    v-spacer
-    v-btn(
-      icon
-      @click="DASHBOARD_SET_ADDING_INTEGRATION(false)"
-    )
-      v-icon mdi-close
-  .pa-3
+  .pl-3.pr-3.pb-3
     v-select(
       :items="list"
       v-model="selectedId"

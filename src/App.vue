@@ -5,7 +5,7 @@ v-app(
   base-snackbar
   base-toolbar
 
-  v-content
+  v-content.pa-0
     router-view(v-if="sessionIsReady")
 </template>
 

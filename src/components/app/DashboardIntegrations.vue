@@ -1,5 +1,11 @@
 <template lang="pug">
 #dashboard-integrations
+  v-btn.ma-0(
+    flat block large
+    color="primary"
+    @click="DASHBOARD_SET_ADDING_INTEGRATION(true)"
+  ) Add Integration
+
   //- Added
   v-list(dense)
     v-list-tile(
@@ -17,12 +23,6 @@
           @click.stop="removeIntegration(item.i)"
         )
           v-icon(small) mdi-minus-circle-outline
-
-  v-btn.ma-0(
-    flat block large
-    color="primary"
-    @click="DASHBOARD_SET_ADDING_INTEGRATION(true)"
-  ) Add Integration
 </template>
 
 <script>

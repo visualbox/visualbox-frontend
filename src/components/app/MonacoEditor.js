@@ -1,4 +1,5 @@
 import * as monaco from 'monaco-editor'
+import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 
 export default {
   name: 'MonacoEditor',
@@ -24,6 +25,10 @@ export default {
   model: {
     event: 'change'
   },
+
+  data: () => ({
+    resizeSensor: null
+  }),
 
   watch: {
     options: {
@@ -59,10 +64,12 @@ export default {
       })
     } else
       this.initMonaco(monaco)
+    this.resizeSensor = new ResizeSensor(this.$el, () => { this.editor.layout() })
   },
 
   beforeDestroy () {
     this.editor && this.editor.dispose()
+    this.resizeSensor.detach()
   },
 
   methods: {

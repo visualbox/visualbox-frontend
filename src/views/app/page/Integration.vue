@@ -1,15 +1,37 @@
 <template lang="pug">
 #integration(v-if="loaded !== null && typeof loaded !== 'undefined'")
   app-context-toolbar
-    v-tabs.elevation-0(
+    v-tabs.editor-tabs(
       v-model="localTab"
       color="rgba(0,0,0,0)"
       slider-color="primary"
     )
-      v-tab Integration
-      v-tab Info
-      v-tab Source
-      v-tab Config
+      v-tab.primary
+        v-icon mdi-home
+      v-tab
+        v-icon(
+          :color="FILE_TYPES['json'].color"
+          small
+        ) {{ FILE_TYPES['json'].icon }}
+        | config.json
+      v-tab
+        v-icon(
+          :color="FILE_TYPES['js'].color"
+          small
+        ) {{ FILE_TYPES['js'].icon }}
+        | index.js
+      v-tab
+        v-icon(
+          :color="FILE_TYPES['json'].color"
+          small
+        ) {{ FILE_TYPES['json'].icon }}
+        | package.json
+      v-tab
+        v-icon(
+          :color="FILE_TYPES['md'].color"
+          small
+        ) {{ FILE_TYPES['md'].icon }}
+        | README.md
 
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
@@ -18,25 +40,24 @@
       monaco-editor(
         :theme="'vs-' + theme"
         class="editor"
-        ref="editorReadme"
-        v-model="readme"
-        language="markdown"
+        v-model="config"
+        language="json"
       )
     .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
         :theme="'vs-' + theme"
         class="editor"
-        ref="editorSource"
         v-model="source"
         language="javascript"
       )
     .tab-item(:class="{ 'active' : localTab === 3 }")
+      span package.json
+    .tab-item(:class="{ 'active' : localTab === 4 }")
       monaco-editor(
         :theme="'vs-' + theme"
         class="editor"
-        ref="editorConfig"
-        v-model="config"
-        language="json"
+        v-model="readme"
+        language="markdown"
       )
 </template>
 
@@ -45,6 +66,7 @@ import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { FILE_TYPES } from '@/lib/fileTypes'
 
 export default {
   name: 'Integration',
@@ -52,10 +74,10 @@ export default {
     AppContextToolbar,
     MonacoEditor
   },
+  data: () => ({
+    FILE_TYPES
+  }),
   watch: {
-    tab () {
-      this.updateDimensions()
-    },
     loaded: {
       handler: _.debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing integration
@@ -123,21 +145,12 @@ export default {
   methods: {
     ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
-    updateDimensions () {
-      this.$refs.editorReadme.getMonaco().layout()
-      this.$refs.editorSource.getMonaco().layout()
-      this.$refs.editorConfig.getMonaco().layout()
-    }
+    ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
-    this.$nextTick(function () {
-      window.addEventListener('resize', this.updateDimensions)
-    })
   },
   beforeDestroy () {
-    window.removeEventListener('resize', this.updateDimensions)
     this.closeLoaded()
   }
 }
@@ -146,6 +159,9 @@ export default {
 <style lang="stylus" scoped>
 #integration
   height 100%
+
+  >>> .v-toolbar__content
+    padding 0 !important
 
   >>> .tabs-items
     height calc(100% - 48px)

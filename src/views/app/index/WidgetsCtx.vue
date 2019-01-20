@@ -139,9 +139,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-#widgets-ctx
-  .v-list
-    padding 0
-</style>

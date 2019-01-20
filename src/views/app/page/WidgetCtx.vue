@@ -121,9 +121,6 @@ export default {
 
 <style lang="stylus" scoped>
 #widget-ctx
-  height 100%
-  overflow auto
-
   >>> .v-alert > div
     width 100%
     overflow hidden

@@ -63,12 +63,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-#dashboards-ctx
-  .v-list
-    padding 0
-
-    .v-list__tile__content
-      cursor pointer
-</style>

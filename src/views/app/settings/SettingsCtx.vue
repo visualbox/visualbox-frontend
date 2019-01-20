@@ -4,7 +4,7 @@
     .subheading Settings
 
   //- List
-  v-list
+  v-list(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
@@ -31,9 +31,3 @@ export default {
   })
 }
 </script>
-
-<style lang="stylus" scoped>
-#settings-ctx
-  .v-list
-    padding 0
-</style>

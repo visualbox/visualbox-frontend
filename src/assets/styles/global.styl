@@ -1,7 +1,7 @@
 @import './colors'
 
 html
-  overflow-y auto !important
+  overflow hidden !important
 
 a
   text-decoration none
@@ -14,9 +14,6 @@ input:-webkit-autofill
 
 .application
   background-color $vb-application !important
-
-.v-content
-  padding 0 !important
 
 .index-icon
   position absolute
@@ -41,7 +38,7 @@ input:-webkit-autofill
     margin-bottom 16px
   code, kbd
     padding 1px 5px
-    background #242424
+    background $vb-drawer-ctx
     color $vb-primary
     font-weight unset
     box-shadow none
@@ -79,6 +76,44 @@ input:-webkit-autofill
 
     .vc-chrome-toggle-icon-highlight
         background #424242
+
+.editor-list
+  .no-style
+    .v-list__tile--link:hover
+      background-color unset !important
+
+      &:before
+        display none
+
+  :not(.no-style)
+    .v-list__tile--link
+      padding-left 40px
+
+  .active
+    .v-list__tile--link, .v-list__tile--link:hover
+      background-color $vb-primary-list-active !important
+
+      &:before
+        content ''
+        width 2px
+        height 100%
+        position absolute
+        left 1px
+        background $vb-primary
+
+  .v-list__tile__action
+    min-width 25px !important
+
+.editor-tabs
+  .v-tabs__div:not(.primary)
+    font-weight unset
+    text-transform unset
+
+    .v-tabs__item--active
+      background-color rgba(255, 255, 255, .05)
+
+    .v-icon
+      margin-right 10px
 
 #data-source-tree
   .v-treeview-node__root

@@ -139,9 +139,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-#integrations-ctx
-  .v-list
-    padding 0
-</style>

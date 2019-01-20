@@ -62,18 +62,12 @@ export default {
   width unset !important
   transition none !important
   -webkit-transition none !important
+  overflow-x unset !important
+  overflow-y unset !important
 
   >>> .v-list__tile
     -webkit-transition unset !important
     transition unset !important
-
-    &--link
-      .v-icon
-        color $vb-drawer-icon !important
-
-    &--link:hover, &--active
-      .v-icon
-        color $vb-drawer-icon-hoveractive !important
 
   .v-navigation-drawer--mini-variant
     background-color $vb-drawer-mini
@@ -84,6 +78,14 @@ export default {
 
       &--active
         background $vb-primary !important
+
+      &--link
+        .v-icon
+          color $vb-drawer-icon !important
+
+      &--link:hover, &--active
+        .v-icon
+          color $vb-drawer-icon-hoveractive !important
 
   .bottom_upper
     position absolute
@@ -98,6 +100,7 @@ export default {
     margin-left 80px
     background-color $vb-drawer-ctx !important
     border-right 1px solid $vb-drawer-ctx-border
+    overflow auto
 
     >>> .v-list
       padding 0
@@ -116,6 +119,7 @@ export default {
       .v-list__tile__action
         min-width 30px
 
-      .container
-        padding 0 16px 16px 30px
+    >>> .v-expansion-panel, .v-expansion-panel__container
+      border-radius 4px
+      overflow hidden
 </style>

@@ -22,7 +22,7 @@
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action(v-if="index === hoverIndex || true")
+      v-list-tile-action(v-if="index === hoverIndex")
         v-btn(
           flat icon
           @click.stop="del(item.id)"

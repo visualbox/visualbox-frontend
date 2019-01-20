@@ -209,6 +209,7 @@ export default {
 #dashboard-widget-config
   .v-toolbar
     background transparent
+    border-bottom 0
 
   .v-dialog__container
     display block !important

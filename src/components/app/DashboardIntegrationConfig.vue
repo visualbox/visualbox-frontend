@@ -99,4 +99,5 @@ export default {
 #dashboard-integration-config
   .v-toolbar
     background transparent
+    border-bottom 0
 </style>

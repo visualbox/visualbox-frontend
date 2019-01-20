@@ -73,7 +73,7 @@ export default {
           type: 'success',
           msg: `Successfully signed in user ${this.email}`
         })
-        this.$router.push('/app')
+        this.$router.push('/app/d')
       } catch (e) {
         this.setSnackbar({
           type: 'error',

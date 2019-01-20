@@ -70,9 +70,12 @@ export default {
 
   #content
     height 100%
-    padding 0 !important
     position relative
     overflow hidden
     transition none !important
     -webkit-transition none !important
+
+    .container
+      position absolute
+      overflow auto
 </style>

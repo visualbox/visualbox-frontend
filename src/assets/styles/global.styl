@@ -1,5 +1,23 @@
 @import './colors'
 
+::-webkit-scrollbar
+  width: 10px
+
+::-webkit-scrollbar-button
+  display none
+
+::-webkit-scrollbar-thumb
+  background-color $vb-scrollbar-thumb
+
+  &:hover
+    background-color $vb-scrollbar-thumb-hover
+  
+  &:active
+    background-color $vb-scrollbar-thumb-active
+
+::-webkit-scrollbar-track
+  background-color transparent
+
 html
   overflow hidden !important
 

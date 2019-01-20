@@ -1,40 +1,61 @@
 <template lang="pug">
-v-navigation-drawer(
-  hide-overlay
-  stateless
-  permanent
-  floating
-)
-  v-navigation-drawer(
-    app
+#app-navigation-drawer
+  v-navigation-drawer#mini(
     mini-variant
     stateless
     permanent
     floating
   )
-    v-list.pa-0(two-line)
-      v-tooltip(
-        v-for="item in items"
-        :key="item.title"
-        :open-delay="0"
-        :close-delay="0"
-        :class="item.class"
-        color="black"
-        transition="fade-transition"
-        right
-      )
-        span {{ item.title }}
-        v-list-tile(
-          slot="activator"
-          :to="item.to"
-          :exact="item.to === '/app'"
+    v-layout(column fill-height)
+      v-list(two-line)
+        v-tooltip(
+          v-for="item in items"
+          :key="item.title"
+          :open-delay="0"
+          :close-delay="0"
+          color="black"
+          transition="fade-transition"
+          right
         )
-          v-list-tile-action
-            v-icon(
-              :color="item.color"
-              medium
-            ) {{ item.icon }}
-  .context
+          span {{ item.title }}
+          v-list-tile(
+            slot="activator"
+            :to="item.to"
+            :exact="item.to === '/app'"
+          )
+            v-list-tile-action
+              v-icon(
+                :color="item.color"
+                medium
+              ) {{ item.icon }}
+      v-spacer
+      v-list(two-line)
+        v-tooltip(
+          v-for="item in itemsBottom"
+          :key="item.title"
+          :open-delay="0"
+          :close-delay="0"
+          color="black"
+          transition="fade-transition"
+          right
+        )
+          span {{ item.title }}
+          v-list-tile(
+            slot="activator"
+            :to="item.to"
+            :exact="item.to === '/app'"
+          )
+            v-list-tile-action
+              v-icon(
+                :color="item.color"
+                medium
+              ) {{ item.icon }}
+
+  v-navigation-drawer#context(
+    stateless
+    permanent
+    floating
+  )
     v-scroll-x-transition(mode="out-in")
       router-view(name="context")
   </template>
@@ -47,7 +68,9 @@ export default {
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-hexagon-multiple' },
-      { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' },
+      { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' }
+    ],
+    itemsBottom: [
       { title: 'Settings', to: '/app/s', icon: 'mdi-settings', class: 'bottom_upper' },
       { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
     ]
@@ -58,49 +81,38 @@ export default {
 <style lang="stylus" scoped>
 @import '../../assets/styles/colors';
 
-.v-navigation-drawer
-  width unset !important
-  transition none !important
-  -webkit-transition none !important
-  overflow-x unset !important
-  overflow-y unset !important
+#app-navigation-drawer
+  height 100%
 
-  >>> .v-list__tile
-    -webkit-transition unset !important
-    transition unset !important
-
-  .v-navigation-drawer--mini-variant
+  #mini
+    overflow auto !important
     background-color $vb-drawer-mini
 
-    >>> .v-list__tile
-      &:hover
-        background unset
+    >>> .v-list
+      padding 0
 
-      &--active
-        background $vb-primary !important
+      .v-list__tile
+        &:hover
+          background unset
 
-      &--link
-        .v-icon
-          color $vb-drawer-icon !important
+        &--active
+          background $vb-primary !important
 
-      &--link:hover, &--active
-        .v-icon
-          color $vb-drawer-icon-hoveractive !important
+        &--link
+          .v-icon
+            color $vb-drawer-icon !important
 
-  .bottom_upper
-    position absolute
-    bottom 72px
+        &--link:hover, &--active
+          .v-icon
+            color $vb-drawer-icon-hoveractive !important
 
-  .bottom
-    position absolute
-    bottom 0
-
-  .context
-    height 100%
-    margin-left 80px
+  #context
+    width unset !important
     background-color $vb-drawer-ctx !important
     border-right 1px solid $vb-drawer-ctx-border
-    overflow auto
+    position absolute
+    right 0
+    left 80px
 
     >>> .v-list
       padding 0

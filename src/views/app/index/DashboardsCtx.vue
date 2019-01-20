@@ -12,7 +12,7 @@
       v-icon mdi-plus-box
 
   //- List
-  v-list
+  v-list(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"

@@ -64,6 +64,10 @@ export default {
       .v-icon
         color rgba(255, 255, 255, .5) !important
 
+    &--link:hover
+      .v-icon
+        color #FFF !important
+
     &--active
       .v-icon
         color #FFF !important
@@ -78,6 +82,11 @@ export default {
         bottom 0
         left 0
         border-left 0 solid #FFF
+
+  .v-navigation-drawer--mini-variant
+    >>> .v-list__tile
+      &--active
+        background #4caf50 !important
 
   .bottom_upper
     position absolute

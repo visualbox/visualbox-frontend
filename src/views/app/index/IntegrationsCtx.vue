@@ -30,7 +30,10 @@
   .text-xs-center(v-if="showSearch && showNoHitsSearch")
     v-icon.mb-3.mt-3 mdi-package-variant
     .caption No results. Try a different phrase.
-  v-list(v-if="showSearch")
+  v-list(
+    v-if="showSearch"
+    dense
+  )
     v-list-tile(
       v-for="(item, index) in listSearch"
       :key="index"
@@ -40,7 +43,10 @@
         v-list-tile-sub-title {{ item.label }}
 
   //- List
-  v-list(v-if="!showSearch")
+  v-list(
+    v-if="!showSearch"
+    dense
+  )
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"

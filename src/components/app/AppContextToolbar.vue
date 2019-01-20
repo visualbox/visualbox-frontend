@@ -10,8 +10,11 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../../assets/styles/colors'
+
 .v-toolbar
   white-space nowrap
+  background-color $vb-app-ctx-toolbar
 
   >>> .v-toolbar__content
     padding 0 16px !important

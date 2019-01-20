@@ -1,11 +1,9 @@
 <template lang="pug">
 v-navigation-drawer(
-  app
   hide-overlay
   stateless
   permanent
   floating
-  width="380"
 )
   v-navigation-drawer(
     app
@@ -58,35 +56,34 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../../assets/styles/colors';
+
 .v-navigation-drawer
+  width unset !important
+  transition none !important
+  -webkit-transition none !important
+
   >>> .v-list__tile
+    -webkit-transition unset !important
+    transition unset !important
+
     &--link
       .v-icon
-        color rgba(255, 255, 255, .5) !important
+        color $vb-drawer-icon !important
 
-    &--link:hover
+    &--link:hover, &--active
       .v-icon
-        color #FFF !important
-
-    &--active
-      .v-icon
-        color #FFF !important
-
-      // Left border
-      &:before
-        content ''
-        display block
-        position absolute
-        top 0
-        right 0
-        bottom 0
-        left 0
-        border-left 0 solid #FFF
+        color $vb-drawer-icon-hoveractive !important
 
   .v-navigation-drawer--mini-variant
+    background-color $vb-drawer-mini
+
     >>> .v-list__tile
+      &:hover
+        background unset
+
       &--active
-        background #4caf50 !important
+        background $vb-primary !important
 
   .bottom_upper
     position absolute
@@ -99,26 +96,26 @@ export default {
   .context
     height 100%
     margin-left 80px
-    background-color #272727 !important
+    background-color $vb-drawer-ctx !important
+    border-right 1px solid $vb-drawer-ctx-border
 
-  &.theme--light
-    .v-navigation-drawer--mini-variant
-      background-color #444
+    >>> .v-list
+      padding 0
 
-      >>> .v-list__tile
-        &--active
-          .v-icon
-            color #FFF !important
+      .v-list__tile--link:hover
+        background-color $vb-primary-list-hover
 
-    >>> .v-list__tile
-        &--link
-          .v-icon
-            color #9e9e9e !important
+        &:before
+          content ''
+          width 2px
+          height 100%
+          position absolute
+          left 1px
+          background $vb-primary
 
-        &--active
-          .v-icon
-            color #747474 !important
+      .v-list__tile__action
+        min-width 30px
 
-    .context
-      background-color #f5f5f5 !important
+      .container
+        padding 0 16px 16px 30px
 </style>

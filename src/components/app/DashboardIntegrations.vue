@@ -1,16 +1,7 @@
 <template lang="pug">
 #dashboard-integrations
-  //- Available
-  v-btn.ma-0(
-    flat block large
-    color="primary"
-    @click="DASHBOARD_SET_ADDING_INTEGRATION(true)"
-  ) Add Integration
-
-  v-divider
-
   //- Added
-  v-list.pa-0(dense)
+  v-list(dense)
     v-list-tile(
       v-for="(item, index) in dashboardIntegrations"
       :key="index"
@@ -26,6 +17,12 @@
           @click.stop="removeIntegration(item.i)"
         )
           v-icon(small) mdi-minus-circle-outline
+
+  v-btn.ma-0(
+    flat block large
+    color="primary"
+    @click="DASHBOARD_SET_ADDING_INTEGRATION(true)"
+  ) Add Integration
 </template>
 
 <script>

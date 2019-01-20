@@ -5,7 +5,6 @@
       v-model="localTab"
       color="rgba(0,0,0,0)"
       slider-color="primary"
-      grow
     )
       v-tab Integration
       v-tab Info

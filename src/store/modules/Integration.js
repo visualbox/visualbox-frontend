@@ -109,7 +109,7 @@ const actions = {
     commit(t.INTEGRATION_SET_LOADED, getters.integrationById(id))
   },
   // Update a loaded local integration
-  updateLoaded ({ commit, dispatch }, payload = {}) {
+  updateLoaded ({ commit }, payload = {}) {
     payload.updatedAt = +new Date()
     commit(t.INTEGRATION_CONCAT_LOADED, payload)
   },
@@ -147,13 +147,16 @@ const actions = {
 }
 
 const getters = {
-  list (state) {
-    return state.list
-  },
+  /**
+   * Get an integration by ID.
+   */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
   },
-  // Return diff between loaded and old item in list
+
+  /**
+   * Return diff between loaded and old item in list
+   */
   loadedDiff ({ loaded }, getters) {
     try {
       return difference(loaded, getters.integrationById(loaded.id))

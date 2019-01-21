@@ -32,7 +32,6 @@
           small
         ) {{ FILE_TYPES['md'].icon }}
         | README.md
-
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
       .markdown(v-html="compiledMarkdown")
@@ -51,7 +50,12 @@
         language="javascript"
       )
     .tab-item(:class="{ 'active' : localTab === 3 }")
-      span package.json
+      monaco-editor(
+        :theme="'vs-' + theme"
+        class="editor"
+        v-model="package"
+        language="json"
+      )
     .tab-item(:class="{ 'active' : localTab === 4 }")
       monaco-editor(
         :theme="'vs-' + theme"
@@ -139,6 +143,20 @@ export default {
       },
       set (config) {
         this.updateLoaded({ config })
+      }
+    },
+    package: {
+      get () {
+        try {
+          return JSON.stringify(_.get(this, 'loaded.package', '{}'), null, 2)
+        } catch (e) {
+          return '{}'
+        }
+      },
+      set (pkg) {
+        try {
+          this.updateLoaded({ package: JSON.parse(pkg) })
+        } catch (e) {}
       }
     }
   },

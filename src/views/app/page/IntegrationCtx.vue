@@ -6,7 +6,7 @@
       @click="$router.go(-1)"
     )
       v-icon mdi-menu-left
-    .subheading {{ label }}
+    .subheading {{ name }}
 
   v-list.editor-list(dense)
     //- Files
@@ -43,8 +43,8 @@
       v-layout(row wrap)
         v-flex(xs12)
           v-text-field(
-            v-model="label"
-            label="Label"
+            v-model="name"
+            label="Name"
             hide-details
             outline
           )
@@ -87,20 +87,26 @@ export default {
   },
   computed: {
     ...mapState('Integration', ['loaded', 'tab']),
-    label: {
-      get () {
-        return _.get(this, 'loaded.label', '')
-      },
-      set (label) {
-        this.updateLoaded({ label })
-      }
-    },
     public: {
       get () {
-        return _.get(this, 'loaded.public', false)
+        return _.get(this, 'loaded.package.public', false)
       },
       set (isPublic) {
-        this.updateLoaded({ public: isPublic })
+        this.updateLoaded({
+          package: {
+            public: isPublic
+          }
+        })
+      }
+    },
+    name: {
+      get () {
+        return _.get(this, 'loaded.package.name', '')
+      },
+      set (name) {
+        this.updateLoaded({
+          package: { name }
+        })
       }
     }
   }

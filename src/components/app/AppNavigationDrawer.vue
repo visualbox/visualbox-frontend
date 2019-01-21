@@ -117,6 +117,10 @@ export default {
     >>> .v-list
       padding 0
 
+      .v-list__tile
+        -webkit-transition none !important
+        transition none !important
+
       .v-list__tile--link:hover
         background-color $vb-primary-list-hover
 

@@ -1,5 +1,6 @@
 <template lang="pug">
 #integration-ctx(v-if="loaded")
+  search-dependencies(:show.sync="dialog")
   app-context-toolbar
     v-btn(
       icon
@@ -25,18 +26,12 @@
         v-icon(small :color="FILE_TYPES[item.file].color") {{ FILE_TYPES[item.file].icon }}
       v-list-tile-content {{ item.text }}
 
-    //- Dependencies
-    v-list-tile.no-style(@click="open.dependencies = !open.dependencies")
-      v-list-tile-action
-        v-icon {{ open.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-      v-list-tile-content Dependencies
-
     //- Settings
     v-list-tile.no-style(@click="open.settings = !open.settings")
       v-list-tile-action
         v-icon {{ open.settings ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Settings
-    v-container(
+    v-container.pt-2(
       v-if="open.settings"
       grid-list-lg
     )
@@ -55,18 +50,53 @@
             color="primary"
             hide-details
           )
+
+    //- Dependencies
+    v-list-tile.no-style(@click="open.dependencies = !open.dependencies")
+      v-list-tile-action
+        v-icon {{ open.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+      v-list-tile-content Dependencies
+    v-list-tile(
+      v-if="open.dependencies"
+      v-for="(item, index) in dependencies"
+      :key="'d' + index"
+      @mouseover="hoverIndex = index"
+      @mouseout="hoverIndex = null"
+      @click=""
+    )
+      v-list-tile-action
+        v-icon(small color="blue") mdi-package-variant-closed
+      v-list-tile-content {{ item.package }}@{{ item.version }}
+      v-list-tile-action(v-if="index === hoverIndex")
+        v-btn(
+          flat icon
+          @click.stop=""
+        )
+          v-icon(small) mdi-trash-can-outline
+    v-btn.ma-0(
+      v-if="open.dependencies"
+      flat block large
+      color="primary"
+      @click="dialog = true"
+    ) Add Dependency
 </template>
 
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
+import { SearchDependencies } from '@/components/dialog'
 import { FILE_TYPES } from '@/lib/fileTypes'
 
 export default {
   name: 'IntegrationCtx',
-  components: { AppContextToolbar },
+  components: {
+    AppContextToolbar,
+    SearchDependencies
+  },
   data: () => ({
+    hoverIndex: null,
+    dialog: false,
     FILE_TYPES,
     open: {
       files: true,
@@ -87,6 +117,16 @@ export default {
   },
   computed: {
     ...mapState('Integration', ['loaded', 'tab']),
+    name: {
+      get () {
+        return _.get(this, 'loaded.package.name', '')
+      },
+      set (name) {
+        this.updateLoaded({
+          package: { name }
+        })
+      }
+    },
     public: {
       get () {
         return _.get(this, 'loaded.package.public', false)
@@ -99,14 +139,16 @@ export default {
         })
       }
     },
-    name: {
+    dependencies: {
       get () {
-        return _.get(this, 'loaded.package.name', '')
-      },
-      set (name) {
-        this.updateLoaded({
-          package: { name }
-        })
+        const list = _.get(this, 'loaded.package.dependencies', {})
+        return Object.keys(list).reduce((a, b) => {
+          a.push({
+            package: b,
+            version: list[b]
+          })
+          return a
+        }, [])
       }
     }
   }

@@ -1,4 +1,4 @@
-export const FILE_TYPES = {
+export default {
   js: {
     icon: 'mdi-language-javascript',
     color: '#fec927'

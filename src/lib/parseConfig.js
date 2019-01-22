@@ -20,7 +20,7 @@ const OPTIONAL_PROPS = [
  * @param  {String} config Configuration JSON string
  * @return {Object}        Return an object with parsed config and error message(s)
  */
-const parseConfig = config => {
+export default config => {
   try {
     const parsed = JSON.parse(config)
 
@@ -157,5 +157,3 @@ const parseConfig = config => {
     }
   }
 }
-
-export default parseConfig

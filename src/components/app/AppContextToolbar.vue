@@ -15,7 +15,6 @@ export default {
 .v-toolbar
   white-space nowrap
   background-color $vb-app-ctx-toolbar
-  border-bottom 1px solid $vb-app-ctx-toolbar-border
 
   >>> .v-toolbar__content
     padding 0 16px !important

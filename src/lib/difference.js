@@ -6,7 +6,7 @@ import * as _ from 'lodash'
  * @param  {Object} base   Object to compare with
  * @return {Object}        Return a new object who represent the diff
  */
-const difference = (object, base) => {
+export default (object, base) => {
   const changes = (object, base) => {
     return _.transform(object, (result, value, key) => {
       if (!_.isEqual(value, base[key]))
@@ -15,5 +15,3 @@ const difference = (object, base) => {
   }
   return changes(object, base)
 }
-
-export default difference

@@ -39,7 +39,7 @@ input:-webkit-autofill
   right 0
   font-size 400px
   line-height 250px
-  color rgba(255, 255, 255, .05) !important
+  color rgba(255, 255, 255, .025) !important
 
 .markdown
   hr
@@ -123,12 +123,23 @@ input:-webkit-autofill
     min-width 25px !important
 
 .editor-tabs
-  .v-tabs__div:not(.primary)
+  .v-tabs__slider-wrapper
+    -webkit-transition none !important
+    transition none !important
+
+    .v-tabs__slider
+      height 1px
+
+  .v-tabs__div:not(.black)
     font-weight unset
     text-transform unset
 
-    .v-tabs__item--active
-      background-color rgba(255, 255, 255, .05)
+    .v-tabs__item
+      -webkit-transition none !important
+      transition none !important
+
+      &--active
+        background-color $vb-application
 
     .v-icon
       margin-right 10px

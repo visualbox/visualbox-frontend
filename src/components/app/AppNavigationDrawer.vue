@@ -86,7 +86,7 @@ export default {
 
   #mini
     overflow auto !important
-    background-color $vb-drawer-mini
+    background-color $vb-drawer-mini !important
 
     >>> .v-list
       padding 0
@@ -109,7 +109,6 @@ export default {
   #context
     width unset !important
     background-color $vb-drawer-ctx !important
-    border-right 1px solid $vb-drawer-ctx-border
     position absolute
     right 0
     left 80px

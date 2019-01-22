@@ -23,7 +23,10 @@
       :class="{ 'active' : tab === item.tab }"
     )
       v-list-tile-action
-        v-icon(small :color="FILE_TYPES[item.file].color") {{ FILE_TYPES[item.file].icon }}
+        v-icon(
+          :color="FILE_TYPES[item.file].color"
+          small
+        ) {{ FILE_TYPES[item.file].icon }}
       v-list-tile-content {{ item.text }}
 
     //- Settings
@@ -86,7 +89,8 @@ import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { AppContextToolbar } from '@/components/app'
 import { SearchDependencies } from '@/components/dialog'
-import { FILE_TYPES } from '@/lib/fileTypes'
+import FILE_TYPES from '@/lib/fileTypes'
+import cloneDeep from '@/lib/cloneDeep'
 
 export default {
   name: 'IntegrationCtx',
@@ -122,9 +126,9 @@ export default {
         return _.get(this, 'loaded.package.name', '')
       },
       set (name) {
-        this.updateLoaded({
-          package: { name }
-        })
+        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+        pkg.name = name
+        this.updateLoaded({ package: pkg })
       }
     },
     public: {
@@ -132,24 +136,20 @@ export default {
         return _.get(this, 'loaded.package.public', false)
       },
       set (isPublic) {
-        this.updateLoaded({
-          package: {
-            public: isPublic
-          }
-        })
+        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+        pkg.public = isPublic
+        this.updateLoaded({ package: pkg })
       }
     },
-    dependencies: {
-      get () {
-        const list = _.get(this, 'loaded.package.dependencies', {})
-        return Object.keys(list).reduce((a, b) => {
-          a.push({
-            package: b,
-            version: list[b]
-          })
-          return a
-        }, [])
-      }
+    dependencies () {
+      const list = _.get(this, 'loaded.package.dependencies', {})
+      return Object.keys(list).reduce((a, b) => {
+        a.push({
+          package: b,
+          version: list[b]
+        })
+        return a
+      }, [])
     }
   }
 }

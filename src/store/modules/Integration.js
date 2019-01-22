@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import Vue from 'vue'
 import * as t from '@/store/types'
 import API from '@aws-amplify/api'
 import config from '@/config'
@@ -24,7 +24,7 @@ const mutations = {
     state.tab = payload
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
-    state.list = _.cloneDeep(payload)
+    Vue.set(state, 'list', payload)
   },
   [t.INTEGRATION_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -33,17 +33,25 @@ const mutations = {
     state.list = state.list.filter(i => i.id !== id)
   },
   [t.INTEGRATION_SET_LOADED] (state, payload) {
-    state.loaded = _.cloneDeep(payload)
+    Vue.set(state, 'loaded', payload)
   },
   [t.INTEGRATION_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = _.cloneDeep(state.loaded)
+    let merged = mergeDeep(state.loaded, payload)
+
+    /**
+     * Package needs to be replaced since
+     * deep merge & diff won't handle deletion.
+     */
+    if (payload.hasOwnProperty('package'))
+      merged.package = payload.package
+
+    state.loaded = cloneDeep(merged)
   },
   [t.INTEGRATION_COMMIT_LOADED] (state, nullify = false) {
     const { loaded } = state
     let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = _.cloneDeep(loaded)
-    state.list = _.cloneDeep(state.list)
+    state.list[index] = cloneDeep(loaded)
+    state.list = cloneDeep(state.list)
 
     // Used when closing / exiting 'loaded'
     if (nullify)
@@ -64,8 +72,8 @@ const mutations = {
     if (index < 0)
       state.public.push(payload)
     else
-      state.public[index] = _.cloneDeep(payload)
-    state.public = _.cloneDeep(state.public)
+      state.public[index] = cloneDeep(payload)
+    state.public = cloneDeep(state.public)
   }
 }
 
@@ -159,7 +167,17 @@ const getters = {
    */
   loadedDiff ({ loaded }, getters) {
     try {
-      return difference(loaded, getters.integrationById(loaded.id))
+      let diff = difference(loaded, getters.integrationById(loaded.id))
+
+      /**
+       * If package is in diff, meaning it has been changed,
+       * copy it in its entirety so that deletions are handled
+       * correctly.
+       */
+      if (diff.hasOwnProperty('package'))
+        diff.package = cloneDeep(loaded.package)
+
+      return diff
     } catch (e) {
       return {}
     }

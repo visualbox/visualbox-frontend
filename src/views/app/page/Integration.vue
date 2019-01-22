@@ -3,63 +3,46 @@
   app-context-toolbar
     v-tabs.editor-tabs(
       v-model="localTab"
-      color="rgba(0,0,0,0)"
+      color="transparent"
       slider-color="primary"
     )
-      v-tab.primary
-        v-icon mdi-home
-      v-tab
+      v-tab(:ripple="false").black
+        v-icon mdi-format-align-left
+      v-tab(
+        v-for="(item, index) in listFiles"
+        :key="index"
+        :ripple="false"
+      )
         v-icon(
-          :color="FILE_TYPES['json'].color"
+          :color="FILE_TYPES[item.file].color"
           small
-        ) {{ FILE_TYPES['json'].icon }}
-        | config.json
-      v-tab
-        v-icon(
-          :color="FILE_TYPES['js'].color"
-          small
-        ) {{ FILE_TYPES['js'].icon }}
-        | index.js
-      v-tab
-        v-icon(
-          :color="FILE_TYPES['json'].color"
-          small
-        ) {{ FILE_TYPES['json'].icon }}
-        | package.json
-      v-tab
-        v-icon(
-          :color="FILE_TYPES['md'].color"
-          small
-        ) {{ FILE_TYPES['md'].icon }}
-        | README.md
+        ) {{ FILE_TYPES[item.file].icon }}
+        | {{ item.text}}
+
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
       .markdown(v-html="compiledMarkdown")
     .tab-item(:class="{ 'active' : localTab === 1 }")
       monaco-editor(
         :theme="'vs-' + theme"
-        class="editor"
         v-model="config"
         language="json"
       )
     .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
         :theme="'vs-' + theme"
-        class="editor"
         v-model="source"
         language="javascript"
       )
     .tab-item(:class="{ 'active' : localTab === 3 }")
       monaco-editor(
         :theme="'vs-' + theme"
-        class="editor"
         v-model="package"
         language="json"
       )
     .tab-item(:class="{ 'active' : localTab === 4 }")
       monaco-editor(
         :theme="'vs-' + theme"
-        class="editor"
         v-model="readme"
         language="markdown"
       )
@@ -70,7 +53,7 @@ import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
-import { FILE_TYPES } from '@/lib/fileTypes'
+import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'Integration',
@@ -79,7 +62,13 @@ export default {
     MonacoEditor
   },
   data: () => ({
-    FILE_TYPES
+    FILE_TYPES,
+    listFiles: [
+      { text: 'config.json', file: 'json', tab: 1 },
+      { text: 'index.js', file: 'js', tab: 2 },
+      { text: 'package.json', file: 'json', tab: 3 },
+      { text: 'README.md', file: 'md', tab: 4 }
+    ]
   }),
   watch: {
     loaded: {
@@ -196,6 +185,9 @@ export default {
       &.active
         visibility visible
 
+        > div
+          height 100%
+
       &.scroll
         overflow auto
 
@@ -204,7 +196,4 @@ export default {
 
           img
             max-width 100%
-
-  >>> .editor
-    height 100%
 </style>

@@ -2,8 +2,6 @@
  * Deep clone an object.
  * @param object
  */
-const cloneDeep = (object) => {
+export default (object) => {
   return JSON.parse(JSON.stringify(object))
 }
-
-export default cloneDeep

@@ -4,7 +4,7 @@
  * @param  {Object} property  Array or string of property to get
  * @return {Object}           Return found value
  */
-const getNestedSource = (object, property) => {
+export default (object, property) => {
   let current = object
   for (var i = 0, l = property.length; i < l; ++i) {
     if (Object(current) === current)
@@ -16,5 +16,3 @@ const getNestedSource = (object, property) => {
   }
   return current
 }
-
-export default getNestedSource

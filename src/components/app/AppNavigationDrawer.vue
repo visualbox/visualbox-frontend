@@ -1,68 +1,79 @@
 <template lang="pug">
-#app-navigation-drawer
-  v-navigation-drawer#mini(
-    mini-variant
-    stateless
-    permanent
-    floating
-  )
-    v-layout(column fill-height)
-      v-list(two-line)
-        v-tooltip(
-          v-for="item in items"
-          :key="item.title"
-          :open-delay="0"
-          :close-delay="0"
-          color="black"
-          transition="fade-transition"
-          right
-        )
-          span {{ item.title }}
-          v-list-tile(
-            slot="activator"
-            :to="item.to"
-            :exact="item.to === '/app'"
+vue-draggable-resizable#app-navigation-drawer(
+  :draggable="false"
+  :w="380"
+  :min-width="80"
+  :handles="['mr']"
+  :active="true"
+  :prevent-deactivation="true"
+)
+  #drawer-wrapper
+    v-navigation-drawer#mini(
+      mini-variant
+      stateless
+      permanent
+      floating
+    )
+      v-layout(column fill-height)
+        v-list(two-line)
+          v-tooltip(
+            v-for="item in items"
+            :key="item.title"
+            :open-delay="0"
+            :close-delay="0"
+            color="black"
+            transition="fade-transition"
+            right
           )
-            v-list-tile-action
-              v-icon(
-                :color="item.color"
-                medium
-              ) {{ item.icon }}
-      v-spacer
-      v-list(two-line)
-        v-tooltip(
-          v-for="item in itemsBottom"
-          :key="item.title"
-          :open-delay="0"
-          :close-delay="0"
-          color="black"
-          transition="fade-transition"
-          right
-        )
-          span {{ item.title }}
-          v-list-tile(
-            slot="activator"
-            :to="item.to"
-            :exact="item.to === '/app'"
+            span {{ item.title }}
+            v-list-tile(
+              slot="activator"
+              :to="item.to"
+              :exact="item.to === '/app'"
+            )
+              v-list-tile-action
+                v-icon(
+                  :color="item.color"
+                  medium
+                ) {{ item.icon }}
+        v-spacer
+        v-list(two-line)
+          v-tooltip(
+            v-for="item in itemsBottom"
+            :key="item.title"
+            :open-delay="0"
+            :close-delay="0"
+            color="black"
+            transition="fade-transition"
+            right
           )
-            v-list-tile-action
-              v-icon(
-                :color="item.color"
-                medium
-              ) {{ item.icon }}
+            span {{ item.title }}
+            v-list-tile(
+              slot="activator"
+              :to="item.to"
+              :exact="item.to === '/app'"
+            )
+              v-list-tile-action
+                v-icon(
+                  :color="item.color"
+                  medium
+                ) {{ item.icon }}
 
-  v-navigation-drawer#context(
-    stateless
-    permanent
-    floating
-  )
-    v-scroll-x-transition(mode="out-in")
-      router-view(name="context")
-  </template>
+    v-navigation-drawer#context(
+      stateless
+      permanent
+      floating
+    )
+      v-scroll-x-transition(mode="out-in")
+        router-view(name="context")
+</template>
 
 <script>
+import VueDraggableResizable from 'vue-draggable-resizable'
+
 export default {
   name: 'AppNavigationDrawer',
+  components: { VueDraggableResizable },
   data: () => ({
     items: [
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
@@ -82,59 +93,76 @@ export default {
 @import '../../assets/styles/colors';
 
 #app-navigation-drawer
-  height 100%
+  position relative !important
+  height 100% !important
+  touch-action none
+  box-sizing border-box
+  float left
 
-  #mini
-    overflow auto !important
-    background-color $vb-drawer-mini !important
-
-    >>> .v-list
-      padding 0
-
-      .v-list__tile
-        &:hover
-          background unset
-
-        &--active
-          background $vb-primary !important
-
-        &--link
-          .v-icon
-            color $vb-drawer-icon !important
-
-        &--link:hover, &--active
-          .v-icon
-            color $vb-drawer-icon-hoveractive !important
-
-  #context
-    width unset !important
-    background-color $vb-drawer-ctx !important
+  >>>.handle
+    width 10px
+    height 100%
+    background transparent
     position absolute
-    right 0
-    left 80px
+    box-sizing border-box
+    z-index 99
+    right -5px
+    cursor e-resize
 
-    >>> .v-list
-      padding 0
+  #drawer-wrapper
+    height 100%
 
-      .v-list__tile
-        -webkit-transition none !important
-        transition none !important
+    #mini
+      overflow auto !important
+      background-color $vb-drawer-mini !important
 
-      .v-list__tile--link:hover
-        background-color $vb-primary-list-hover
+      >>> .v-list
+        padding 0
 
-        &:before
-          content ''
-          width 2px
-          height 100%
-          position absolute
-          left 1px
-          background $vb-primary
+        .v-list__tile
+          &:hover
+            background unset
 
-      .v-list__tile__action
-        min-width 30px
+          &--active
+            background $vb-primary !important
 
-    >>> .v-expansion-panel, .v-expansion-panel__container
-      border-radius 4px
-      overflow hidden
+          &--link
+            .v-icon
+              color $vb-drawer-icon !important
+
+          &--link:hover, &--active
+            .v-icon
+              color $vb-drawer-icon-hoveractive !important
+
+    #context
+      width unset !important
+      background-color $vb-drawer-ctx !important
+      position absolute
+      right 0
+      left 80px
+
+      >>> .v-list
+        padding 0
+
+        .v-list__tile
+          -webkit-transition none !important
+          transition none !important
+
+        .v-list__tile--link:hover
+          background-color $vb-primary-list-hover
+
+          &:before
+            content ''
+            width 2px
+            height 100%
+            position absolute
+            left 1px
+            background $vb-primary
+
+        .v-list__tile__action
+          min-width 30px
+
+      >>> .v-expansion-panel, .v-expansion-panel__container
+        border-radius 4px
+        overflow hidden
 </style>

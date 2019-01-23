@@ -7,17 +7,29 @@
       slider-color="primary"
     )
       v-tab(:ripple="false").black
-        v-icon mdi-format-align-left
+        v-icon mdi-home-variant
       v-tab(
         v-for="(item, index) in listFiles"
         :key="index"
         :ripple="false"
       )
-        v-icon(
+        v-icon.mr-2(
           :color="FILE_TYPES[item.file].color"
           small
         ) {{ FILE_TYPES[item.file].icon }}
         | {{ item.text}}
+      v-spacer
+      v-toolbar-items
+        v-btn(
+          @click="formatCode"
+          flat
+        )
+          v-icon mdi-format-align-left
+        v-btn(
+          @click="showHelper = !showHelper"
+          flat
+        )
+          v-icon mdi-powershell
 
   .tabs-items
     .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
@@ -26,26 +38,31 @@
       monaco-editor(
         :theme="'vs-' + theme"
         v-model="config"
+        ref="config"
         language="json"
       )
     .tab-item(:class="{ 'active' : localTab === 2 }")
       monaco-editor(
         :theme="'vs-' + theme"
         v-model="source"
+        ref="source"
         language="javascript"
       )
     .tab-item(:class="{ 'active' : localTab === 3 }")
       monaco-editor(
         :theme="'vs-' + theme"
         v-model="package"
+        ref="package"
         language="json"
       )
     .tab-item(:class="{ 'active' : localTab === 4 }")
       monaco-editor(
         :theme="'vs-' + theme"
         v-model="readme"
+        ref="readme"
         language="markdown"
       )
+    helper-integration(v-if="showHelper")
 </template>
 
 <script>
@@ -53,15 +70,18 @@ import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { HelperIntegration } from '@/components/helper'
 import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'Integration',
   components: {
     AppContextToolbar,
+    HelperIntegration,
     MonacoEditor
   },
   data: () => ({
+    showHelper: false,
     FILE_TYPES,
     listFiles: [
       { text: 'config.json', file: 'json', tab: 1 },
@@ -152,7 +172,22 @@ export default {
   methods: {
     ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded'])
+    ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
+    formatCode () {
+      let ref = null
+      if (this.localTab === 1)
+        ref = this.$refs.config
+      else if (this.localTab === 2)
+        ref = this.$refs.source
+      else if (this.localTab === 3)
+        ref = this.$refs.package
+      else if (this.localTab === 4)
+        ref = this.$refs.readme
+      if (ref === null)
+        return
+
+      ref.getMonaco().trigger('anyString', 'editor.action.formatDocument')
+    }
   },
   mounted () {
     this.load(this.$route.params.id)

@@ -8,8 +8,6 @@ import '@/assets/styles/global.styl'
 
 import '@/lib/amplify'
 import '@/lib/vuetify'
-import '@/mixins/global'
-import '@/components/base'
 
 import App from '@/App.vue'
 

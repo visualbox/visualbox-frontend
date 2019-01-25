@@ -1,6 +1,6 @@
 <template lang="pug">
 #integration(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+  context-toolbar
     v-tabs.editor-tabs(
       v-model="localTab"
       color="transparent"
@@ -69,14 +69,14 @@
 import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { ContextToolbar, MonacoEditor } from '@/components'
 import { HelperIntegration } from '@/components/helper'
 import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'Integration',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     HelperIntegration,
     MonacoEditor
   },

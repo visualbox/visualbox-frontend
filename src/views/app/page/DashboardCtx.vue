@@ -1,6 +1,6 @@
 <template lang="pug">
 #dashboard-ctx(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+  context-toolbar
     v-btn(
       icon
       @click="goBack"
@@ -50,20 +50,20 @@
 import * as _ from 'lodash'
 import moment from 'moment'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { ContextToolbar } from '@/components'
 import {
-  AppContextToolbar,
   DashboardIntegrations,
   DashboardWidgets,
   DashboardSettings,
   DashboardAddIntegration,
   DashboardIntegrationConfig,
   DashboardWidgetConfig
-} from '@/components/app'
+} from '@/components/dashboard'
 
 export default {
   name: 'DashboardCtx',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     DashboardIntegrations,
     DashboardWidgets,
     DashboardSettings,

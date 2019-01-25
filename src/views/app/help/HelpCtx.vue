@@ -1,6 +1,6 @@
 <template lang="pug">
 #help-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Help Center
 
   //- List
@@ -18,11 +18,11 @@
 </template>
 
 <script>
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'HelpCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     list: [
       { label: 'Home', icon: 'mdi-home', to: '/app/h' },

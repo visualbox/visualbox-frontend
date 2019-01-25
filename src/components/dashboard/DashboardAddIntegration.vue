@@ -1,6 +1,6 @@
 <template lang="pug">
 #dashboard-add-integration(v-if="isAddingIntegration")
-  app-context-toolbar
+  context-toolbar
     .subheading Add Integration
   .pl-3.pr-3.pb-3
     v-select(
@@ -35,14 +35,14 @@
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, InputTypes } from '@/components/app'
+import { ContextToolbar, InputTypes } from '@/components'
 import WorkerHandler from '@/lib/workerHandler'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
   name: 'DashboardAddIntegration',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     InputTypes
   },
   data: () => ({

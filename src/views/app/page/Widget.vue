@@ -1,6 +1,6 @@
 <template lang="pug">
 #widget(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+  context-toolbar
     v-tabs.elevation-0(
       v-model="localTab"
       color="rgba(0,0,0,0)"
@@ -47,12 +47,12 @@
 import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { ContextToolbar, MonacoEditor } from '@/components'
 
 export default {
   name: 'Widget',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     MonacoEditor
   },
   watch: {

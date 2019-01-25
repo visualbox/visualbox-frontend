@@ -1,6 +1,6 @@
 <template lang="pug">
 #dashboard-integration-config(v-if="focusedIntegration")
-  app-context-toolbar
+  context-toolbar
     .subheading Edit Integration
   .pl-3.pr-3.pb-3
     v-text-field.mb-3(
@@ -20,14 +20,14 @@
 <script>
 import * as _ from 'lodash'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, InputTypes } from '@/components/app'
+import { ContextToolbar, InputTypes } from '@/components'
 import WorkerHandler from '@/lib/workerHandler'
 import parseConfig from '@/lib/parseConfig'
 
 export default {
   name: 'DashboardIntegrationConfig',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     InputTypes
   },
   data: () => ({

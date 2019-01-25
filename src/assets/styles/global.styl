@@ -19,7 +19,7 @@
   background-color transparent
 
 html
-  overflow hidden !important
+  overflow auto !important
 
 a
   text-decoration none
@@ -32,6 +32,17 @@ input:-webkit-autofill
 
 .application
   background-color $vb-application !important
+
+.multipane
+  height 100%
+
+  &.layout-v
+    > .multipane-resizer
+      left 10px
+      z-index 100
+
+    > .pane
+      overflow hidden
 
 .index-icon
   position absolute

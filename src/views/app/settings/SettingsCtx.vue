@@ -1,6 +1,6 @@
 <template lang="pug">
 #settings-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Settings
 
   //- List
@@ -18,11 +18,11 @@
 </template>
 
 <script>
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'SettingsCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     list: [
       { label: 'Account', icon: 'mdi-account-circle', to: '/app/s' },

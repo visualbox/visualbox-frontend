@@ -3,7 +3,7 @@ v-container#dashboard.pa-0(
   v-if="loaded !== null && typeof loaded !== 'undefined'"
   fluid
 )
-  app-context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
+  context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
     v-btn(
       @click="DASHBOARD_SET_EDITING(!isEditing)"
       icon
@@ -30,12 +30,13 @@ v-container#dashboard.pa-0(
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { AppContextToolbar, DashboardLayout } from '@/components/app'
+import { ContextToolbar } from '@/components'
+import { DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     DashboardLayout
   },
   computed: {

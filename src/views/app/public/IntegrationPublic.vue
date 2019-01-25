@@ -1,6 +1,6 @@
 <template lang="pug">
 #integration-public(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+  context-toolbar
     v-tabs.elevation-0(
       v-model="tab"
       color="rgba(0,0,0,0)"
@@ -50,12 +50,12 @@
 <script>
 import marked from 'marked'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { ContextToolbar, MonacoEditor } from '@/components'
 
 export default {
   name: 'IntegrationPublic',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     MonacoEditor
   },
   data: () => ({

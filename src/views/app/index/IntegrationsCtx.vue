@@ -1,6 +1,6 @@
 <template lang="pug">
 #integrations-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Manage Integrations
     v-spacer
     v-btn(
@@ -69,11 +69,11 @@ import * as _ from 'lodash'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 import { integrationsIndex } from '@/lib/algoliasearch'
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'IntegrationsCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     showSearch: false,
     loadingSearch: false,

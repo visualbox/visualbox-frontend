@@ -1,6 +1,6 @@
 <template lang="pug">
 #widgets-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Manage Widgets
     v-spacer
     v-btn(
@@ -69,11 +69,11 @@ import * as _ from 'lodash'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 import { widgetsIndex } from '@/lib/algoliasearch'
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'WidgetsCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     showSearch: false,
     loadingSearch: false,

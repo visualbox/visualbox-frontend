@@ -1,6 +1,6 @@
 <template lang="pug">
 #widget-ctx(v-if="loaded")
-  app-context-toolbar
+  context-toolbar
     v-btn(
       icon
       @click="$router.push('/app/w')"
@@ -85,11 +85,11 @@
 <script>
 import * as _ from 'lodash'
 import { mapState, mapActions } from 'vuex'
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'WidgetCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     showInfo: false
   }),

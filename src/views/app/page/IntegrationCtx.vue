@@ -1,7 +1,7 @@
 <template lang="pug">
 #integration-ctx(v-if="loaded")
   search-dependencies(:show.sync="dialog")
-  app-context-toolbar
+  context-toolbar
     v-btn(
       icon
       @click="$router.go(-1)"
@@ -87,7 +87,7 @@
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 import { SearchDependencies } from '@/components/dialog'
 import FILE_TYPES from '@/lib/fileTypes'
 import cloneDeep from '@/lib/cloneDeep'
@@ -95,7 +95,7 @@ import cloneDeep from '@/lib/cloneDeep'
 export default {
   name: 'IntegrationCtx',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     SearchDependencies
   },
   data: () => ({

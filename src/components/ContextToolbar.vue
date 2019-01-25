@@ -5,12 +5,12 @@ v-toolbar(dense flat)
 
 <script>
 export default {
-  name: 'AppContextToolbar'
+  name: 'ContextToolbar'
 }
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors'
+@import '../assets/styles/colors'
 
 .v-toolbar
   white-space nowrap

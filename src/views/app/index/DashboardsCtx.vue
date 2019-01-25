@@ -1,6 +1,6 @@
 <template lang="pug">
 #dashboards-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Dashboards
     v-spacer
     v-btn(
@@ -32,11 +32,11 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { AppContextToolbar } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'DashboardsCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     hoverIndex: null
   }),

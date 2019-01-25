@@ -1,20 +1,37 @@
 <template lang="pug">
 #app
-  app-navigation-drawer
-  #content
-    v-scroll-x-transition(mode="out-in")
-      router-view(v-if="appIsReady")
+  multipane
+    .pane(:style="pane1")
+      navigation-drawer
+    multipane-resizer
+    .pane(:style="pane2")
+      v-scroll-x-transition(mode="out-in")
+        router-view(v-if="appIsReady")
 </template>
 
 <script>
+import { Multipane, MultipaneResizer } from 'vue-multipane'
 import { mapState, mapActions } from 'vuex'
 import unauthGuard from '@/mixins/unauthGuard'
-import { AppNavigationDrawer } from '@/components/app'
+import { NavigationDrawer } from '@/components'
 
 export default {
   name: 'App',
   mixins: [ unauthGuard ],
-  components: { AppNavigationDrawer },
+  components: {
+    Multipane,
+    MultipaneResizer,
+    NavigationDrawer
+  },
+  data: () => ({
+    pane1: {
+      width: '380px',
+      minWidth: '80px'
+    },
+    pane2: {
+      flexGrow: 1
+    }
+  }),
   computed: mapState('App', ['appIsReady']),
   methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),
   async mounted () {
@@ -36,15 +53,4 @@ export default {
 <style lang="stylus" scoped>
 #app
   height 100%
-
-  #content
-    height 100%
-    position relative
-    overflow hidden
-    transition none !important
-    -webkit-transition none !important
-
-    .container
-      position absolute
-      overflow auto
 </style>

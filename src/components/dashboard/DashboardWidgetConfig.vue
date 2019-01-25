@@ -1,6 +1,6 @@
 <template lang="pug">
 #dashboard-widget-config(v-if="focusedWidget")
-  app-context-toolbar
+  context-toolbar
     .subheading Edit Widget
   .pl-3.pr-3.pb-3
     v-dialog(
@@ -72,14 +72,14 @@
 import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, InputTypes } from '@/components/app'
+import { ContextToolbar, InputTypes } from '@/components'
 import parseConfig from '@/lib/parseConfig'
 import IFrameHandler from '@/lib/iframeHandler'
 
 export default {
   name: 'DashboardWidgetConfig',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     InputTypes,
     'color-picker': Chrome
   },

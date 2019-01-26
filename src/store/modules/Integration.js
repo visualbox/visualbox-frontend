@@ -10,7 +10,9 @@ const state = {
   list: [],
   public: [],
   loaded: null,
-  tab: 0
+  tab: 0,
+  showHelper: false,
+  layoutHelper: 'vertical'
 }
 
 const mutations = {
@@ -22,6 +24,12 @@ const mutations = {
   },
   [t.INTEGRATION_SET_TAB] (state, payload) {
     state.tab = payload
+  },
+  [t.INTEGRATION_SET_HELPER] (state, payload) {
+    state.showHelper = !!payload
+  },
+  [t.INTEGRATION_SET_HELPER_LAYOUT] (state, payload) {
+    state.layoutHelper = payload
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
     Vue.set(state, 'list', payload)

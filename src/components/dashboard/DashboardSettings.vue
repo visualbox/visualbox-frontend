@@ -19,20 +19,6 @@
           hide-details
           outline
         )
-      v-flex(xs6)
-        v-text-field.mb-3(
-          v-model="width"
-          label="Width"
-          hide-details
-          outline
-        )
-      v-flex(xs6)
-        v-text-field.mb-3(
-          v-model="height"
-          label="Height"
-          hide-details
-          outline
-        )
 </template>
 
 <script>
@@ -56,22 +42,6 @@ export default {
       },
       set (label) {
         this.updateLoaded({ label })
-      }
-    },
-    width: {
-      get () {
-        return this.loaded.settings.width
-      },
-      set (width) {
-        this.updateLoaded({ settings: { width } })
-      }
-    },
-    height: {
-      get () {
-        return this.loaded.settings.height
-      },
-      set (height) {
-        this.updateLoaded({ settings: { height } })
       }
     },
     bgc: {

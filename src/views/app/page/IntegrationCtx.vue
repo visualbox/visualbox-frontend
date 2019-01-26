@@ -11,7 +11,7 @@
 
   v-list.editor-list(dense)
     //- Files
-    v-list-tile.no-style(@click="open.files = !open.files")
+    v-list-tile.no-hover(@click="open.files = !open.files")
       v-list-tile-action
         v-icon {{ open.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
@@ -30,7 +30,7 @@
       v-list-tile-content {{ item.text }}
 
     //- Settings
-    v-list-tile.no-style(@click="open.settings = !open.settings")
+    v-list-tile.no-hover(@click="open.settings = !open.settings")
       v-list-tile-action
         v-icon {{ open.settings ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Settings
@@ -55,7 +55,7 @@
           )
 
     //- Dependencies
-    v-list-tile.no-style(@click="open.dependencies = !open.dependencies")
+    v-list-tile.no-hover(@click="open.dependencies = !open.dependencies")
       v-list-tile-action
         v-icon {{ open.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Dependencies

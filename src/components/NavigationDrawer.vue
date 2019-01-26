@@ -2,9 +2,9 @@
 #navigation-drawer
   v-navigation-drawer#mini(
     mini-variant
-    stateless
     permanent
     floating
+    fixed
   )
     v-layout(column fill-height)
       v-list(two-line)
@@ -51,11 +51,7 @@
                 medium
               ) {{ item.icon }}
 
-  v-navigation-drawer#context(
-    stateless
-    permanent
-    floating
-  )
+  #context
     v-scroll-x-transition(mode="out-in")
       router-view(name="context")
 </template>
@@ -82,14 +78,16 @@ export default {
 @import '../assets/styles/colors';
 
 #navigation-drawer
-  height 100% !important
+  height 100%
   position relative
 
-  #mini
+  .v-navigation-drawer
+    top 0; bottom 0;
     background-color $vb-drawer-mini !important
 
     >>> .v-list
       padding 0
+      background unset
 
       .v-list__tile
         -webkit-transition none !important
@@ -110,32 +108,60 @@ export default {
             color $vb-drawer-icon-hoveractive !important
 
   #context
-    width unset !important
     background-color $vb-drawer-ctx !important
     position absolute
-    left 80px
-    right 0
+    top 0; right 0; bottom 0; left 80px;
 
     >>> .v-list
       padding 0
+      background unset
 
       .v-list__tile
         -webkit-transition none !important
         transition none !important
 
-      .v-list__tile--link:hover
-        background-color $vb-primary-list-hover
+        &:hover
+          background-color $vb-primary-list-hover
 
-        &:before
-          content ''
-          width 2px
-          height 100%
-          position absolute
-          left 1px
-          background $vb-primary
+          &:before
+            content ''
+            width 2px
+            height 100%
+            position absolute
+            left 1px
+            background $vb-primary
+
+      &.editor-list
+        .v-list__tile
+          padding-left 40px
+
+        .no-hover
+          .v-list__tile
+            padding-left 16px
+
+            &:hover
+              background-color unset !important
+
+            &:before
+              display none
+
+        .container
+          padding-left 40px
+
+      .active
+        .v-list__tile, .v-list__tile:hover
+          background-color $vb-primary-list-active !important
+
+          &:before
+            content ''
+            width 2px
+            height 100%
+            position absolute
+            left 1px
+            background $vb-primary
 
       .v-list__tile__action
-        min-width 30px
+        min-width 25px
 
     >>> .v-expansion-panel, .v-expansion-panel__container
       border-radius 4px

@@ -1,7 +1,7 @@
 @import './colors'
 
 ::-webkit-scrollbar
-  width: 10px
+  width: 15px
 
 ::-webkit-scrollbar-button
   display none
@@ -32,17 +32,6 @@ input:-webkit-autofill
 
 .application
   background-color $vb-application !important
-
-.multipane
-  height 100%
-
-  &.layout-v
-    > .multipane-resizer
-      left 10px
-      z-index 100
-
-    > .pane
-      overflow hidden
 
 .index-icon
   position absolute
@@ -105,33 +94,6 @@ input:-webkit-autofill
 
     .vc-chrome-toggle-icon-highlight
         background #424242
-
-.editor-list
-  .no-style
-    .v-list__tile--link:hover
-      background-color unset !important
-
-      &:before
-        display none
-
-  :not(.no-style)
-    .v-list__tile--link
-      padding-left 40px
-
-  .active
-    .v-list__tile--link, .v-list__tile--link:hover
-      background-color $vb-primary-list-active !important
-
-      &:before
-        content ''
-        width 2px
-        height 100%
-        position absolute
-        left 1px
-        background $vb-primary
-
-  .v-list__tile__action
-    min-width 25px !important
 
 .editor-tabs
   .v-tabs__slider-wrapper

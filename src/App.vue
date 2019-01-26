@@ -1,12 +1,9 @@
 <template lang="pug">
-v-app(
-  :dark="theme === 'dark'"
-)
+v-app(:dark="theme === 'dark'")
   base-snackbar
   base-toolbar
 
-  v-content.pa-0
-    router-view(v-if="sessionIsReady")
+  router-view(v-if="sessionIsReady")
 </template>
 
 <script>

@@ -1,5 +1,5 @@
 <template lang="pug">
-#integration(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#integration(v-if="loaded")
   context-toolbar
     v-tabs.editor-tabs(
       v-model="localTab"
@@ -7,7 +7,7 @@
       slider-color="primary"
     )
       v-tab(:ripple="false").black
-        v-icon mdi-home-variant
+        v-icon mdi-card-text
       v-tab(
         v-for="(item, index) in listFiles"
         :key="index"
@@ -21,51 +21,38 @@
       v-spacer
       v-toolbar-items
         v-btn(
+          v-if="localTab !== 0"
           @click="formatCode"
           flat
         )
-          v-icon mdi-format-align-left
+          v-icon mdi-auto-fix
         v-btn(
-          @click="showHelper = !showHelper"
+          @click="INTEGRATION_SET_HELPER(!showHelper)"
           flat
         )
-          v-icon mdi-powershell
+          v-icon mdi-console
 
-  .tabs-items
-    .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
-      .markdown(v-html="compiledMarkdown")
-    .tab-item(:class="{ 'active' : localTab === 1 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        v-model="config"
-        ref="config"
-        language="json"
+  .grid-layout(:class="showHelper ? layoutHelper : 'no-split'")
+    .grid-item
+      .markdown(
+        v-if="localTab === 0"
+        v-html="compiledMarkdown"
       )
-    .tab-item(:class="{ 'active' : localTab === 2 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        v-model="source"
-        ref="source"
-        language="javascript"
-      )
-    .tab-item(:class="{ 'active' : localTab === 3 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        v-model="package"
-        ref="package"
-        language="json"
-      )
-    .tab-item(:class="{ 'active' : localTab === 4 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        v-model="readme"
-        ref="readme"
-        language="markdown"
-      )
-    helper-integration(v-if="showHelper")
+      .monaco(v-if="localTab !== 0")
+        monaco-editor(
+          :theme="'vs-' + theme"
+          v-model="editorModel"
+          ref="editor"
+          :language="file.monacoSyntax"
+        )
+    template(v-if="showHelper")
+      .grid-item.gutter(ref="gutter")
+      .grid-item
+        helper-integration
 </template>
 
 <script>
+import Split from 'split-grid'
 import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
@@ -81,13 +68,37 @@ export default {
     MonacoEditor
   },
   data: () => ({
-    showHelper: false,
+    split: Split({}),
     FILE_TYPES,
     listFiles: [
-      { text: 'config.json', file: 'json', tab: 1 },
-      { text: 'index.js', file: 'js', tab: 2 },
-      { text: 'package.json', file: 'json', tab: 3 },
-      { text: 'README.md', file: 'md', tab: 4 }
+      {
+        text: 'config.json',
+        key: 'config',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 1
+      },
+      {
+        text: 'index.js',
+        key: 'source',
+        file: 'js',
+        monacoSyntax: 'javascript',
+        tab: 2
+      },
+      {
+        text: 'package.json',
+        key: 'package',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 3
+      },
+      {
+        text: 'README.md',
+        key: 'readme',
+        file: 'md',
+        monacoSyntax: 'markdown',
+        tab: 4
+      }
     ]
   }),
   watch: {
@@ -107,22 +118,51 @@ export default {
         } catch (e) {}
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
+    },
+    showHelper: {
+      immediate: true,
+      handler: function (val) {
+        // Remove all
+        if (!val) {
+          this.split.removeColumnGutter(1)
+          this.split.removeRowGutter(1)
+          return
+        }
+
+        // Add new
+        this.$nextTick(() => {
+          if (this.layoutHelper === 'vertical')
+            this.split.addColumnGutter(this.$refs.gutter, 1)
+          else
+            this.split.addRowGutter(this.$refs.gutter, 1)
+        })
+      }
+    },
+    layoutHelper (newVal, oldVal) {
+      // Remove old & add new
+      if (oldVal === 'vertical') {
+        this.split.removeColumnGutter(1)
+        this.split.addRowGutter(this.$refs.gutter, 1)
+      } else {
+        this.split.removeRowGutter(1)
+        this.split.addColumnGutter(this.$refs.gutter, 1)
+      }
     }
   },
   computed: {
-    ...mapState('Integration', ['loaded', 'tab']),
+    ...mapState('Integration', ['loaded', 'tab', 'showHelper', 'layoutHelper']),
     ...mapGetters('App', ['theme']),
     localTab: {
-      get () {
-        return this.tab
-      },
-      set: function (val) {
-        this.INTEGRATION_SET_TAB(val)
-      }
+      get () { return this.tab },
+      set: function (val) { this.INTEGRATION_SET_TAB(val) }
+    },
+    file () {
+      return this.listFiles.find(({ tab }) => tab === this.localTab)
     },
     compiledMarkdown () {
       try {
-        return marked(this.readme, {
+        const readme = _.get(this, 'loaded.readme', '')
+        return marked(readme, {
           sanitize: true,
           gfm: true
         })
@@ -130,63 +170,37 @@ export default {
         return null
       }
     },
-    readme: {
+    editorModel: {
       get () {
-        return _.get(this, 'loaded.readme', '')
-      },
-      set (readme) {
-        this.updateLoaded({ readme })
-      }
-    },
-    source: {
-      get () {
-        return _.get(this, 'loaded.source', '')
-      },
-      set (source) {
-        this.updateLoaded({ source })
-      }
-    },
-    config: {
-      get () {
-        return _.get(this, 'loaded.config', '')
-      },
-      set (config) {
-        this.updateLoaded({ config })
-      }
-    },
-    package: {
-      get () {
-        try {
-          return JSON.stringify(_.get(this, 'loaded.package', '{}'), null, 2)
-        } catch (e) {
-          return '{}'
+        if (this.file.key === 'package') {
+          try {
+            return JSON.stringify(_.get(this, 'loaded.package', {}), null, 2)
+          } catch (e) {
+            return '{}'
+          }
         }
+
+        return _.get(this, `loaded.${this.file.key}`, '')
       },
-      set (pkg) {
-        try {
-          this.updateLoaded({ package: JSON.parse(pkg) })
-        } catch (e) {}
+      set (val) {
+        if (this.file.key === 'package') {
+          try {
+            this.updateLoaded({ package: JSON.parse(val) })
+          } catch (e) {}
+
+          return
+        }
+
+        this.updateLoaded({ [this.file.key]: val })
       }
     }
   },
   methods: {
-    ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
+    ...mapMutations('Integration', ['INTEGRATION_SET_TAB', 'INTEGRATION_SET_HELPER']),
     ...mapActions('App', ['setSnackbar']),
     ...mapActions('Integration', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
     formatCode () {
-      let ref = null
-      if (this.localTab === 1)
-        ref = this.$refs.config
-      else if (this.localTab === 2)
-        ref = this.$refs.source
-      else if (this.localTab === 3)
-        ref = this.$refs.package
-      else if (this.localTab === 4)
-        ref = this.$refs.readme
-      if (ref === null)
-        return
-
-      ref.getMonaco().trigger('anyString', 'editor.action.formatDocument')
+      this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
     }
   },
   mounted () {
@@ -194,6 +208,7 @@ export default {
   },
   beforeDestroy () {
     this.closeLoaded()
+    this.split.destroy()
   }
 }
 </script>
@@ -205,30 +220,45 @@ export default {
   >>> .v-toolbar__content
     padding 0 !important
 
-  >>> .tabs-items
-    height calc(100% - 48px)
-    position relative
+  .grid-layout
+    display grid
+    position absolute
+    top 48px; right 0; left 0; bottom 0;
 
-    .tab-item
-      position absolute
-      top 0
-      bottom 0
-      left 0
-      right 0
-      visibility hidden
+    .grid-item
+      position relative
+      overflow-y auto
+      overflow-x hidden
 
-      &.active
-        visibility visible
+      &.gutter
+        background #111
 
-        > div
-          height 100%
+    &.vertical
+      grid-template none / 3fr 10px 1fr
+      grid-template-rows unset !important
 
-      &.scroll
-        overflow auto
+      .gutter, .gutter:hover
+        cursor col-resize
 
-        .markdown
-          word-wrap break-word
+    &.horizontal
+      grid-template 3fr 10px 1fr / none
+      grid-template-columns unset !important
 
-          img
-            max-width 100%
+      .gutter, .gutter:hover
+        cursor row-resize
+
+    &.no-split
+      grid-template-rows unset !important
+      grid-template-columns unset !important
+
+  .markdown
+    padding 16px
+
+  .monaco
+    position absolute
+    top 0; right 0; left 0; bottom 0;
+    overflow hidden
+
+    > div
+      height 100%
 </style>

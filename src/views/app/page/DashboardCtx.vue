@@ -62,7 +62,6 @@
 
 <script>
 import * as _ from 'lodash'
-import moment from 'moment'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import {
@@ -101,10 +100,6 @@ export default {
       set (label) {
         this.updateLoaded({ label })
       }
-    },
-    updatedAt () {
-      const { updatedAt } = this.loaded
-      return moment(updatedAt).format('DD/MM HH:mm:ss')
     },
     editingIcon () {
       return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'

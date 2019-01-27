@@ -1,21 +1,28 @@
 <template lang="pug">
-#integration-public(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#integration-public(v-if="loaded")
   context-toolbar
-    v-tabs.elevation-0(
+    v-tabs.editor-tabs(
       v-model="tab"
-      color="rgba(0,0,0,0)"
+      color="transparent"
       slider-color="primary"
-      grow
     )
-      v-tab Widget
-      v-tab Source
-      v-tab Config
+      v-tab(:ripple="false").black
+        v-icon mdi-card-text
+      v-tab(
+        v-for="(item, index) in listFiles"
+        :key="index"
+        :ripple="false"
+      )
+        v-icon.mr-2(
+          :color="FILE_TYPES[item.file].color"
+          small
+        ) {{ FILE_TYPES[item.file].icon }}
+        | {{ item.text}}
 
-  .tabs-items
-    .tab-item.pa-3.scroll(:class="{ 'active' : tab === 0 }")
-      .item-header.mb-3
-        .display-1.pa-3 {{ loaded.label }}
-        .headline.pr-3.pl-3.pb-3
+  .grid-layout
+    .grid-item(v-if="tab === 0")
+      .display-1.pa-3 {{ loaded.label }}
+        .headline.mt-3
           v-btn.ma-0(
             flat outline
             color="primary"
@@ -25,32 +32,23 @@
           )
             v-icon(left) mdi-content-copy
             | Copy integration
-        v-divider
       .markdown(v-html="compiledMarkdown")
-    .tab-item(:class="{ 'active' : tab === 1 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        :options="monacoOptions"
-        class="editor"
-        ref="editorSource"
-        v-model="loaded.source"
-        language="javascript"
-      )
-    .tab-item(:class="{ 'active' : tab === 2 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        :options="monacoOptions"
-        class="editor"
-        ref="editorConfig"
-        v-model="loaded.config"
-        language="json"
-      )
+    .grid-item(v-if="tab !== 0")
+      .monaco
+        monaco-editor(
+          v-model="editorModel"
+          :theme="'vs-' + theme"
+          :options="monacoOptions"
+          :language="file.monacoSyntax"
+        )
 </template>
 
 <script>
 import marked from 'marked'
+import * as _ from 'lodash'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
+import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'IntegrationPublic',
@@ -59,10 +57,41 @@ export default {
     MonacoEditor
   },
   data: () => ({
+    FILE_TYPES,
     tab: 0,
     monacoOptions: {
       readOnly: true
-    }
+    },
+    listFiles: [
+      {
+        text: 'config.json',
+        key: 'config',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 1
+      },
+      {
+        text: 'index.js',
+        key: 'source',
+        file: 'js',
+        monacoSyntax: 'javascript',
+        tab: 2
+      },
+      {
+        text: 'package.json',
+        key: 'package',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 3
+      },
+      {
+        text: 'README.md',
+        key: 'readme',
+        file: 'md',
+        monacoSyntax: 'markdown',
+        tab: 4
+      }
+    ]
   }),
   watch: {
     '$route.params.id': async function () {
@@ -86,24 +115,35 @@ export default {
         return null
       }
     },
+    file () {
+      return this.listFiles.find(({ tab }) => tab === this.tab)
+    },
     compiledMarkdown () {
       try {
-        return marked(this.loaded.readme, {
+        const readme = _.get(this, 'loaded.readme', '')
+        return marked(readme, {
           sanitize: true,
           gfm: true
         })
       } catch (e) {
         return null
       }
+    },
+    editorModel () {
+      if (this.file.key === 'package') {
+        try {
+          return JSON.stringify(_.get(this, 'loaded.package', {}), null, 2)
+        } catch (e) {
+          return '{}'
+        }
+      }
+
+      return _.get(this, `loaded.${this.file.key}`, '')
     }
   },
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Integration', ['loadPublic', 'create']),
-    updateDimensions () {
-      this.$refs.editorSource.getMonaco().layout()
-      this.$refs.editorConfig.getMonaco().layout()
-    },
     async submit () {
       this.setIsLoading(true)
       try {
@@ -120,53 +160,45 @@ export default {
     }
   },
   async mounted () {
-    this.$nextTick(function () {
-      window.addEventListener('resize', this.updateDimensions)
-    })
-
     try {
       await this.loadPublic(this.$route.params.id)
     } catch (e) {
       this.$router.push('/app/i')
     }
-  },
-  beforeDestroy () {
-    window.removeEventListener('resize', this.updateDimensions)
   }
 }
 </script>
 
 <style lang="stylus" scoped>
+@import '../../../assets/styles/colors';
+
 #integration-public
   height 100%
 
-  >>> .tabs-items
-    height calc(100% - 48px)
-    position relative
+  >>> .v-toolbar__content
+    padding 0 !important
 
-    .tab-item
-      position absolute
-      top 0
-      bottom 0
-      left 0
-      right 0
-      visibility hidden
+  .grid-layout
+    display grid
+    position absolute
+    top 48px; right 0; left 0; bottom 0;
 
-      &.active
-        visibility visible
+    .grid-item
+      position relative
+      overflow-y auto
+      overflow-x hidden
 
-      &.scroll
-        overflow auto
+      .display-1
+        background $vb-gutter
 
-        .item-header
-          margin -16px -16px 0
+  .markdown
+    padding 16px
 
-        .markdown
-          word-wrap break-word
+  .monaco
+    position absolute
+    top 0; right 0; left 0; bottom 0;
+    overflow hidden
 
-          img
-            max-width 100%
-
-  >>> .editor
-    height 100%
+    > div
+      height 100%
 </style>

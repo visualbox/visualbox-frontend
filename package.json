@@ -17,7 +17,6 @@
     "css-element-queries": "^1.1.1",
     "lodash": "^4.17.10",
     "marked": "^0.5.1",
-    "moment": "^2.22.2",
     "monaco-editor": "^0.15.1",
     "split-grid": "^1.0.9",
     "vivus": "^0.4.4",
@@ -55,7 +54,8 @@
     "vue-cli-plugin-vuetify": "^0.1.6",
     "vue-template-compiler": "^2.5.22",
     "vuetify-loader": "^1.1.1",
-    "webpack": "^4.28.4"
+    "webpack": "^4.28.4",
+    "webpack-bundle-analyzer": "^3.0.3"
   },
   "jest": {
     "moduleFileExtensions": [

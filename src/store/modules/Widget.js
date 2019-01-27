@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import * as t from '@/store/types'
 import API from '@aws-amplify/api'
 import config from '@/config'
@@ -34,7 +33,7 @@ const mutations = {
     state.layoutHelper = payload
   },
   [t.WIDGET_SET_LIST] (state, payload) {
-    Vue.set(state, 'list', payload)
+    state.list = cloneDeep(payload)
   },
   [t.WIDGET_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -43,7 +42,7 @@ const mutations = {
     state.list = state.list.filter(i => i.id !== id)
   },
   [t.WIDGET_SET_LOADED] (state, payload) {
-    Vue.set(state, 'loaded', payload)
+    state.loaded = cloneDeep(payload)
   },
   [t.WIDGET_CONCAT_LOADED] (state, payload) {
     let merged = mergeDeep(state.loaded, payload)

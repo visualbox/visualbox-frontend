@@ -40,7 +40,7 @@
       :to="`/app/w/${item.objectID}/public`"
     )
       v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
+        v-list-tile-sub-title {{ name(item) }}
 
   //- List
   v-list(
@@ -55,7 +55,7 @@
       @click="$router.push(`/app/w/${item.id}`)"
     )
       v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
+        v-list-tile-sub-title {{ name(item) }}
       v-list-tile-action(v-if="index === hoverIndex")
         v-btn(
           flat icon
@@ -117,7 +117,7 @@ export default {
 
       widgetsIndex.search({
         query,
-        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt']
+        attributesToRetrieve: ['objectID', 'package', 'readme', 'updatedAt']
         // filters: `-uid:'${this.identityId}'`
       }, (err, result) => {
         this.loadingSearch = false
@@ -131,7 +131,10 @@ export default {
           this.showNoHitsSearch = true
         this.listSearch = result.hits
       })
-    }, process.env.VUE_APP_SEARCH_DEBOUNCE)
+    }, process.env.VUE_APP_SEARCH_DEBOUNCE),
+    name (item) {
+      return _.get(item, 'package.name', 'Untitled')
+    }
   },
   async mounted () {
     const { identityId } = await Auth.currentCredentials()

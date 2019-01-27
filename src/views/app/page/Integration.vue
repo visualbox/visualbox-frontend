@@ -27,6 +27,7 @@
         )
           v-icon mdi-auto-fix
         v-btn(
+          :color="showHelper ? 'primary' : ''"
           @click="INTEGRATION_SET_HELPER(!showHelper)"
           flat
         )

@@ -12,10 +12,11 @@
         v-card.text-xs-center
           v-card-text
             v-layout(column justify-center fill-height)
-              .caption {{ item.label }}
+              .caption {{ name(item) }}
 </template>
 
 <script>
+import * as _ from 'lodash'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -24,7 +25,12 @@ export default {
     ...mapState('Widget', ['list']),
     ...mapState('Dashboard', ['loaded'])
   },
-  methods: mapActions('Dashboard', ['addWidget'])
+  methods: {
+    ...mapActions('Dashboard', ['addWidget']),
+    name (item) {
+      return _.get(item, 'package.name', 'Undefined')
+    }
+  }
 }
 </script>
 

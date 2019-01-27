@@ -117,7 +117,7 @@ export default {
 
       integrationsIndex.search({
         query,
-        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt']
+        attributesToRetrieve: ['objectID', 'package', 'readme', 'updatedAt']
         // filters: `-uid:'${this.identityId}'`
       }, (err, result) => {
         this.loadingSearch = false

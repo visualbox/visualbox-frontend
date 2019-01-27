@@ -21,6 +21,8 @@ const mutations = {
     state.public = []
     state.loaded = null
     state.tab = 0
+    state.showHelper = false
+    state.layoutHelper = 'vertical'
   },
   [t.INTEGRATION_SET_TAB] (state, payload) {
     state.tab = payload

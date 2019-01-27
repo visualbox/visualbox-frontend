@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import Vue from 'vue'
 import * as t from '@/store/types'
 import API from '@aws-amplify/api'
 import config from '@/config'
@@ -10,7 +10,9 @@ const state = {
   list: [],
   public: [],
   loaded: null,
-  tab: 0
+  tab: 0,
+  showHelper: false,
+  layoutHelper: 'vertical'
 }
 
 const mutations = {
@@ -19,12 +21,20 @@ const mutations = {
     state.public = []
     state.loaded = null
     state.tab = 0
+    state.showHelper = false
+    state.layoutHelper = 'vertical'
   },
   [t.WIDGET_SET_TAB] (state, payload) {
     state.tab = payload
   },
+  [t.WIDGET_SET_HELPER] (state, payload) {
+    state.showHelper = !!payload
+  },
+  [t.WIDGET_SET_HELPER_LAYOUT] (state, payload) {
+    state.layoutHelper = payload
+  },
   [t.WIDGET_SET_LIST] (state, payload) {
-    state.list = _.cloneDeep(payload)
+    Vue.set(state, 'list', payload)
   },
   [t.WIDGET_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -33,17 +43,25 @@ const mutations = {
     state.list = state.list.filter(i => i.id !== id)
   },
   [t.WIDGET_SET_LOADED] (state, payload) {
-    state.loaded = _.cloneDeep(payload)
+    Vue.set(state, 'loaded', payload)
   },
   [t.WIDGET_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = _.cloneDeep(state.loaded)
+    let merged = mergeDeep(state.loaded, payload)
+
+    /**
+     * Package needs to be replaced since
+     * deep merge & diff won't handle deletion.
+     */
+    if (payload.hasOwnProperty('package'))
+      merged.package = payload.package
+
+    state.loaded = cloneDeep(merged)
   },
   [t.WIDGET_COMMIT_LOADED] (state, nullify = false) {
     const { loaded } = state
     let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = _.cloneDeep(loaded)
-    state.list = _.cloneDeep(state.list)
+    state.list[index] = cloneDeep(loaded)
+    state.list = cloneDeep(state.list)
 
     // Used when closing / exiting 'loaded'
     if (nullify)
@@ -64,8 +82,8 @@ const mutations = {
     if (index < 0)
       state.public.push(payload)
     else
-      state.public[index] = _.cloneDeep(payload)
-    state.public = _.cloneDeep(state.public)
+      state.public[index] = cloneDeep(payload)
+    state.public = cloneDeep(state.public)
   }
 }
 
@@ -109,7 +127,7 @@ const actions = {
     commit(t.WIDGET_SET_LOADED, getters.widgetById(id))
   },
   // Update a loaded local widget
-  updateLoaded ({ commit, dispatch }, payload = {}) {
+  updateLoaded ({ commit }, payload = {}) {
     payload.updatedAt = +new Date()
     commit(t.WIDGET_CONCAT_LOADED, payload)
   },
@@ -147,13 +165,29 @@ const actions = {
 }
 
 const getters = {
+  /**
+   * Get a widget by ID.
+   */
   widgetById: ({ list }) => id => {
     return list.find(i => i.id === id)
   },
-  // Return diff between loaded and old item in list
+
+  /**
+   * Return diff between loaded and old item in list
+   */
   loadedDiff ({ loaded }, getters) {
     try {
-      return difference(loaded, getters.widgetById(loaded.id))
+      let diff = difference(loaded, getters.widgetById(loaded.id))
+
+      /**
+       * If package is in diff, meaning it has been changed,
+       * copy it in its entirety so that deletions are handled
+       * correctly.
+       */
+      if (diff.hasOwnProperty('package'))
+        diff.package = cloneDeep(loaded.package)
+
+      return diff
     } catch (e) {
       return {}
     }

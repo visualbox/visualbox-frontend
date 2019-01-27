@@ -1,60 +1,107 @@
 <template lang="pug">
-#widget(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#widget(v-if="loaded")
   context-toolbar
-    v-tabs.elevation-0(
+    v-tabs.editor-tabs(
       v-model="localTab"
-      color="rgba(0,0,0,0)"
+      color="transparent"
       slider-color="primary"
-      grow
     )
-      v-tab Widget
-      v-tab Info
-      v-tab Source
-      v-tab Config
+      v-tab(:ripple="false").black
+        v-icon mdi-card-text
+      v-tab(
+        v-for="(item, index) in listFiles"
+        :key="index"
+        :ripple="false"
+      )
+        v-icon.mr-2(
+          :color="FILE_TYPES[item.file].color"
+          small
+        ) {{ FILE_TYPES[item.file].icon }}
+        | {{ item.text}}
+      v-spacer
+      v-toolbar-items
+        v-btn(
+          v-if="localTab !== 0"
+          @click="formatCode"
+          flat
+        )
+          v-icon mdi-auto-fix
+        v-btn(
+          :color="showHelper ? 'primary' : ''"
+          @click="INTEGRATION_SET_HELPER(!showHelper)"
+          flat
+        )
+          v-icon mdi-console
 
-  .tabs-items
-    .tab-item.pa-3.scroll(:class="{ 'active' : localTab === 0 }")
-      .markdown(v-html="compiledMarkdown")
-    .tab-item(:class="{ 'active' : localTab === 1 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        class="editor"
-        ref="editorReadme"
-        v-model="readme"
-        language="markdown"
+  .grid-layout(:class="showHelper ? layoutHelper : 'no-split'")
+    .grid-item
+      .markdown(
+        v-if="localTab === 0"
+        v-html="compiledMarkdown"
       )
-    .tab-item(:class="{ 'active' : localTab === 2 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        class="editor"
-        ref="editorSource"
-        v-model="source"
-        language="html"
-      )
-    .tab-item(:class="{ 'active' : localTab === 3 }")
-      monaco-editor(
-        :theme="'vs-' + theme"
-        class="editor"
-        ref="editorConfig"
-        v-model="config"
-        language="json"
-      )
-    .tab-item(:class="{ 'active' : localTab === 4 }")
-      span PREVIEW
+      .monaco(v-if="localTab !== 0")
+        monaco-editor(
+          :theme="'vs-' + theme"
+          v-model="editorModel"
+          ref="editor"
+          :language="file.monacoSyntax"
+        )
+    template(v-if="showHelper")
+      .grid-item.gutter(ref="gutter")
+      .grid-item
+        helper-integration
 </template>
 
 <script>
+import Split from 'split-grid'
 import marked from 'marked'
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
+import { HelperWidget } from '@/components/helper'
+import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'Widget',
   components: {
     ContextToolbar,
+    HelperWidget,
     MonacoEditor
   },
+  data: () => ({
+    split: Split({}),
+    FILE_TYPES,
+    listFiles: [
+      {
+        text: 'config.json',
+        key: 'config',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 1
+      },
+      {
+        text: 'index.html',
+        key: 'source',
+        file: 'html',
+        monacoSyntax: 'html',
+        tab: 2
+      },
+      {
+        text: 'package.json',
+        key: 'package',
+        file: 'json',
+        monacoSyntax: 'json',
+        tab: 3
+      },
+      {
+        text: 'README.md',
+        key: 'readme',
+        file: 'md',
+        monacoSyntax: 'markdown',
+        tab: 4
+      }
+    ]
+  }),
   watch: {
     loaded: {
       handler: _.debounce(async function (newVal, oldVal) {
@@ -72,22 +119,51 @@ export default {
         } catch (e) {}
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
+    },
+    showHelper: {
+      immediate: true,
+      handler: function (val) {
+        // Remove all
+        if (!val) {
+          this.split.removeColumnGutter(1)
+          this.split.removeRowGutter(1)
+          return
+        }
+
+        // Add new
+        this.$nextTick(() => {
+          if (this.layoutHelper === 'vertical')
+            this.split.addColumnGutter(this.$refs.gutter, 1)
+          else
+            this.split.addRowGutter(this.$refs.gutter, 1)
+        })
+      }
+    },
+    layoutHelper (newVal, oldVal) {
+      // Remove old & add new
+      if (oldVal === 'vertical') {
+        this.split.removeColumnGutter(1)
+        this.split.addRowGutter(this.$refs.gutter, 1)
+      } else {
+        this.split.removeRowGutter(1)
+        this.split.addColumnGutter(this.$refs.gutter, 1)
+      }
     }
   },
   computed: {
-    ...mapState('Widget', ['loaded', 'tab']),
+    ...mapState('Widget', ['loaded', 'tab', 'showHelper', 'layoutHelper']),
     ...mapGetters('App', ['theme']),
     localTab: {
-      get () {
-        return this.tab
-      },
-      set: function (val) {
-        this.WIDGET_SET_TAB(val)
-      }
+      get () { return this.tab },
+      set: function (val) { this.WIDGET_SET_TAB(val) }
+    },
+    file () {
+      return this.listFiles.find(({ tab }) => tab === this.localTab)
     },
     compiledMarkdown () {
       try {
-        return marked(this.readme, {
+        const readme = _.get(this, 'loaded.readme', '')
+        return marked(readme, {
           sanitize: true,
           gfm: true
         })
@@ -95,50 +171,45 @@ export default {
         return null
       }
     },
-    readme: {
+    editorModel: {
       get () {
-        return _.get(this, 'loaded.readme', '')
+        if (this.file.key === 'package') {
+          try {
+            return JSON.stringify(_.get(this, 'loaded.package', {}), null, 2)
+          } catch (e) {
+            return '{}'
+          }
+        }
+
+        return _.get(this, `loaded.${this.file.key}`, '')
       },
-      set (readme) {
-        this.updateLoaded({ readme })
-      }
-    },
-    source: {
-      get () {
-        return _.get(this, 'loaded.source', '')
-      },
-      set (source) {
-        this.updateLoaded({ source })
-      }
-    },
-    config: {
-      get () {
-        return _.get(this, 'loaded.config', '')
-      },
-      set (config) {
-        this.updateLoaded({ config })
+      set (val) {
+        if (this.file.key === 'package') {
+          try {
+            this.updateLoaded({ package: JSON.parse(val) })
+          } catch (e) {}
+
+          return
+        }
+
+        this.updateLoaded({ [this.file.key]: val })
       }
     }
   },
   methods: {
-    ...mapMutations('Widget', ['WIDGET_SET_TAB']),
+    ...mapMutations('Widget', ['WIDGET_SET_TAB', 'WIDGET_SET_HELPER']),
     ...mapActions('App', ['setSnackbar']),
     ...mapActions('Widget', ['load', 'updateLoaded', 'closeLoaded', 'commitLoaded']),
-    updateDimensions () {
-      this.$refs.editorReadme.getMonaco().layout()
-      this.$refs.editorSource.getMonaco().layout()
-      this.$refs.editorConfig.getMonaco().layout()
+    formatCode () {
+      this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
     }
   },
   mounted () {
     this.load(this.$route.params.id)
-    this.$nextTick(function () {
-      window.addEventListener('resize', this.updateDimensions)
-    })
   },
   beforeDestroy () {
-    window.removeEventListener('resize', this.updateDimensions)
     this.closeLoaded()
+    this.split.destroy()
   }
 }
 </script>
@@ -147,30 +218,48 @@ export default {
 #widget
   height 100%
 
-  >>> .tabs-items
-    height calc(100% - 48px)
-    position relative
+  >>> .v-toolbar__content
+    padding 0 !important
 
-    .tab-item
-      position absolute
-      top 0
-      bottom 0
-      left 0
-      right 0
-      visibility hidden
+  .grid-layout
+    display grid
+    position absolute
+    top 48px; right 0; left 0; bottom 0;
 
-      &.active
-        visibility visible
+    .grid-item
+      position relative
+      overflow-y auto
+      overflow-x hidden
 
-      &.scroll
-        overflow auto
+      &.gutter
+        background #111
 
-        .markdown
-          word-wrap break-word
+    &.vertical
+      grid-template none / 3fr 10px 1fr
+      grid-template-rows unset !important
 
-          img
-            max-width 100%
+      .gutter, .gutter:hover
+        cursor col-resize
 
-  >>> .editor
-    height 100%
+    &.horizontal
+      grid-template 3fr 10px 1fr / none
+      grid-template-columns unset !important
+
+      .gutter, .gutter:hover
+        cursor row-resize
+
+    &.no-split
+      grid-template-rows unset !important
+      grid-template-columns unset !important
+
+  .markdown
+    padding 16px
+
+  .monaco
+    position absolute
+    top 0; right 0; left 0; bottom 0;
+    overflow hidden
+
+    > div
+      height 100%
 </style>

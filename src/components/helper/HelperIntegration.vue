@@ -186,17 +186,17 @@ export default {
     margin 0
     padding 0
     background $vb-application
-    border-bottom 1px solid #111
+    border-bottom 1px solid $vb-gutter
 
     .tab
       padding 2px 6px
-      border-right 1px solid #111
+      border-right 1px solid $vb-gutter
       display inline-block
       cursor pointer
 
       &[active]
         color white
-        background #111
+        background $vb-gutter
 
     .v-icon
       margin-right 6px

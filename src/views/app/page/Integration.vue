@@ -215,6 +215,8 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../../../assets/styles/colors';
+
 #integration
   height 100%
 
@@ -232,7 +234,7 @@ export default {
       overflow-x hidden
 
       &.gutter
-        background #111
+        background $vb-gutter
 
     &.vertical
       grid-template none / 3fr 10px 1fr

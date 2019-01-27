@@ -1,35 +1,18 @@
 <template lang="pug">
-v-container#dashboard.pa-0(
-  v-if="loaded !== null && typeof loaded !== 'undefined'"
+v-container#dashboard(
+  v-if="loaded"
   fluid
 )
-  context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
-    v-btn(
-      @click="DASHBOARD_SET_EDITING(!isEditing)"
-      icon
-    )
-      v-icon {{ editingIcon }}
-    template(v-if="isFullscreen")
-      v-spacer
-      span VisualBox.io
-    v-spacer
-    v-btn(
-      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      icon
-    )
-      v-icon {{ fullscreenIcon }}
   v-layout(
-    align-center
     justify-center
     row fill-height
-    :class="{ 'fullscreen' : isFullscreen }"
   )
-    dashboard-layout.elevation-5(:style="style")
+    dashboard-layout(:style="style")
 </template>
 
 <script>
 import * as _ from 'lodash'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { DashboardLayout } from '@/components/dashboard'
 
@@ -40,23 +23,14 @@ export default {
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['loaded', 'isEditing', 'isFullscreen']),
+    ...mapState('Dashboard', ['loaded']),
     style () {
-      const { width, height } = this.loaded.settings
       const { r, g, b, a } = this.loaded.settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
-
       return {
         'background-color': bgc,
-        'width': width,
-        'height': height
+        'background-position': 'fixed'
       }
-    },
-    editingIcon () {
-      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
-    },
-    fullscreenIcon () {
-      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
     }
   },
   watch: {
@@ -80,11 +54,7 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded']),
-    ...mapMutations('Dashboard', [
-      'DASHBOARD_SET_EDITING',
-      'DASHBOARD_SET_FULLSCREEN'
-    ])
+    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
@@ -98,16 +68,5 @@ export default {
 <style lang="stylus" scoped>
 #dashboard
   height 100%
-
-  .v-toolbar.fullscreen, .layout.fullscreen
-    position fixed
-    left 0
-    right 0
-    z-index 100
-
-  .v-toolbar.fullscreen
-    top 0
-  .layout.fullscreen
-    top 48px
-    bottom 0
+  padding 0
 </style>

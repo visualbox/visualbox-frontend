@@ -1,5 +1,5 @@
 <template lang="pug">
-#dashboard-ctx(v-if="loaded !== null && typeof loaded !== 'undefined'")
+#dashboard-ctx(v-if="loaded")
   context-toolbar
     v-btn(
       icon
@@ -7,6 +7,20 @@
     )
       v-icon mdi-menu-left
     .subheading {{ label }}
+    v-spacer
+    v-btn(
+      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
+      icon
+    )
+      v-icon {{ fullscreenIcon }}
+    template(v-if="isFullscreen")
+      v-spacer
+      span VisualBox.io
+    v-btn(
+      @click="DASHBOARD_SET_EDITING(!isEditing)"
+      icon
+    )
+      v-icon {{ editingIcon }}
 
   v-tabs(
     :class="{ 'hidden' : focusedIntegration || focusedWidget || isAddingIntegration }"
@@ -73,7 +87,12 @@ export default {
   },
   computed: {
     ...mapState('Widget', ['list']),
-    ...mapState('Dashboard', ['loaded', 'isAddingIntegration']),
+    ...mapState('Dashboard', [
+      'loaded',
+      'isAddingIntegration',
+      'isEditing',
+      'isFullscreen'
+    ]),
     ...mapGetters('Dashboard', ['focusedIntegration', 'focusedWidget']),
     label: {
       get () {
@@ -86,13 +105,21 @@ export default {
     updatedAt () {
       const { updatedAt } = this.loaded
       return moment(updatedAt).format('DD/MM HH:mm:ss')
+    },
+    editingIcon () {
+      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
+    },
+    fullscreenIcon () {
+      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
     }
   },
   methods: {
     ...mapMutations('Dashboard', [
       'DASHBOARD_SET_FOCUSED_WIDGET',
       'DASHBOARD_SET_FOCUSED_INTEGRATION',
-      'DASHBOARD_SET_ADDING_INTEGRATION'
+      'DASHBOARD_SET_ADDING_INTEGRATION',
+      'DASHBOARD_SET_EDITING',
+      'DASHBOARD_SET_FULLSCREEN'
     ]),
     ...mapActions('Dashboard', ['updateLoaded']),
     goBack () {

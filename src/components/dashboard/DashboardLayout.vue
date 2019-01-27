@@ -7,7 +7,6 @@ grid-layout#dashboard-layout(
   :is-draggable="isEditing"
   :is-resizable="isEditing"
   :use-css-transforms="true"
-  :auto-size="false"
   @layout-updated="layoutUpdatedEvent"
   @click.native.capture="blurWidget"
 )
@@ -157,7 +156,9 @@ export default {
 
 <style lang="stylus" scoped>
 #dashboard-layout
+  width 100%
   height 100%
+  min-height 100%
   background #FFF
 
   .vue-grid-item

@@ -59,7 +59,7 @@ export default {
     overflow-x hidden
 
     &.gutter
-      background #111
+      background $vb-gutter
 
       &:hover
         cursor col-resize

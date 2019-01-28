@@ -1,6 +1,5 @@
 <template lang="pug">
 #integration-ctx(v-if="loaded")
-  search-dependencies(:show.sync="dialog")
   context-toolbar
     v-btn(
       icon
@@ -76,31 +75,31 @@
           @click.stop=""
         )
           v-icon(small) mdi-trash-can-outline
-    v-btn.ma-0(
+    v-container.pt-2(
       v-if="open.dependencies"
-      flat block large
-      color="primary"
-      @click="dialog = true"
-    ) Add Dependency
+    )
+      v-text-field(
+        v-model="dependency"
+        @keyup.enter.native="addDep"
+        placeholder="Enter package name"
+        hide-details outline single-line
+      )
 </template>
 
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
-import { SearchDependencies } from '@/components/dialog'
 import FILE_TYPES from '@/lib/fileTypes'
 import cloneDeep from '@/lib/cloneDeep'
 
 export default {
   name: 'IntegrationCtx',
-  components: {
-    ContextToolbar,
-    SearchDependencies
-  },
+  components: { ContextToolbar },
   data: () => ({
     hoverIndex: null,
-    dialog: false,
+    dependency: '',
+    dependencyLoading: false,
     FILE_TYPES,
     open: {
       files: true,
@@ -115,9 +114,21 @@ export default {
     ]
   }),
   methods: {
-    ...mapActions('Integration', ['updateLoaded']),
+    ...mapActions('Integration', ['updateLoaded', 'addDependency']),
     ...mapActions('App', ['setSnackbar']),
-    ...mapMutations('Integration', ['INTEGRATION_SET_TAB'])
+    ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
+    async addDep () {
+      this.dependencyLoading = true
+      const dependency = this.dependency
+      this.dependency = ''
+      try {
+        await this.addDependency(dependency)
+      } catch (e) {
+        throw e
+      } finally {
+        this.dependencyLoading = false
+      }
+    }
   },
   computed: {
     ...mapState('Integration', ['loaded', 'tab']),

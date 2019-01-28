@@ -6,7 +6,7 @@
     v-select(
       :items="list"
       v-model="selectedId"
-      item-text="label"
+      item-text="package.name"
       item-value="id"
       label="Select Integration"
       hide-details outline

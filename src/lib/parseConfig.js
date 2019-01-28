@@ -6,7 +6,8 @@ const VALID_TYPES = [
   'color',
   'switch',
   'slider',
-  'select'
+  'select',
+  'date'
 ]
 
 /*

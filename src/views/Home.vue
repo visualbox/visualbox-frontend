@@ -30,7 +30,7 @@ v-container(fluid)
   v-container#infotron(fluid fill-height)
     v-layout(align-center justify-center)
       v-flex(xs12 text-xs-center)
-        .display-3.font-weight-thin A CAPSTONE PROJECT
+        .display-3.font-weight-thin A MASTER'S PROJECT
         .display-1.font-weight-light.mt-4 by Pontus Edvard Aurdal at the University of Tromsø – the Arctic University of Norway
 </template>
 

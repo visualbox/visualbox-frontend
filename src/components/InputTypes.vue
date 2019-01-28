@@ -31,7 +31,6 @@ div
       v-if="field.type === 'switch'"
       v-model="internalValue[field.name]"
       :label="field.label"
-      :type="field.type"
       color="primary"
       hide-details
     )
@@ -59,6 +58,27 @@ div
       item-text="label"
       item-value="value"
     )
+    //- Date type
+    v-menu(
+      v-if="field.type === 'date'"
+      :close-on-content-click="false"
+      transition="scale-transition"
+      lazy offset-y full-width
+      min-width="290px"
+    )
+      v-text-field(
+        slot="activator"
+        v-model="internalValue[field.name]"
+        :label="field.label"
+        append-icon="mdi-calendar"
+        readonly hide-details
+        outline
+      )
+      v-date-picker(
+        v-model="internalValue[field.name]"
+        color="primary"
+        no-title scrollable
+      )
 
   //- Integration config parse errors
   v-alert(

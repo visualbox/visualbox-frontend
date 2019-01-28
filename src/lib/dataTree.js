@@ -4,7 +4,9 @@ const MAX_LEVEL_COUNT = 15
 
 /**
  * Convert a nested object into a Vuetify data Tree.
- * @param target
+ * @param  {Object} target Target object to traverse
+ * @param  {String} accKey Accumulated key
+ * @return {Array}         Vuetify tree array
  */
 const dataTree = (target, accKey = null) => {
   let out = []

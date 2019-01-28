@@ -3,6 +3,13 @@
   v-container.pa-3(grid-list-lg)
     v-layout(row wrap)
       v-flex(xs12)
+        v-text-field(
+          v-model="label"
+          label="Dashboard Name"
+          hide-details
+          outline
+        )
+      v-flex(xs12)
         v-expansion-panel
           v-expansion-panel-content
             div(slot="header")
@@ -12,13 +19,6 @@
               )
               | Background Color
             color-picker(v-model="bgc")
-      v-flex(xs12)
-        v-text-field(
-          v-model="label"
-          label="Label"
-          hide-details
-          outline
-        )
 </template>
 
 <script>

@@ -11,7 +11,7 @@ const state = {
   loaded: null,
   tab: 0,
   showHelper: false,
-  layoutHelper: 'vertical'
+  layoutHelper: 'horizontal'
 }
 
 const mutations = {
@@ -21,7 +21,7 @@ const mutations = {
     state.loaded = null
     state.tab = 0
     state.showHelper = false
-    state.layoutHelper = 'vertical'
+    state.layoutHelper = 'horizontal'
   },
   [t.INTEGRATION_SET_TAB] (state, payload) {
     state.tab = payload

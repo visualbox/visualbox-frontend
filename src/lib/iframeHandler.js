@@ -1,5 +1,5 @@
-// import * as _ from 'lodash'
 import getNestedSource from '@/lib/getNestedSource'
+import buildIframe from '@/lib/buildIframe'
 
 class IFrameHandler {
   constructor () {
@@ -17,44 +17,10 @@ class IFrameHandler {
       // Get source code and config vars from widget
       const { source } = this.widgetById(w.id)
       const { config } = w.settings
-
-      // Create injectable JS code containing config vars
-      const injected = `
-      <script type="text/javascript">
-        window.CONFIG = ${JSON.stringify(config)};
-        window.DATA = null;
-
-        window.addEventListener('message', function (event) {
-          try {
-            if (typeof event.data == 'object' && event.data.call=='sendConfig') {
-              window.CONFIG = event.data.value;
-
-              if (typeof onMessage === 'function') {
-                onMessage({
-                  type: 'CONFIG_CHANGED',
-                  value: event.data.value
-                })
-              }
-            }
-            if (typeof event.data == 'object' && event.data.call=='sendData') {
-              window.DATA = event.data.value;
-
-              if (typeof onMessage === 'function') {
-                onMessage({
-                  type: 'DATA_CHANGED',
-                  value: event.data.value
-                })
-              }
-            }
-          } catch (e) {
-            console.warn('Widget error:', e);
-          }
-        }, false);
-      </script>`
+      // ^ fetch package to get deps for widget
 
       // Create iframe content with injected config vars
-      const html = injected + source
-      this.refs[w.i][0].src = `data:text/html,${encodeURIComponent(html)}`
+      this.refs[w.i][0].src = buildIframe(source, config)
     })
   }
 

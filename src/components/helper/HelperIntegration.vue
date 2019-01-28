@@ -9,7 +9,32 @@
       :active="tab === 1"
       @click="tab = 1"
     ) Console
+    v-tooltip(
+      :open-delay="0"
+      :close-delay="0"
+      color="black"
+      transition="fade-transition"
+      top
+    )
+      span Clear Console
+      v-icon.ml(
+        @click="consoleBuffer = []"
+        slot="activator"
+        color="red"
+      ) mdi-cancel
     v-spacer
+    v-tooltip(
+      :open-delay="0"
+      :close-delay="0"
+      color="black"
+      transition="fade-transition"
+      top
+    )
+      span Restart
+      v-icon(
+        @click="forceRestart"
+        slot="activator"
+      ) mdi-restart
     v-tooltip(
       :open-delay="0"
       :close-delay="0"
@@ -59,7 +84,8 @@
     .ln(
       v-for="(item, index) in consoleBuffer"
       :key="index"
-    ) {{ item.timestamp }} {{ item.line }}
+      :error="item.error"
+    ) {{ item.line }}
 </template>
 
 <script>
@@ -67,6 +93,7 @@ import * as _ from 'lodash'
 import { mapState, mapMutations } from 'vuex'
 import { InputTypes } from '@/components'
 import parseConfig from '@/lib/parseConfig'
+import buildWorker from '@/lib/buildWorker'
 
 const BUFFER_MAX = 100
 
@@ -75,7 +102,7 @@ export default {
   components: { InputTypes },
   data: () => ({
     model: {},
-    tab: 0,
+    tab: 1,
     worker: null,
     consoleBuffer: [],
     freeze: false
@@ -125,6 +152,10 @@ export default {
   },
   methods: {
     ...mapMutations('Integration', ['INTEGRATION_SET_HELPER_LAYOUT', 'INTEGRATION_SET_HELPER']),
+    forceRestart () {
+      this.freeze = false
+      this.restartWorker()
+    },
     restartWorker () {
       if (this.freeze)
         return
@@ -138,26 +169,22 @@ export default {
         }
 
         const source = _.get(this, 'loaded.source', '')
+        const config = this.model
 
-        // Create injectable JS code containing config vars
-        const injected = `const CONFIG = ${JSON.stringify(this.model)};`
-
-        // Create worker BLOB with injected config vars
-        const workerBlob = URL.createObjectURL(new Blob([injected + source], { type: 'application/javascript' }))
-
-        // Create worker and hook onmessage callback
-        this.worker = new Worker(workerBlob)
+        // Create worker and hook onmessage/onerror callback
+        this.worker = buildWorker(source, config)
         this.worker.onmessage = this.onmessage
         this.worker.onerror = this.onerror
       } catch (e) {
         this.onerror(new Error('Failed to start Web Worker', e))
       }
     },
-    consoleBufferAdd (i) {
+    consoleBufferAdd (i, error = false) {
       if (this.consoleBuffer.length > BUFFER_MAX)
         this.consoleBuffer.pop()
       this.consoleBuffer.unshift({
         timestamp: +new Date(),
+        error,
         line: i
       })
     },
@@ -165,7 +192,9 @@ export default {
       this.consoleBufferAdd(data)
     },
     onerror (e) {
-      this.consoleBufferAdd('error' + e.message)
+      e.preventDefault()
+      const { message, lineno, colno } = e
+      this.consoleBufferAdd(`Error: ${message}:${lineno}:${colno}`, true)
     }
   },
   beforeDestroy () {
@@ -201,6 +230,9 @@ export default {
     .v-icon
       margin-right 6px
 
+      &.ml
+        margin-left 6px
+
   .pane
     visibility hidden
     padding 16px
@@ -210,4 +242,10 @@ export default {
 
     &[active]
       visibility visible
+
+    .ln
+      border-bottom 1px solid #444
+
+      &[error]
+        color red
 </style>

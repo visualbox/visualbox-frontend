@@ -1,3 +1,4 @@
+import buildWorker from '@/lib/buildWorker'
 
 class WorkerHandler {
   constructor () {
@@ -17,18 +18,12 @@ class WorkerHandler {
   register (integrations) {
     integrations.forEach(integration => {
       // Get ID, source code and config vars from integration
-      const { i, settings } = integration
-      const { config } = settings
+      const { i, settings: { config } } = integration
       const { source } = this.integrationById(integration.id)
-
-      // Create injectable JS code containing config vars
-      const injected = `const CONFIG = ${JSON.stringify(config)};`
-
-      // Create worker BLOB with injected config vars
-      const workerBlob = URL.createObjectURL(new Blob([injected + source], { type: 'application/javascript' }))
+      // ^ fetch package to get deps for worker
 
       // Create worker and hook onmessage callback
-      let worker = new Worker(workerBlob)
+      let worker = buildWorker(source, config)
       worker.onmessage = ({ data }) => {
         this.DATA_SET_DATA({ i, data })
       }

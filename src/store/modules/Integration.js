@@ -151,72 +151,6 @@ const actions = {
       throw e
     }
   },
-  async addDependency ({ dispatch, state }, dependency) {
-    if (!dependency || dependency === '')
-      return
-    
-    const addDependencies = (deps) => {
-      // Clone dependencies and update new
-      let pkg = cloneDeep(_.get(state, 'loaded.package', {}))
-      if (!pkg.hasOwnProperty('dependencies'))
-        pkg.dependencies = {}
-      for (let i in deps) {
-        let { name, version } = deps[i]
-        version = typeof version === 'undefined' ? '*' : version
-        pkg.dependencies[name] = version
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    const removeDependencies = (deps) => {
-      // Clone dependencies and update new
-      let pkg = cloneDeep(_.get(state, 'loaded.package', {}))
-      if (!pkg.hasOwnProperty('dependencies'))
-        pkg.dependencies = {}
-      for (let i in deps) {
-        if (pkg.dependencies.hasOwnProperty(i))
-          delete pkg.dependencies[i]
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    try {
-      // Parse string name and version
-      let [ name, version ] = dependency.split('@')
-      addDependencies([{ name, version }])
-
-      // Resolve dependency list
-      let pkg = cloneDeep(_.get(state, 'loaded.package', {}))
-      if (!pkg.hasOwnProperty('dependencies'))
-        pkg.dependencies = {}
-      const res = await API.post(config.env, '/resolver', {
-        body: pkg.dependencies
-      })
-
-      if (res.hasOwnProperty('error')) {
-        const { error } = res
-
-        if (error === 'PACKAGE_NOT_FOUND')
-          removeDependencies([ res.data.name ])
-        else if (error === 'UNSATISFIED_RANGE')
-          removeDependencies(Object.keys(res.data))
-        else if (error === 'MISSING_PEERS') {
-          const peers = Object.keys(res.data).map(i => {
-            const [ n, v ] = Object.keys(res.data[i])[0].split('@')
-            return { name: n, version: v }
-          })
-          addDependencies(peers)
-        // TIMEOUT
-        } else
-          removeDependencies(name)
-      // OK
-      } else {
-
-      }
-    } catch (e) {
-      console.log('err', e)
-    }
-  },
   async loadPublic ({ commit }, id) {
     let result = null // Default value
 
@@ -226,6 +160,107 @@ const actions = {
       throw e
     } finally {
       commit(t.INTEGRATION_SET_PUBLIC, result)
+    }
+  },
+  async addDependency ({ dispatch, state }, dependencyList) {
+    if (!dependencyList || dependencyList.length === 0)
+      return
+
+    const getPkg = () => {
+      let pkg = cloneDeep(_.get(state, 'loaded.package', {}))
+      if (!pkg.hasOwnProperty('dependencies'))
+        pkg.dependencies = {}
+      return pkg
+    }
+
+    const getVN = str => {
+      const [ a, b, c ] = str.split('@')
+
+      // Name starts with '@' (e.g. @angular/core)
+      if (str.charAt(0) === '@')
+        return [ `@${b}`, c ]
+      else
+        return [ a, b ]
+    }
+
+    const addDependencies = (deps) => {
+      let pkg = getPkg()
+      for (let i in deps) {
+        let { name, version } = deps[i]
+        version = typeof version === 'undefined' ? '*' : version
+        pkg.dependencies[name] = version
+      }
+      dispatch('updateLoaded', { package: pkg })
+    }
+
+    const removeDependencies = (deps) => {
+      let pkg = getPkg()
+      for (let i in deps) {
+        const name = deps[i]
+        if (pkg.dependencies.hasOwnProperty(name))
+          delete pkg.dependencies[name]
+      }
+      dispatch('updateLoaded', { package: pkg })
+    }
+
+    try {
+      // Parse string name and version
+      const newDeps = dependencyList.map(d => {
+        let [ name, version ] = getVN(d)
+        return { name, version }
+      })
+      addDependencies(newDeps)
+
+      // Resolve dependency list
+      let pkg = getPkg()
+      const res = await API.post(config.env, '/resolver', {
+        body: pkg.dependencies
+      })
+
+      // Parse error and revert accordingly
+      if (res.error) {
+        const { error } = res
+
+        switch (error) {
+          case 'PACKAGE_NOT_FOUND':
+            removeDependencies([ res.data.name ])
+            break
+          case 'UNSATISFIED_RANGE':
+            removeDependencies([ res.data.name ])
+            console.log('removed', res.data.name)
+            break
+          case 'MISSING_PEERS':
+            const peers = Object.keys(res.data).map(name => {
+              const requester = Object.keys(res.data[name])[0]
+              const version = res.data[name][requester]
+
+              // Add resolved requester dep
+              const [ rname, rversion ] = getVN(requester)
+              addDependencies([{
+                name: rname,
+                version: rversion
+              }])
+
+              return `${name}@${version}`
+            })
+
+            // Recursively add peer
+            await dispatch('addDependency', peers)
+            break
+          default:
+            removeDependencies(name)
+        }
+      // OK
+      } else {
+        const { appDependencies } = res
+        const deps = Object.keys(appDependencies).map(name => {
+          const version = appDependencies[name].version
+          return { name, version }
+        })
+        addDependencies(deps)
+      }
+    } catch (e) {
+      console.log('err', e)
     }
   }
 }

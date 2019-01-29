@@ -209,23 +209,26 @@ export default {
 
 #helper-integration
   height 100%
-  background $vb-drawer-ctx
+  background #000
 
   .v-system-bar
     margin 0
     padding 0
-    background $vb-application
-    border-bottom 1px solid $vb-gutter
+    height 30px !important
+    background rgba(255, 255, 255, .2)
 
     .tab
-      padding 2px 6px
-      border-right 1px solid $vb-gutter
+      padding 5px 6px
       display inline-block
       cursor pointer
 
       &[active]
         color white
-        background $vb-gutter
+        background #000
+
+    // Place above gutter overlay
+    .tab, .v-tooltip, .v-icon
+      z-index 25
 
     .v-icon
       margin-right 6px
@@ -237,14 +240,15 @@ export default {
     visibility hidden
     padding 16px
     position absolute
-    top 24px; right 0; left 0; bottom 0;
+    top 30px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]
       visibility visible
 
     .ln
-      border-bottom 1px solid #444
+      font-family monospace
+      word-break break-all
 
       &[error]
         color red

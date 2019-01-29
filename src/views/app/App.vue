@@ -26,7 +26,7 @@ export default {
         track: 1,
         element: this.$refs.gutter
       }],
-      columnMinSizes: { 0: 80 }
+      columnMinSizes: { 0: 60 }
     })
 
     this.setIsLoading(true)
@@ -49,7 +49,7 @@ export default {
 
 #app
   display grid
-  grid-template none / 1fr 10px 3fr
+  grid-template none / 1fr 0 3fr
   position absolute
   top 0; right 0; left 0; bottom 0;
 
@@ -59,7 +59,9 @@ export default {
     overflow-x hidden
 
     &.gutter
-      background $vb-gutter
+      width 10px
+      margin-left -5px
+      z-index 10
 
       &:hover
         cursor col-resize

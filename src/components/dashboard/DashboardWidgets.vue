@@ -12,7 +12,10 @@
         v-card.text-xs-center
           v-card-text
             v-layout(column justify-center fill-height)
-              v-icon(v-if="icon(item)") {{ icon(item) }}
+              v-icon(
+                v-if="icon(item)"
+                :color="color(item)"
+              ) {{ icon(item) }}
               .caption {{ name(item) }}
 </template>
 
@@ -28,6 +31,9 @@ export default {
   },
   methods: {
     ...mapActions('Dashboard', ['addWidget']),
+    color (item) {
+      return _.get(item, 'package.color', '#FFF')
+    },
     icon (item) {
       return _.get(item, 'package.icon', false)
     },

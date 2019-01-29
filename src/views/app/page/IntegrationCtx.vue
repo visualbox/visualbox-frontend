@@ -9,6 +9,30 @@
     .subheading {{ name }}
 
   v-list.editor-list(dense)
+    //- Settings
+    v-list-tile.no-hover(@click="open.settings = !open.settings")
+      v-list-tile-action
+        v-icon {{ open.settings ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+      v-list-tile-content Settings
+    v-container.pt-2(
+      v-if="open.settings"
+      grid-list-lg
+    )
+      v-layout(row wrap)
+        v-flex(xs12)
+          v-text-field(
+            v-model="name"
+            placeholder="Name"
+            hide-details solo
+          )
+        v-flex(xs10)
+          v-switch.ma-0(
+            v-model="public"
+            label="Public"
+            color="primary"
+            hide-details
+          )
+
     //- Files
     v-list-tile.no-hover(@click="open.files = !open.files")
       v-list-tile-action
@@ -28,31 +52,6 @@
         ) {{ FILE_TYPES[item.file].icon }}
       v-list-tile-content {{ item.text }}
 
-    //- Settings
-    v-list-tile.no-hover(@click="open.settings = !open.settings")
-      v-list-tile-action
-        v-icon {{ open.settings ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-      v-list-tile-content Settings
-    v-container.pt-2(
-      v-if="open.settings"
-      grid-list-lg
-    )
-      v-layout(row wrap)
-        v-flex(xs12)
-          v-text-field(
-            v-model="name"
-            label="Name"
-            hide-details
-            outline
-          )
-        v-flex(xs10)
-          v-switch.ma-0(
-            v-model="public"
-            label="Public"
-            color="primary"
-            hide-details
-          )
-
     //- Dependencies
     v-list-tile.no-hover(@click="open.dependencies = !open.dependencies")
       v-list-tile-action
@@ -68,21 +67,27 @@
     )
       v-list-tile-action
         v-icon(small color="blue") mdi-package-variant-closed
-      v-list-tile-content {{ item.package }}@{{ item.version }}
-      v-list-tile-action(v-if="index === hoverIndex")
+      v-list-tile-content
+        a(
+          :href="'https://www.npmjs.com/package/' + item.name"
+          target="_new"
+        ) {{ item.name }}
+      v-list-tile-action
         v-btn(
+          v-if="index === hoverIndex"
           flat icon
           @click.stop=""
         )
           v-icon(small) mdi-trash-can-outline
-    v-container.pt-2(
-      v-if="open.dependencies"
-    )
-      v-text-field(
+        .grey--text(v-else) {{ item.version }}
+    v-container.pt-2(v-if="open.dependencies")
+      v-text-field.elevation-0(
         v-model="dependency"
         @keyup.enter.native="addDep"
+        :loading="dependencyLoading"
+        :disabled="dependencyLoading"
         placeholder="Enter package name"
-        hide-details outline single-line
+        hide-details solo
       )
 </template>
 
@@ -122,7 +127,7 @@ export default {
       const dependency = this.dependency
       this.dependency = ''
       try {
-        await this.addDependency(dependency)
+        await this.addDependency([ dependency ])
       } catch (e) {
         throw e
       } finally {
@@ -156,7 +161,7 @@ export default {
       const list = _.get(this, 'loaded.package.dependencies', {})
       return Object.keys(list).reduce((a, b) => {
         a.push({
-          package: b,
+          name: b,
           version: list[b]
         })
         return a

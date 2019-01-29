@@ -82,6 +82,7 @@ export default {
   position relative
 
   .v-navigation-drawer
+    width 60px !important
     top 0; bottom 0;
     background-color $vb-drawer-mini !important
 
@@ -90,6 +91,7 @@ export default {
       background unset
 
       .v-list__tile
+        height 56px
         -webkit-transition none !important
         transition none !important
 
@@ -107,10 +109,13 @@ export default {
           .v-icon
             color $vb-drawer-icon-hoveractive !important
 
+        .v-list__tile__action
+          min-width 20px
+
   #context
     background-color $vb-drawer-ctx !important
     position absolute
-    top 0; right 0; bottom 0; left 80px;
+    top 0; right 0; bottom 0; left 60px;
 
     >>> .v-list
       padding 0
@@ -123,17 +128,15 @@ export default {
         &:hover
           background-color $vb-primary-list-hover
 
-          &:before
-            content ''
-            width 2px
-            height 100%
-            position absolute
-            left 1px
-            background $vb-primary
-
       &.editor-list
         .v-list__tile
           padding-left 40px
+
+          a, a:active, a:visited
+            color #FFF
+
+            &:hover
+              text-decoration underline
 
         .no-hover
           .v-list__tile
@@ -151,14 +154,6 @@ export default {
       .active
         .v-list__tile, .v-list__tile:hover
           background-color $vb-primary-list-active !important
-
-          &:before
-            content ''
-            width 2px
-            height 100%
-            position absolute
-            left 1px
-            background $vb-primary
 
       .v-list__tile__action
         min-width 25px

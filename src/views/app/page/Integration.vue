@@ -234,21 +234,29 @@ export default {
       overflow-x hidden
 
       &.gutter
-        background $vb-gutter
+        z-index 20
 
     &.vertical
-      grid-template none / 3fr 10px 1fr
+      grid-template none / 3fr 0 1fr
       grid-template-rows unset !important
 
-      .gutter, .gutter:hover
-        cursor col-resize
+      .gutter
+        width 10px
+        margin-left -5px
+
+        &:hover
+          cursor col-resize
 
     &.horizontal
-      grid-template 3fr 10px 1fr / none
+      grid-template 3fr 0 1fr / none
       grid-template-columns unset !important
 
-      .gutter, .gutter:hover
-        cursor row-resize
+      .gutter
+        height 35px
+        margin-top -5px
+
+        &:hover
+          cursor row-resize
 
     &.no-split
       grid-template-rows unset !important

@@ -22,8 +22,8 @@
         v-flex(xs12)
           v-text-field(
             v-model="name"
-            placeholder="Name"
-            hide-details solo
+            label="Name"
+            hide-details outline
           )
         v-flex(xs10)
           v-switch.ma-0(
@@ -75,15 +75,15 @@
       v-list-tile-action
         v-btn(
           v-if="index === hoverIndex"
+          @click.stop="removeDependency(item.name)"
           flat icon
-          @click.stop=""
         )
           v-icon(small) mdi-trash-can-outline
         .grey--text(v-else) {{ item.version }}
     v-container.pt-2(v-if="open.dependencies")
       v-text-field.elevation-0(
         v-model="dependency"
-        @keyup.enter.native="addDep"
+        @keyup.enter.native="addDependency"
         :loading="dependencyLoading"
         :disabled="dependencyLoading"
         placeholder="Enter package name"
@@ -119,15 +119,32 @@ export default {
     ]
   }),
   methods: {
-    ...mapActions('Integration', ['updateLoaded', 'addDependency']),
+    ...mapActions('Integration', ['updateLoaded', 'resolveDependency']),
     ...mapActions('App', ['setSnackbar']),
     ...mapMutations('Integration', ['INTEGRATION_SET_TAB']),
-    async addDep () {
+    async addDependency () {
       this.dependencyLoading = true
       const dependency = this.dependency
       this.dependency = ''
       try {
-        await this.addDependency([ dependency ])
+        await this.resolveDependency({
+          action: 'ADD',
+          list: [ dependency ]
+        })
+      } catch (e) {
+        throw e
+      } finally {
+        this.dependencyLoading = false
+      }
+    },
+    async removeDependency (dependency) {
+      this.hoverIndex = null // Fixes hover glitch
+      this.dependencyLoading = true
+      try {
+        await this.resolveDependency({
+          action: 'REMOVE',
+          list: [ dependency ]
+        })
       } catch (e) {
         throw e
       } finally {

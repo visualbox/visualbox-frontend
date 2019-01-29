@@ -231,10 +231,10 @@ export default {
       z-index 25
 
     .v-icon
-      margin-right 6px
+      margin-right 10px
 
       &.ml
-        margin-left 6px
+        margin-left 10px
 
   .pane
     visibility hidden

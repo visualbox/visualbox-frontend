@@ -89,6 +89,7 @@
         placeholder="Enter package name"
         hide-details solo
       )
+      pre {{ resDependencies }}
 </template>
 
 <script>
@@ -183,6 +184,9 @@ export default {
         })
         return a
       }, [])
+    },
+    resDependencies () {
+      return _.get(this, 'loaded.resDependencies', [])
     }
   }
 }

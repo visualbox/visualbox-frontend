@@ -82,6 +82,13 @@ const mutations = {
     if (payload.hasOwnProperty('package'))
       merged.package = payload.package
 
+    /**
+     * Package needs to be replaced since
+     * deep merge & diff won't handle deletion.
+     */
+    if (payload.hasOwnProperty('resDependencies'))
+      merged.resDependencies = payload.resDependencies
+
     state.loaded = cloneDeep(merged)
   },
   [t.INTEGRATION_COMMIT_LOADED] (state, nullify = false) {
@@ -194,7 +201,7 @@ const actions = {
       return
     action = action === 'ADD' ? 'ADD' : 'REMOVE'
 
-    const addDependencies = (deps) => {
+    const addDependencies = deps => {
       let pkg = getPkg(state)
       for (let i in deps) {
         let { name, version } = deps[i]
@@ -204,7 +211,11 @@ const actions = {
       dispatch('updateLoaded', { package: pkg })
     }
 
-    const removeDependencies = (deps) => {
+    const addResDependencies = resDependencies => {
+      dispatch('updateLoaded', { resDependencies })
+    }
+
+    const removeDependencies = deps => {
       let pkg = getPkg(state)
       for (let i in deps) {
         const name = deps[i]
@@ -273,12 +284,15 @@ const actions = {
         }
       // OK
       } else {
-        const { appDependencies } = res
+        const { appDependencies, resDependencies } = res
         const deps = Object.keys(appDependencies).map(name => {
           const version = appDependencies[name].version
           return { name, version }
         })
+        const resDeps = Object.keys(resDependencies)
+        console.log(resDeps)
         addDependencies(deps)
+        addResDependencies(resDeps)
       }
     } catch (e) {
       console.log(e)
@@ -308,6 +322,8 @@ const getters = {
        */
       if (diff.hasOwnProperty('package'))
         diff.package = cloneDeep(loaded.package)
+      if (diff.hasOwnProperty('resDependencies'))
+        diff.resDependencies = cloneDeep(loaded.resDependencies)
 
       return diff
     } catch (e) {

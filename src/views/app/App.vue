@@ -11,12 +11,10 @@
 <script>
 import Split from 'split-grid'
 import { mapState, mapActions } from 'vuex'
-import { unauthGuard } from '@/mixins'
 import { NavigationDrawer } from '@/components'
 
 export default {
   name: 'App',
-  mixins: [ unauthGuard ],
   components: { NavigationDrawer },
   computed: mapState('App', ['appIsReady']),
   methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),

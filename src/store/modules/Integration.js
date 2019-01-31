@@ -1,7 +1,6 @@
 import * as _ from 'lodash'
 import * as t from '@/store/types'
-import API from '@aws-amplify/api'
-import config from '@/config'
+import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
 
 /**
@@ -124,7 +123,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result = await API.get(config.env, '/integration')
+      result = await API.invoke('get', '/integration')
     } catch (e) {
       throw e
     } finally {
@@ -135,7 +134,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/integration', {
+      result.push(await API.invoke('post', '/integration', {
         body: { id }
       }))
     } catch (e) {
@@ -149,7 +148,7 @@ const actions = {
     commit(t.INTEGRATION_DELETE_LIST, id)
 
     try {
-      await API.del(config.env, `/integration/${id}`)
+      await API.invoke('del', `/integration/${id}`)
     } catch (e) {
       throw e
     } finally {}
@@ -169,7 +168,7 @@ const actions = {
       const { id } = state.loaded
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.INTEGRATION_COMMIT_LOADED, true) // Must come before API call
-      await API.put(config.env, `/integration/${id}`, { body: diff })
+      await API.invoke('put', `/integration/${id}`, { body: diff })
     } catch (e) {
       throw e
     }
@@ -177,7 +176,7 @@ const actions = {
   // Commit a loaded local integration
   async commitLoaded ({ commit, state, getters }) {
     try {
-      await API.put(config.env, `/integration/${state.loaded.id}`, { body: getters.loadedDiff })
+      await API.invoke('put', `/integration/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.INTEGRATION_COMMIT_LOADED)
     } catch (e) {
       throw e
@@ -187,7 +186,7 @@ const actions = {
     let result = null // Default value
 
     try {
-      result = await API.get(config.env, `/integration/${id}`)
+      result = await API.invoke('get', `/integration/${id}`)
     } catch (e) {
       throw e
     } finally {
@@ -237,7 +236,7 @@ const actions = {
 
       // Resolve dependency list
       let pkg = getPkg(state)
-      const res = await API.post(config.env, '/resolver', {
+      const res = await API.invoke('post', '/resolver', {
         body: pkg.dependencies
       })
 

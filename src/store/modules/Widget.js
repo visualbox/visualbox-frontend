@@ -1,6 +1,5 @@
 import * as t from '@/store/types'
-import API from '@aws-amplify/api'
-import config from '@/config'
+import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
 
 const state = {
@@ -89,7 +88,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result = await API.get(config.env, '/widget')
+      result = await API.invoke('get', '/widget')
     } catch (e) {
       throw e
     } finally {
@@ -100,7 +99,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/widget', {
+      result.push(await API.invoke('post', '/widget', {
         body: { id }
       }))
     } catch (e) {
@@ -114,7 +113,7 @@ const actions = {
     commit(t.WIDGET_DELETE_LIST, id)
 
     try {
-      await API.del(config.env, `/widget/${id}`)
+      await API.invoke('del', `/widget/${id}`)
     } catch (e) {
       throw e
     } finally {}
@@ -134,7 +133,7 @@ const actions = {
       const { id } = state.loaded
       const diff = cloneDeep(getters.loadedDiff)
       commit(t.WIDGET_COMMIT_LOADED, true) // Must come before API call
-      await API.put(config.env, `/widget/${id}`, { body: diff })
+      await API.invoke('put', `/widget/${id}`, { body: diff })
     } catch (e) {
       throw e
     }
@@ -142,7 +141,7 @@ const actions = {
   // Commit a loaded local widget
   async commitLoaded ({ commit, state, getters }) {
     try {
-      await API.put(config.env, `/widget/${state.loaded.id}`, { body: getters.loadedDiff })
+      await API.invoke('put', `/widget/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.WIDGET_COMMIT_LOADED)
     } catch (e) {
       throw e
@@ -152,7 +151,7 @@ const actions = {
     let result = null // Default value
 
     try {
-      result = await API.get(config.env, `/widget/${id}`)
+      result = await API.invoke('get', `/widget/${id}`)
     } catch (e) {
       throw e
     } finally {

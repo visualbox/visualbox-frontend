@@ -1,9 +1,7 @@
 import * as _ from 'lodash'
 import * as t from '@/store/types'
-import API from '@aws-amplify/api'
-import config from '@/config'
+import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
-import APII from '@/service/API'
 
 const state = {
   list: [],
@@ -101,8 +99,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      // result = await APII.
-      result = await API.get(config.env, '/dashboard')
+      result = await API.invoke('get', '/dashboard')
     } catch (e) {
       throw e
     } finally {
@@ -113,7 +110,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/dashboard'))
+      result.push(await API.invoke('post', '/dashboard'))
     } catch (e) {
       throw e
     } finally {
@@ -125,7 +122,7 @@ const actions = {
     commit(t.DASHBOARD_DELETE_LIST, id)
 
     try {
-      await API.del(config.env, `/dashboard/${id}`)
+      await API.invoke('del', `/dashboard/${id}`)
     } catch (e) {
       throw e
     } finally {}
@@ -151,7 +148,7 @@ const actions = {
       commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false) // Close potentially open adding integration
       commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null) // Close potentially open focused widget
       commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null) // Close potentially open focused integration
-      await API.put(config.env, `/dashboard/${id}`, { body: diff })
+      await API.invoke('put', `/dashboard/${id}`, { body: diff })
     } catch (e) {
       throw e
     }
@@ -159,7 +156,7 @@ const actions = {
   // Commit a loaded local dashboard
   async commitLoaded ({ commit, state, getters }) {
     try {
-      await API.put(config.env, `/dashboard/${state.loaded.id}`, { body: getters.loadedDiff })
+      await API.invoke('put', `/dashboard/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.DASHBOARD_COMMIT_LOADED)
     } catch (e) {
       throw e

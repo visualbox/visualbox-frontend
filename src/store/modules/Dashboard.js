@@ -2,10 +2,8 @@ import * as _ from 'lodash'
 import * as t from '@/store/types'
 import API from '@aws-amplify/api'
 import config from '@/config'
-import difference from '@/lib/difference'
-import mergeDeep from '@/lib/mergeDeep'
-import cloneDeep from '@/lib/cloneDeep'
-import parseConfig from '@/lib/parseConfig'
+import { difference, mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
+import APII from '@/service/API'
 
 const state = {
   list: [],
@@ -103,6 +101,7 @@ const actions = {
     let result = [] // Default value
 
     try {
+      // result = await APII.
       result = await API.get(config.env, '/dashboard')
     } catch (e) {
       throw e

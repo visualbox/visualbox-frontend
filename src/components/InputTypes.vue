@@ -92,11 +92,11 @@ div
 
 <script>
 import { Chrome } from 'vue-color'
-import ProxyValue from '@/mixins/proxyValue'
+import { proxyValue } from '@/mixins'
 
 export default {
   name: 'InputTypes',
-  mixins: [ ProxyValue ],
+  mixins: [ proxyValue ],
   components: { 'color-picker': Chrome },
   props: {
     config: {

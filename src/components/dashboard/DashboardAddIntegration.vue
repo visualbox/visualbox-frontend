@@ -36,8 +36,8 @@
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import WorkerHandler from '@/lib/workerHandler'
-import parseConfig from '@/lib/parseConfig'
+import { WorkerHandler } from '@/service'
+import { parseConfig } from '@/lib/utils'
 
 export default {
   name: 'DashboardAddIntegration',

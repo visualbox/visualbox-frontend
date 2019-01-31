@@ -28,10 +28,10 @@ div
 </template>
 
 <script>
-import ProxyValue from '@/mixins/proxyValue'
+import { proxyValue } from '@/mixins'
 
 export default {
   name: 'PartialEmail',
-  mixins: [ ProxyValue ]
+  mixins: [ proxyValue ]
 }
 </script>

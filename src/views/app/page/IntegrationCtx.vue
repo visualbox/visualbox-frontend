@@ -96,8 +96,8 @@
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
+import { cloneDeep } from '@/lib/utils'
 import FILE_TYPES from '@/lib/fileTypes'
-import cloneDeep from '@/lib/cloneDeep'
 
 export default {
   name: 'IntegrationCtx',

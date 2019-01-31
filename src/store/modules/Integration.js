@@ -2,9 +2,7 @@ import * as _ from 'lodash'
 import * as t from '@/store/types'
 import API from '@aws-amplify/api'
 import config from '@/config'
-import difference from '@/lib/difference'
-import mergeDeep from '@/lib/mergeDeep'
-import cloneDeep from '@/lib/cloneDeep'
+import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
 
 /**
  * Parse the version and name from a string.

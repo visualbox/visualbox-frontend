@@ -1,4 +1,4 @@
-import buildWorker from '@/lib/buildWorker'
+import { BuildWorker } from '@/service'
 
 class WorkerHandler {
   constructor () {
@@ -23,7 +23,7 @@ class WorkerHandler {
       // ^ fetch package to get deps for worker
 
       // Create worker and hook onmessage callback
-      let worker = buildWorker(source, config)
+      let worker = BuildWorker(source, config)
       worker.onmessage = ({ data }) => {
         this.DATA_SET_DATA({ i, data })
       }

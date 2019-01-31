@@ -6,8 +6,12 @@ import store from '@/store'
 import '@mdi/font/css/materialdesignicons.css'
 import '@/assets/styles/global.styl'
 
+// Libraries
 import '@/lib/amplify'
 import '@/lib/vuetify'
+
+// Services
+import '@/service/RegisterServiceWorker'
 
 import App from '@/App.vue'
 

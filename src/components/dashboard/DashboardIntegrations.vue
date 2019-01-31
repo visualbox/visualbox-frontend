@@ -28,7 +28,7 @@
 <script>
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapGetters } from 'vuex'
-import WorkerHandler from '@/lib/workerHandler'
+import { WorkerHandler } from '@/service'
 
 export default {
   name: 'DashboardIntegrations',

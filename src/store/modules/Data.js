@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
-import dataTree from '@/lib/dataTree'
+import { dataTree } from '@/lib/utils'
 
 const state = {
   data: {}

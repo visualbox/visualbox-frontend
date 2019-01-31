@@ -92,8 +92,8 @@
 import * as _ from 'lodash'
 import { mapState, mapMutations } from 'vuex'
 import { InputTypes } from '@/components'
-import parseConfig from '@/lib/parseConfig'
-import buildWorker from '@/lib/buildWorker'
+import { parseConfig } from '@/lib/utils'
+import { BuildWorker } from '@/service'
 
 const BUFFER_MAX = 100
 
@@ -172,7 +172,7 @@ export default {
         const config = this.model
 
         // Create worker and hook onmessage/onerror callback
-        this.worker = await buildWorker(loaded, config)
+        this.worker = await BuildWorker(loaded, config)
         this.worker.onmessage = this.onmessage
         this.worker.onerror = this.onerror
       } catch (e) {

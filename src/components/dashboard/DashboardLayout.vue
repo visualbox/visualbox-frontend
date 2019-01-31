@@ -56,9 +56,8 @@ grid-layout#dashboard-layout(
 import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
-import cloneDeep from '@/lib/cloneDeep'
-import difference from '@/lib/difference'
-import IFrameHandler from '@/lib/iframeHandler'
+import { cloneDeep, difference } from '@/lib/utils'
+import { IFrameHandler } from '@/service'
 
 export default {
   name: 'DashboardLayout',

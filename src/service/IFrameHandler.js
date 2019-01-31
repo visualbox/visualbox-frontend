@@ -1,5 +1,5 @@
-import getNestedSource from '@/lib/getNestedSource'
-import buildIframe from '@/lib/buildIframe'
+import { getNestedSource } from '@/lib/utils'
+import { BuildIFrame } from '@/service'
 
 class IFrameHandler {
   constructor () {
@@ -20,7 +20,7 @@ class IFrameHandler {
       // ^ fetch package to get deps for widget
 
       // Create iframe content with injected config vars
-      this.refs[w.i][0].src = buildIframe(source, config)
+      this.refs[w.i][0].src = BuildIFrame(source, config)
     })
   }
 

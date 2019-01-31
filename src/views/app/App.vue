@@ -11,7 +11,7 @@
 <script>
 import Split from 'split-grid'
 import { mapState, mapActions } from 'vuex'
-import unauthGuard from '@/mixins/unauthGuard'
+import { unauthGuard } from '@/mixins'
 import { NavigationDrawer } from '@/components'
 
 export default {

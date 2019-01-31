@@ -73,8 +73,8 @@ import * as _ from 'lodash'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import parseConfig from '@/lib/parseConfig'
-import IFrameHandler from '@/lib/iframeHandler'
+import { parseConfig } from '@/lib/utils'
+import { IFrameHandler } from '@/service'
 
 export default {
   name: 'DashboardWidgetConfig',

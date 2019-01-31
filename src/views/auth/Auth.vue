@@ -7,7 +7,7 @@ v-container(fluid fill-height)
 </template>
 
 <script>
-import authGuard from '@/mixins/authGuard'
+import { authGuard } from '@/mixins'
 
 export default {
   name: 'Auth',

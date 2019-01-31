@@ -17,7 +17,7 @@ const getDependencies = loaded => {
 export default async (loaded, config) => {
   if (!loaded)
     return new Worker()
-  
+
   const source = _.get(loaded, 'source', '')
   if (source === '')
     return new Worker()

@@ -79,15 +79,15 @@
           flat icon
         )
           v-icon(small) mdi-trash-can-outline
-        .grey--text(v-else) {{ item.version }}
+        .grey--text.pr-2(v-else) {{ item.version }}
     v-container.pt-2(v-if="open.dependencies")
-      v-text-field.elevation-0(
+      v-text-field.dependency-input(
         v-model="dependency"
         @keyup.enter.native="addDependency"
         :loading="dependencyLoading"
         :disabled="dependencyLoading"
         placeholder="Enter package name"
-        hide-details solo
+        hide-details outline single-line
       )
       pre {{ resDependencies }}
 </template>
@@ -191,3 +191,17 @@ export default {
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+#integration-ctx
+  .dependency-input
+    min-height 30px
+    font-size 12px
+
+    >>> .v-input__slot
+      min-height 30px
+
+      input
+        max-height 30px
+        margin-top 0
+</style>

@@ -692,6 +692,11 @@
   dependencies:
     regenerator-runtime "^0.12.0"
 
+"@babel/standalone@^7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@babel/standalone/-/standalone-7.3.1.tgz#5de5a857f6fb0e0258c024936c47158cee2bb095"
+  integrity sha512-8InAwp1Ij4K5tzAnFRqHQ46C7kiuLK/IniVAtfHBHmCvvsdXz6rUxk9BhcOhcMdmo5yNDt0ki/cDg4tdBhaDFg==
+
 "@babel/template@^7.1.0", "@babel/template@^7.1.2":
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.1.2.tgz#090484a574fef5a2d2d7726a674eceda5c5b5644"
@@ -1665,12 +1670,7 @@ babel-code-frame@^6.22.0, babel-code-frame@^6.26.0:
     esutils "^2.0.2"
     js-tokens "^3.0.2"
 
-babel-core@7.0.0-bridge.0:
-  version "7.0.0-bridge.0"
-  resolved "https://registry.yarnpkg.com/babel-core/-/babel-core-7.0.0-bridge.0.tgz#95a492ddd90f9b4e9a4a1da14eb335b87b634ece"
-  integrity sha512-poPX9mZH/5CSanm50Q+1toVci6pv5KSRv/5TWCwtzQS5XEwn40BcCrgIeMFWP9CKKIniKXNxoIOnOq4VVlGXhg==
-
-babel-core@^6.0.0, babel-core@^6.26.0:
+babel-core@^6.0.0, babel-core@^6.26.0, babel-core@^6.26.3:
   version "6.26.3"
   resolved "https://registry.yarnpkg.com/babel-core/-/babel-core-6.26.3.tgz#b2e2f09e342d0f0c88e2f02e067794125e75c207"
   integrity sha512-6jyFLuDmeidKmUEb3NM+/yawG0M2bDZ9Z1qbZP59cyHLz8kYGKYwpJP0UwUKKUiTRNvxfLesJnTedqczP7cTDA==
@@ -9317,6 +9317,11 @@ symbol-tree@^3.2.2:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.2.tgz#ae27db38f660a7ae2e1c3b7d1bc290819b8519e6"
   integrity sha1-rifbOPZgp64uHDt9G8KQgZuFGeY=
+
+systemjs@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/systemjs/-/systemjs-3.0.0.tgz#7e15ec942db9abacd484b53f30de11b018333560"
+  integrity sha512-EkC2dGhRkGJy0Ug5eZWIveIFTyPNXjW1J7PIBpPtzHuw6nDRJEFQr/rAOdfclD6PN/2YIAeexpP4LrgLZhmNrw==
 
 table@4.0.2:
   version "4.0.2"

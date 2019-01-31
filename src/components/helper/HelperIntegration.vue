@@ -156,7 +156,7 @@ export default {
       this.freeze = false
       this.restartWorker()
     },
-    restartWorker () {
+    async restartWorker () {
       if (this.freeze)
         return
 
@@ -168,15 +168,16 @@ export default {
           this.worker = null
         }
 
-        const source = _.get(this, 'loaded.source', '')
+        const loaded = _.get(this, 'loaded', null)
         const config = this.model
 
         // Create worker and hook onmessage/onerror callback
-        this.worker = buildWorker(source, config)
+        this.worker = await buildWorker(loaded, config)
         this.worker.onmessage = this.onmessage
         this.worker.onerror = this.onerror
       } catch (e) {
-        this.onerror(new Error('Failed to start Web Worker', e))
+        console.log(e)
+        this.onerror(new Error('Failed to start Web Worker'))
       }
     },
     consoleBufferAdd (i, error = false) {
@@ -192,9 +193,10 @@ export default {
       this.consoleBufferAdd(data)
     },
     onerror (e) {
-      e.preventDefault()
+      // e.preventDefault()
       const { message, lineno, colno } = e
-      this.consoleBufferAdd(`Error: ${message}:${lineno}:${colno}`, true)
+      const lines = lineno && colno ? `:${lineno}:${colno}` : ''
+      this.consoleBufferAdd(`Error: ${message}:${lines}`, true)
     }
   },
   beforeDestroy () {

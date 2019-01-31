@@ -81,6 +81,7 @@ export default {
   height 100%
   position relative
 
+  // Mini-drawer styles
   .v-navigation-drawer
     width 60px !important
     top 0; bottom 0;
@@ -112,6 +113,7 @@ export default {
         .v-list__tile__action
           min-width 20px
 
+  // Context global styles
   #context
     background-color $vb-drawer-ctx !important
     position absolute
@@ -129,6 +131,9 @@ export default {
           background-color $vb-primary-list-hover
 
       &.editor-list
+        .v-icon, .v-list__tile__content
+          color rgba(255, 255, 255, .7)
+
         .v-list__tile
           padding-left 40px
 
@@ -152,13 +157,33 @@ export default {
           padding-left 40px
 
       .active
+        .v-icon, .v-list__tile__content
+          color unset
+
         .v-list__tile, .v-list__tile:hover
           background-color $vb-primary-list-active !important
 
       .v-list__tile__action
         min-width 25px
 
+    // Color picker
     >>> .v-expansion-panel, .v-expansion-panel__container
       border-radius 4px
       overflow hidden
+
+    // Outline input
+    >>> .v-text-field--outline
+      &.primary--text, .primary--text
+        color #FFF !important
+        caret-color #FFF  !important
+
+      .v-input__slot
+        border 1px solid rgba(255, 255, 255, .5)
+
+        &:hover
+          border 1px solid rgba(255, 255, 255, 1)
+
+      &.v-input--is-focused, &.v-input--has-state
+        & > .v-input__control > .v-input__slot
+          border 1px solid rgba(255, 255, 255, 1)
 </style>

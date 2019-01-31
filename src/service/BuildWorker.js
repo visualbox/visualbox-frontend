@@ -22,6 +22,7 @@ export default async (loaded, config) => {
   if (source === '')
     return new Worker()
 
+  /*
   // Resolve external dependencies
   const dependencies = getDependencies(loaded)
   console.log('Gotta get ALL these', dependencies)
@@ -37,6 +38,7 @@ export default async (loaded, config) => {
   } catch (e) {
     console.log(e)
   }
+  */
 
   try {
     config = JSON.stringify(config)
@@ -44,17 +46,18 @@ export default async (loaded, config) => {
     config = '{}'
   }
   let code = `
-    ${externalSource}
     const CONFIG = ${config};
     ${source}
   `
+  console.log(code)
 
+  /*
   // Compile code template
   try {
     code = transform(code, { presets: ['es2015'] }).code
   } catch (e) {
     console.log(e)
-  }
+  }*/
 
   // Create BLOB
   let blob

@@ -30,11 +30,12 @@
           v-icon(small) mdi-trash-can-outline
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'DashboardsCtx',
   components: { ContextToolbar },
   data: () => ({
@@ -61,5 +62,5 @@ export default {
       }
     }
   }
-}
+})
 </script>

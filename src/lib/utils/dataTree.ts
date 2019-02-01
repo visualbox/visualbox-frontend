@@ -1,18 +1,27 @@
-import * as _ from 'lodash'
+import isObject from 'lodash-es/isObject'
 
-const MAX_LEVEL_COUNT = 15
+const MAX_LEVEL_COUNT: number = 15
+
+interface INode {
+  key: string
+  text: string
+  children?: INode[]
+}
 
 /**
  * Convert a nested object into a Vuetify data Tree.
- * @param  {Object} target Target object to traverse
- * @param  {String} accKey Accumulated key
- * @return {Array}         Vuetify tree array
+ * @param  {IObject} target Target object to traverse
+ * @param  {String}  accKey Accumulated key
+ * @return {INode[]}        Vuetify tree array
  */
-const dataTree = (target, accKey = null) => {
-  let out = []
-  let levelCount = 0
+const dataTree = (target: IObject, accKey: string | null = null): INode[] => {
+  const out: INode[] = []
+  let levelCount: number = 0
 
   for (const key in target) {
+    if (!target.hasOwnProperty(key))
+      continue
+
     // Limit number of primitives per level
     // to increase performance
     levelCount++
@@ -20,8 +29,8 @@ const dataTree = (target, accKey = null) => {
       continue
 
     // Non-primitive, recurse
-    if (_.isObject(target[key])) {
-      const accumulativeKey = accKey === null
+    if (isObject(target[key])) {
+      const accumulativeKey: string = accKey === null
         ? key
         : `${accKey}.${key}`
       out.push({
@@ -33,10 +42,10 @@ const dataTree = (target, accKey = null) => {
 
     // Primitive
     } else {
-      const accumulativeKey = accKey === null
+      const accumulativeKey: string = accKey === null
         ? key
         : `${accKey}.${key}`
-      const formattedvalue = (typeof target[key] === 'string') ? `"${target[key]}"` : target[key]
+      const formattedvalue: string = (typeof target[key] === 'string') ? `"${target[key]}"` : target[key]
 
       out.push({
         text: `<span class="property">${key}</span>: <span class="${typeof target[key]}">${formattedvalue}</span>`,

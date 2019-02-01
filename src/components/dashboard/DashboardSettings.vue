@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
 import { mapState, mapActions } from 'vuex'
 
@@ -49,7 +49,7 @@ export default {
         const { r, g, b, a } = this.loaded.settings.rgba
         return `rgba(${r}, ${g}, ${b}, ${a})`
       },
-      set: _.debounce(function (val) {
+      set: debounce(function (val) {
         const { rgba } = val
         this.updateLoaded({ settings: { rgba } })
       }, 20)

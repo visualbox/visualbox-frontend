@@ -5,7 +5,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const webpack = require('webpack')
 
 module.exports = {
-  baseUrl: '/',
+  publicPath: '/',
   configureWebpack: {
     node: {
       process: 'mock'

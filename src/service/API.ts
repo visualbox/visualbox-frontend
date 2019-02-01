@@ -1,16 +1,15 @@
+import { Store } from 'vuex'
 import ONLINE_DRIVER from './ONLINE_DRIVER'
 import OFFLINE_DRIVER from './OFFLINE_DRIVER'
 
 class API {
-  attachStore (store) {
+  private store: Store<any> | null = null
+
+  public attachStore (store: Store<any>): void {
     this.store = store
   }
 
-  isLoggedIn () {
-    return this.store.getters['Cognito/isLoggedIn']
-  }
-
-  async invoke (method, path, opts) {
+  public async invoke (method: string, path: string, opts?: IObject) {
     console.log('INVOKING', this.isLoggedIn())
     try {
       return this.isLoggedIn()
@@ -19,6 +18,10 @@ class API {
     } catch (e) {
       throw e
     }
+  }
+
+  private isLoggedIn (): boolean {
+    return (this.store) ? this.store.getters['Cognito/isLoggedIn'] : false
   }
 }
 

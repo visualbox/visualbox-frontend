@@ -1,7 +1,0 @@
-export { default as DashboardIntegrationConfig } from './DashboardIntegrationConfig'
-export { default as DashboardAddIntegration } from './DashboardAddIntegration'
-export { default as DashboardIntegrations } from './DashboardIntegrations'
-export { default as DashboardLayout } from './DashboardLayout'
-export { default as DashboardSettings } from './DashboardSettings'
-export { default as DashboardWidgetConfig } from './DashboardWidgetConfig'
-export { default as DashboardWidgets } from './DashboardWidgets'

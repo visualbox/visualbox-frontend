@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { cloneDeep } from '@/lib/utils'
@@ -157,26 +157,26 @@ export default {
     ...mapState('Integration', ['loaded', 'tab']),
     name: {
       get () {
-        return _.get(this, 'loaded.package.name', '')
+        return get(this, 'loaded.package.name', '')
       },
       set (name) {
-        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+        const pkg = cloneDeep(get(this, 'loaded.package', {}))
         pkg.name = name
         this.updateLoaded({ package: pkg })
       }
     },
     public: {
       get () {
-        return _.get(this, 'loaded.package.public', false)
+        return get(this, 'loaded.package.public', false)
       },
       set (isPublic) {
-        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+        const pkg = cloneDeep(get(this, 'loaded.package', {}))
         pkg.public = isPublic
         this.updateLoaded({ package: pkg })
       }
     },
     dependencies () {
-      const list = _.get(this, 'loaded.package.dependencies', {})
+      const list = get(this, 'loaded.package.dependencies', {})
       return Object.keys(list).reduce((a, b) => {
         a.push({
           name: b,
@@ -186,7 +186,7 @@ export default {
       }, [])
     },
     resDependencies () {
-      return _.get(this, 'loaded.resDependencies', [])
+      return get(this, 'loaded.resDependencies', [])
     }
   }
 }

@@ -1,11 +1,12 @@
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
+import union from 'lodash-es/union'
 import { transform } from '@babel/standalone'
 
-const getDependencies = loaded => {
-  const dependencies = _.get(loaded, 'package.dependencies', null)
-  const resDependencies = _.get(loaded, 'resDependencies', null)
+const getDependencies = (loaded: IObject) => {
+  const dependencies = get(loaded, 'package.dependencies', null)
+  const resDependencies = get(loaded, 'resDependencies', null)
   const deps = Object.keys(dependencies).map(k => `${k}@${dependencies[k]}`)
-  return _.union(resDependencies, deps)
+  return union(resDependencies, deps)
 }
 
 /**
@@ -14,11 +15,11 @@ const getDependencies = loaded => {
  * @param  {Object} config Integration configuration
  * @return {Worker}        New Web Worker
  */
-export default async (loaded, config) => {
+export default async (loaded: IObject, config: IObject) => {
   if (!loaded)
     return new Worker()
 
-  const source = _.get(loaded, 'source', '')
+  const source = get(loaded, 'source', '')
   if (source === '')
     return new Worker()
 
@@ -45,7 +46,7 @@ export default async (loaded, config) => {
   } catch (e) {
     config = '{}'
   }
-  let code = `
+  const code = `
     const CONFIG = ${config};
     ${source}
   `

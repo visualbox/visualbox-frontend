@@ -3,10 +3,12 @@ v-toolbar(dense flat)
   slot
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'ContextToolbar'
-}
+})
 </script>
 
 <style lang="stylus" scoped>

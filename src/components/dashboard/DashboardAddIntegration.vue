@@ -33,11 +33,10 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { WorkerHandler } from '@/service'
-import { parseConfig } from '@/lib/utils'
+import { parseConfig, cloneDeep } from '@/lib/utils'
 
 export default {
   name: 'DashboardAddIntegration',
@@ -73,7 +72,7 @@ export default {
   },
   watch: {
     selectedId: {
-      handler: function (newVal, oldVal) {
+      handler (newVal, oldVal) {
         // Don't load local config model if not changed
         if (newVal === null)
           return
@@ -81,12 +80,12 @@ export default {
           return
 
         // Create local config model
-        let configModel = this.config.variables.reduce((acc, cur) => {
+        const configModel = this.config.variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
 
-        this.model = _.cloneDeep(configModel)
+        this.model = cloneDeep(configModel)
       },
       deep: true
     }

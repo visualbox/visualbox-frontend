@@ -53,7 +53,7 @@ grid-layout#dashboard-layout(
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import { cloneDeep, difference } from '@/lib/utils'
@@ -75,7 +75,7 @@ export default {
     ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     widgets () {
-      return _.get(this, 'loaded.widgets', [])
+      return get(this, 'loaded.widgets', [])
     }
   },
   methods: {
@@ -105,12 +105,12 @@ export default {
         this.DASHBOARD_REMOVE_WIDGET(i)
     },
     isFocused (wI) {
-      return wI === _.get(this, 'focusedWidget.i', null)
+      return wI === get(this, 'focusedWidget.i', null)
     }
   },
   watch: {
     widgets: {
-      handler: function (widgets) {
+      handler (widgets) {
         const layout = this.layout
 
         // Copy new widgets to layout system and let them render
@@ -137,7 +137,7 @@ export default {
       deep: true
     },
     data: {
-      handler: function (newVal) {
+      handler (newVal) {
         IFrameHandler.onDataChange(this.widgets, newVal)
       },
       deep: true

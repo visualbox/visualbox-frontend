@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import {
@@ -95,7 +95,7 @@ export default {
     ...mapGetters('Dashboard', ['focusedIntegration', 'focusedWidget']),
     label: {
       get () {
-        return _.get(this, 'loaded.label', '')
+        return get(this, 'loaded.label', '')
       },
       set (label) {
         this.updateLoaded({ label })

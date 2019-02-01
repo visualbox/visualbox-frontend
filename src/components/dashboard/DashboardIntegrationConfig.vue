@@ -18,11 +18,11 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import debounce from 'lodash-es/debounce'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { WorkerHandler } from '@/service'
-import { parseConfig } from '@/lib/utils'
+import { parseConfig, cloneDeep } from '@/lib/utils'
 
 export default {
   name: 'DashboardIntegrationConfig',
@@ -51,7 +51,7 @@ export default {
   },
   watch: {
     focusedIntegration: {
-      handler: function (newVal, oldVal) {
+      handler (newVal, oldVal) {
         // Don't load local config model if not changed
         if (newVal === null)
           return
@@ -59,23 +59,23 @@ export default {
           return
 
         // Create local config model
-        let configModel = this.config.variables.reduce((acc, cur) => {
+        const configModel = this.config.variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
 
         // Apply integration config model on local (true) model
-        for (let name in this.focusedIntegration.settings.config) {
+        for (const name in this.focusedIntegration.settings.config) {
           if (configModel.hasOwnProperty(name))
             configModel[name] = this.focusedIntegration.settings.config[name]
         }
-        this.model = _.cloneDeep(configModel)
-        this.label = _.cloneDeep(this.focusedIntegration.settings.label)
+        this.model = cloneDeep(configModel)
+        this.label = cloneDeep(this.focusedIntegration.settings.label)
       },
       deep: true
     },
     settings: {
-      handler: function (settings) {
+      handler (settings) {
         this.updateFocusedIntegration({ settings })
         // Send argument bcs debounce may fire when this.focusedIntegration value is gone
         this.restartFocusedWorker(this.focusedIntegration)
@@ -86,7 +86,7 @@ export default {
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
-    restartFocusedWorker: _.debounce(function (integration) {
+    restartFocusedWorker: debounce(integration => {
       // Restart worker
       WorkerHandler.end(integration.i)
       WorkerHandler.register([ integration ])

@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -32,13 +32,13 @@ export default {
   methods: {
     ...mapActions('Dashboard', ['addWidget']),
     color (item) {
-      return _.get(item, 'package.color', '#FFF')
+      return get(item, 'package.color', '#FFF')
     },
     icon (item) {
-      return _.get(item, 'package.icon', false)
+      return get(item, 'package.icon', false)
     },
     name (item) {
-      return _.get(item, 'package.name', 'Undefined')
+      return get(item, 'package.name', 'Undefined')
     }
   }
 }

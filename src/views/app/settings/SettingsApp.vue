@@ -11,11 +11,12 @@ v-container(fluid fill-height)
     )
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-export default {
+export default Vue.extend({
   name: 'SettingsApp',
   data: () => ({
     localTheme: false
@@ -27,7 +28,7 @@ export default {
   methods: {
     ...mapActions('Cognito', ['fetchSession']),
     ...mapActions('App', ['setSnackbar']),
-    async changeTheme (val) {
+    async changeTheme (val: boolean) {
       try {
         const theme = val ? 'light' : 'dark'
         await Auth.updateUserAttributes(this.user, {
@@ -45,7 +46,7 @@ export default {
   mounted () {
     this.localTheme = this.theme !== 'dark'
   }
-}
+})
 </script>
 
 <style lang="stylus" scoped>

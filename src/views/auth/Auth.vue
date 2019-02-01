@@ -6,11 +6,12 @@ v-container(fluid fill-height)
         router-view
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { authGuard } from '@/mixins'
 
-export default {
+export default Vue.extend({
   name: 'Auth',
   mixins: [ authGuard ]
-}
+})
 </script>

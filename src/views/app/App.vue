@@ -8,12 +8,14 @@
       router-view(v-if="appIsReady")
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
+// @ts-ignore
 import Split from 'split-grid'
 import { mapState, mapActions } from 'vuex'
 import { NavigationDrawer } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'App',
   components: { NavigationDrawer },
   computed: mapState('App', ['appIsReady']),
@@ -39,7 +41,7 @@ export default {
       this.setIsLoading(false)
     }
   }
-}
+})
 </script>
 
 <style lang="stylus" scoped>

@@ -17,7 +17,6 @@
     "algoliasearch": "^3.30.0",
     "css-element-queries": "^1.1.1",
     "localforage": "^1.7.3",
-    "lodash": "^4.17.10",
     "marked": "^0.5.1",
     "monaco-editor": "^0.15.1",
     "register-service-worker": "^1.5.2",
@@ -36,54 +35,32 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
-    "@vue/cli-plugin-babel": "^3.0.1",
-    "@vue/cli-plugin-eslint": "^3.0.1",
+    "@types/algoliasearch": "^3.30.1",
+    "@types/jest": "^23.3.13",
+    "@types/lodash-es": "^4.17.1",
+    "@types/uuid": "^3.4.4",
+    "@types/vivus": "^0.4.0",
+    "@vue/cli-plugin-babel": "^3.4.0",
     "@vue/cli-plugin-pwa": "^3.3.0",
-    "@vue/cli-plugin-unit-jest": "^3.0.1",
-    "@vue/cli-service": "^3.0.1",
-    "@vue/eslint-config-standard": "^3.0.1",
+    "@vue/cli-plugin-typescript": "^3.3.0",
+    "@vue/cli-plugin-unit-jest": "^3.3.0",
+    "@vue/cli-service": "^3.4.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "babel-core": "^6.26.3",
-    "babel-eslint": "^10.0.1",
-    "babel-jest": "^23.0.1",
-    "eslint": "^5.12.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^5.1.0",
+    "jest": "^24.0.0",
+    "lodash-es": "^4.17.11",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
     "raw-loader": "^0.5.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.4",
     "vue-cli-plugin-vuetify": "^0.1.6",
     "vue-template-compiler": "^2.5.22",
     "vuetify-loader": "^1.1.1",
     "webpack": "^4.28.4",
     "webpack-bundle-analyzer": "^3.0.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "json",
-      "vue"
-    ],
-    "transform": {
-      "^.+\\.vue$": "vue-jest",
-      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub",
-      "^.+\\.jsx?$": "babel-jest"
-    },
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "snapshotSerializers": [
-      "jest-serializer-vue"
-    ],
-    "testMatch": [
-      "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
-    ],
-    "testURL": "http://localhost/"
   }
 }

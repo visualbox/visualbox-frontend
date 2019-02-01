@@ -1,18 +1,18 @@
-import * as _ from 'lodash'
+import isObject from 'lodash-es/isObject'
 
 /**
  * Deep merge two objects.
  * @param target
  * @param ...sources
  */
-const mergeDeep = (target, ...sources) => {
+const mergeDeep = (target: IObject, ...sources: IObject[]): IObject => {
   if (!sources.length)
     return target
-  const source = sources.shift()
+  const source = sources.shift() || {}
 
-  if (_.isObject(target) && _.isObject(source)) {
+  if (isObject(target) && isObject(source)) {
     for (const key in source) {
-      if (_.isObject(source[key])) {
+      if (isObject(source[key])) {
         if (!target[key])
           Object.assign(target, { [key]: {} })
         mergeDeep(target[key], source[key])

@@ -27,11 +27,12 @@ div
     ) Next
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { proxyValue } from '@/mixins'
 
-export default {
+export default Vue.extend({
   name: 'PartialEmail',
   mixins: [ proxyValue ]
-}
+})
 </script>

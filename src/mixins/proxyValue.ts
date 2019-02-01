@@ -1,13 +1,15 @@
-export default {
+import Vue from 'vue'
+
+export default Vue.extend({
   props: ['value'],
   computed: {
     internalValue: {
-      get () {
+      get (): any {
         return this.value
       },
-      set (val) {
+      set (val: any) {
         this.$emit('input', val)
       }
     }
   }
-}
+})

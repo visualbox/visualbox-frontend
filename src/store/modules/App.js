@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import clone from 'lodash-es/clone'
 import * as t from '@/store/types'
 
 const set = property => (store, payload) => (store[property] = payload)
@@ -17,7 +17,7 @@ const mutations = {
   [t.APP_SET_APP_IS_READY]: set('appIsReady'),
   [t.APP_SET_IS_LOADING]: set('isLoading'),
   [t.APP_SET_SNACKBAR] (state, payload) {
-    state.snackbar = _.clone(payload)
+    state.snackbar = clone(payload)
   }
 }
 

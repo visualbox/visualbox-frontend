@@ -1,10 +1,11 @@
 <template lang="pug">
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { mapActions } from 'vuex'
 
-export default {
+export default Vue.extend({
   name: 'SignOut',
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar', 'reset']),
@@ -25,5 +26,5 @@ export default {
       this.$router.push('/')
     }
   }
-}
+})
 </script>

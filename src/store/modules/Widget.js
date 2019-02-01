@@ -173,7 +173,7 @@ const getters = {
    */
   loadedDiff ({ loaded }, getters) {
     try {
-      let diff = difference(loaded, getters.widgetById(loaded.id))
+      const diff = difference(loaded, getters.widgetById(loaded.id))
 
       /**
        * If package is in diff, meaning it has been changed,

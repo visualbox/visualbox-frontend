@@ -17,10 +17,11 @@
         v-icon {{ item.icon }}
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { ContextToolbar } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'HelpCtx',
   components: { ContextToolbar },
   data: () => ({
@@ -31,5 +32,5 @@ export default {
       { label: 'Configuration Types', icon: 'mdi-json', to: '/app/h/config-types' }
     ]
   })
-}
+})
 </script>

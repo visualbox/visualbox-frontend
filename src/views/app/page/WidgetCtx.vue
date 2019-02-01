@@ -1,6 +1,5 @@
 <template lang="pug">
 #widget-ctx(v-if="loaded")
-  search-dependencies(:show.sync="dialog")
   context-toolbar
     v-btn(
       icon
@@ -84,23 +83,19 @@
     ) Add Dependency
 </template>
 
-<script>
-import * as _ from 'lodash'
+<script lang="ts">
+import Vue from 'vue'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
-import { SearchDependencies } from '@/components/dialog'
 import { cloneDeep } from '@/lib/utils'
 import FILE_TYPES from '@/lib/fileTypes'
 
-export default {
+export default Vue.extend({
   name: 'WidgetCtx',
-  components: {
-    ContextToolbar,
-    SearchDependencies
-  },
+  components: { ContextToolbar },
   data: () => ({
     hoverIndex: null,
-    dialog: false,
     FILE_TYPES,
     open: {
       files: true,
@@ -123,27 +118,27 @@ export default {
     ...mapState('Widget', ['loaded', 'tab']),
     name: {
       get () {
-        return _.get(this, 'loaded.package.name', '')
+        return get(this, 'loaded.package.name', '')
       },
-      set (name) {
-        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+      set (name: string) {
+        const pkg = cloneDeep(get(this, 'loaded.package', {}))
         pkg.name = name
         this.updateLoaded({ package: pkg })
       }
     },
     public: {
       get () {
-        return _.get(this, 'loaded.package.public', false)
+        return get(this, 'loaded.package.public', false)
       },
-      set (isPublic) {
-        let pkg = cloneDeep(_.get(this, 'loaded.package', {}))
+      set (isPublic: boolean) {
+        const pkg = cloneDeep(get(this, 'loaded.package', {}))
         pkg.public = isPublic
         this.updateLoaded({ package: pkg })
       }
     },
-    dependencies () {
-      const list = _.get(this, 'loaded.package.dependencies', {})
-      return Object.keys(list).reduce((a, b) => {
+    dependencies (): object[] {
+      const list: any = get(this, 'loaded.package.dependencies', {})
+      return Object.keys(list).reduce((a: object[], b) => {
         a.push({
           package: b,
           version: list[b]
@@ -152,5 +147,5 @@ export default {
       }, [])
     }
   }
-}
+})
 </script>

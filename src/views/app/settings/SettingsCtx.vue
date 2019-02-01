@@ -17,10 +17,11 @@
         v-icon {{ item.icon }}
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { ContextToolbar } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'SettingsCtx',
   components: { ContextToolbar },
   data: () => ({
@@ -29,5 +30,5 @@ export default {
       { label: 'Application', icon: 'mdi-settings', to: '/app/s/app' }
     ]
   })
-}
+})
 </script>

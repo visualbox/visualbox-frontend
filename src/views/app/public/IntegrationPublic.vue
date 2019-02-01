@@ -45,7 +45,7 @@
 
 <script>
 import marked from 'marked'
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
 import FILE_TYPES from '@/lib/fileTypes'
@@ -94,7 +94,7 @@ export default {
     ]
   }),
   watch: {
-    '$route.params.id': async function () {
+    async '$route.params.id' () {
       this.tab = 0
       try {
         await this.loadPublic(this.$route.params.id)
@@ -109,8 +109,8 @@ export default {
     ...mapGetters('App', ['theme']),
     loaded () {
       try {
-        const item = this.public.find(item => item.id === this.$route.params.id)
-        return typeof item === 'undefined' ? null : item
+        const item = this.public.find(({ id }) => id === this.$route.params.id)
+        return item || null
       } catch (e) {
         return null
       }
@@ -120,7 +120,7 @@ export default {
     },
     compiledMarkdown () {
       try {
-        const readme = _.get(this, 'loaded.readme', '')
+        const readme = get(this, 'loaded.readme', '')
         return marked(readme, {
           sanitize: true,
           gfm: true
@@ -132,13 +132,13 @@ export default {
     editorModel () {
       if (this.file.key === 'package') {
         try {
-          return JSON.stringify(_.get(this, 'loaded.package', {}), null, 2)
+          return JSON.stringify(get(this, 'loaded.package', {}), null, 2)
         } catch (e) {
           return '{}'
         }
       }
 
-      return _.get(this, `loaded.${this.file.key}`, '')
+      return get(this, `loaded.${this.file.key}`, '')
     }
   },
   methods: {

@@ -89,7 +89,8 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
+import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations } from 'vuex'
 import { InputTypes } from '@/components'
 import { parseConfig } from '@/lib/utils'
@@ -110,18 +111,18 @@ export default {
   computed: {
     ...mapState('Integration', ['loaded', 'layoutHelper']),
     parsedConfig () {
-      const config = _.get(this, 'loaded.config', '')
+      const config = get(this, 'loaded.config', '')
       return parseConfig(config)
     },
     source () {
-      return _.get(this, 'loaded.source', '')
+      return get(this, 'loaded.source', '')
     }
   },
   watch: {
     parsedConfig: {
       immediate: true,
       deep: true,
-      handler: function () {
+      handler () {
         // Create local config model
         this.model = this.parsedConfig.variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
@@ -130,14 +131,14 @@ export default {
       }
     },
     model: {
-      handler: _.debounce(function () {
+      handler: debounce(function () {
         this.restartWorker()
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     },
     source: {
       immediate: true,
-      handler: _.debounce(function () {
+      handler: debounce(function () {
         this.restartWorker()
       }, process.env.VUE_APP_COMMIT_DEBOUNCE)
     },
@@ -168,7 +169,7 @@ export default {
           this.worker = null
         }
 
-        const loaded = _.get(this, 'loaded', null)
+        const loaded = get(this, 'loaded', null)
         const config = this.model
 
         // Create worker and hook onmessage/onerror callback

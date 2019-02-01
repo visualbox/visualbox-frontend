@@ -65,7 +65,8 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
+import debounce from 'lodash-es/debounce'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 import { widgetsIndex } from '@/lib/algoliasearch'
@@ -108,7 +109,7 @@ export default {
         this.setIsLoading(false)
       }
     },
-    search: _.debounce(function (query) {
+    search: debounce(function (query) {
       if (!query || query === '')
         return
 
@@ -133,7 +134,7 @@ export default {
       })
     }, process.env.VUE_APP_SEARCH_DEBOUNCE),
     name (item) {
-      return _.get(item, 'package.name', 'Untitled')
+      return get(item, 'package.name', 'Untitled')
     }
   },
   async mounted () {

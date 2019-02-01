@@ -1,43 +1,43 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Home from '@/views/Home'
-import Auth from '@/views/auth/Auth'
-import SignIn from '@/views/auth/SignIn'
-import SignUp from '@/views/auth/SignUp'
-import Verify from '@/views/auth/Verify'
-import Forgot from '@/views/auth/Forgot'
-import App from '@/views/app/App'
-import SignOut from '@/views/app/SignOut'
+import Home from '@/views/Home.vue'
+import Auth from '@/views/auth/Auth.vue'
+import SignIn from '@/views/auth/SignIn.vue'
+import SignUp from '@/views/auth/SignUp.vue'
+import Verify from '@/views/auth/Verify.vue'
+import Forgot from '@/views/auth/Forgot.vue'
+import App from '@/views/app/App.vue'
+import SignOut from '@/views/app/SignOut.vue'
 
 // Index
-import DashboardsCtx from '@/views/app/index/DashboardsCtx'
-import DashboardsIndex from '@/views/app/index/DashboardsIndex'
-import IntegrationsCtx from '@/views/app/index/IntegrationsCtx'
-import IntegrationsIndex from '@/views/app/index/IntegrationsIndex'
-import WidgetsCtx from '@/views/app/index/WidgetsCtx'
-import WidgetsIndex from '@/views/app/index/WidgetsIndex'
+import DashboardsCtx from '@/views/app/index/DashboardsCtx.vue'
+import DashboardsIndex from '@/views/app/index/DashboardsIndex.vue'
+import IntegrationsCtx from '@/views/app/index/IntegrationsCtx.vue'
+import IntegrationsIndex from '@/views/app/index/IntegrationsIndex.vue'
+import WidgetsCtx from '@/views/app/index/WidgetsCtx.vue'
+import WidgetsIndex from '@/views/app/index/WidgetsIndex.vue'
 
 // Page
-import DashboardCtx from '@/views/app/page/DashboardCtx'
-import Dashboard from '@/views/app/page/Dashboard'
-import WidgetCtx from '@/views/app/page/WidgetCtx'
-import Widget from '@/views/app/page/Widget'
-import IntegrationCtx from '@/views/app/page/IntegrationCtx'
-import Integration from '@/views/app/page/Integration'
+import DashboardCtx from '@/views/app/page/DashboardCtx.vue'
+import Dashboard from '@/views/app/page/Dashboard.vue'
+import WidgetCtx from '@/views/app/page/WidgetCtx.vue'
+import Widget from '@/views/app/page/Widget.vue'
+import IntegrationCtx from '@/views/app/page/IntegrationCtx.vue'
+import Integration from '@/views/app/page/Integration.vue'
 
 // Public
-import WidgetPublic from '@/views/app/public/WidgetPublic'
-import IntegrationPublic from '@/views/app/public/IntegrationPublic'
+import WidgetPublic from '@/views/app/public/WidgetPublic.vue'
+import IntegrationPublic from '@/views/app/public/IntegrationPublic.vue'
 
 // Help
-import HelpCtx from '@/views/app/help/HelpCtx'
-import HelpIndex from '@/views/app/help/HelpIndex'
+import HelpCtx from '@/views/app/help/HelpCtx.vue'
+import HelpIndex from '@/views/app/help/HelpIndex.vue'
 
 // Settings
-import SettingsCtx from '@/views/app/settings/SettingsCtx'
-import SettingsIndex from '@/views/app/settings/SettingsIndex'
-import SettingsApp from '@/views/app/settings/SettingsApp'
+import SettingsCtx from '@/views/app/settings/SettingsCtx.vue'
+import SettingsIndex from '@/views/app/settings/SettingsIndex.vue'
+import SettingsApp from '@/views/app/settings/SettingsApp.vue'
 
 Vue.use(Router)
 

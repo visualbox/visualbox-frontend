@@ -4,16 +4,17 @@
  * @param  {Object} config Integration configuration
  * @return {String}        URI encoded string
  */
-export default (source, config) => {
+export default (source: string, config: IObject) => {
   // Compile code template
+  let configParsed: string
   try {
-    config = JSON.stringify(config)
+    configParsed = JSON.stringify(config)
   } catch (e) {
-    config = '{}'
+    configParsed = '{}'
   }
   let code = `
     <script type="text/javascript">
-      window.CONFIG = ${config};
+      window.CONFIG = ${configParsed};
       window.DATA = null;
 
       window.addEventListener('message', function (event) {

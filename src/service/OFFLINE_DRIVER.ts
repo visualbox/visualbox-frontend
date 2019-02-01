@@ -1,4 +1,4 @@
-import * as _ from 'lodash'
+import isArray from 'lodash-es/isArray'
 import uuid from 'uuid'
 import localforage from 'localforage'
 import _API from '@aws-amplify/api'
@@ -10,15 +10,15 @@ const API = localforage.createInstance({
   name: env
 })
 
-const setList = async (key, value, matchKey) => {
+const setList = async (key: string, value: any, matchKey: string) => {
   try {
-    let list = await API.getItem(key)
+    const list = await API.getItem(key)
 
     /**
      * Not an Array. Create Array, set value
      * and return.
      */
-    if (!_.isArray(list))
+    if (!isArray(list))
       return await API.setItem(key, [ value ])
 
     const index = list.findIndex(item => item[matchKey] === value[matchKey])
@@ -37,7 +37,7 @@ const setList = async (key, value, matchKey) => {
   }
 }
 
-const post = async (type, item) => {
+const post = async (type: string, item: IObject) => {
   try {
     const key = `${type}/${item.id}`
     await API.setItem(key, item)
@@ -50,11 +50,11 @@ const post = async (type, item) => {
   }
 }
 
-const putParam = async (type, id, body) => {
+const putParam = async (type: string, id: string, body: IObject) => {
   try {
     const key = `${type}/${id}`
-    const old = await API.getItem(key) // TODO: handle not found
-    let merged = mergeDeep(old, body)
+    const old: IObject = await API.getItem(key) // TODO: handle not found
+    const merged = mergeDeep(old, body)
 
     // Re-assign write protected properties
     merged.uid = old.uid
@@ -71,7 +71,7 @@ const putParam = async (type, id, body) => {
   }
 }
 
-export default async (method, path, opts = null) => {
+export default async (method: string, path: string, opts?: IObject) => {
   try {
     console.log(`OFFLINE: ${method} ${path} ${opts}`)
 
@@ -92,21 +92,21 @@ export default async (method, path, opts = null) => {
            * Get a public integration
            */
           if (resource === 'integration')
-            return _API.get(env, `/integration/${param}`)
+            return _API.get(env, `/integration/${param}`, null)
 
           /**
            * GET /widget/{id}
            * Get a public widget
            */
           else if (resource === 'widget')
-            return _API.get(env, `/widget/${param}`)
+            return _API.get(env, `/widget/${param}`, null)
 
           /**
            * GET /cdn/{package}
            * Turbo CDN
            */
           else if (resource === 'cdn')
-            return await _API.get(env, `/cdn/${param}`)
+            return await _API.get(env, `/cdn/${param}`, null)
         }
 
         const item = await API.getItem(`/${path}`)
@@ -213,7 +213,7 @@ export default async (method, path, opts = null) => {
          */
         if (param) {
           const id = param
-          const { body } = opts
+          const body = opts && opts.body ? opts.body : {}
 
           /**
            * PUT /dashboard/{id}
@@ -237,8 +237,8 @@ export default async (method, path, opts = null) => {
             return await putParam('/integration', id, body)
         }
         break
-      case 'del': return API.del(env, path, opts)
-      case 'head': return API.head(env, path, opts)
+      // case 'del': return API.del(env, path, opts)
+      // case 'head': return API.head(env, path, opts)
       default:
         console.warn(`OFFLINE: ${method} not applicable`)
         return null

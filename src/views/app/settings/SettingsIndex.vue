@@ -76,9 +76,9 @@ v-container(fluid fill-height)
 </template>
 
 <script>
-import * as _ from 'lodash'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
+import { cloneDeep } from '@/lib/utils'
 
 export default {
   name: 'SettingsIndex',
@@ -170,9 +170,14 @@ export default {
   async mounted () {
     try {
       const { attributes: { name, email } } = this.user
-      this.name = _.clone(name)
-      this.email = _.clone(email)
-    } catch (e) {}
+      this.name = cloneDeep(name)
+      this.email = cloneDeep(email)
+    } catch (e) {
+      this.setSnackbar({
+        type: 'error',
+        msg: e.message
+      })
+    }
   }
 }
 </script>

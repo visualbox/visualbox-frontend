@@ -69,11 +69,12 @@
 </template>
 
 <script>
-import * as _ from 'lodash'
+import debounce from 'lodash-es/debounce'
+import isString from 'lodash-es/isString'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import { parseConfig } from '@/lib/utils'
+import { parseConfig, cloneDeep } from '@/lib/utils'
 import { IFrameHandler } from '@/service'
 
 export default {
@@ -101,7 +102,7 @@ export default {
         const { r, g, b, a } = this.focusedWidget.settings.rgba
         return `rgba(${r}, ${g}, ${b}, ${a})`
       },
-      set: _.debounce(function (val) {
+      set: debounce(function (val) {
         const { rgba } = val
         this.updateFocusedWidget({ settings: { rgba } })
       }, 20)
@@ -114,7 +115,7 @@ export default {
   },
   watch: {
     focusedWidget: {
-      handler: function (newVal, oldVal) {
+      handler (newVal, oldVal) {
         // Don't load local config model if not changed
         if (newVal === null)
           return
@@ -122,17 +123,17 @@ export default {
           return
 
         // Create local config model
-        let configModel = this.config.variables.reduce((acc, cur) => {
+        const configModel = this.config.variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
 
         // Apply widget config model on local (true) model
-        for (let name in this.focusedWidget.settings.config) {
+        for (const name in this.focusedWidget.settings.config) {
           if (configModel.hasOwnProperty(name))
             configModel[name] = this.focusedWidget.settings.config[name]
         }
-        this.model = _.cloneDeep(configModel)
+        this.model = cloneDeep(configModel)
 
         // Load data source
         this.loadDataSource()
@@ -156,7 +157,7 @@ export default {
       deep: true
     },
     model: {
-      handler: function (config) {
+      handler (config) {
         this.updateFocusedWidget({ settings: { config } })
         // Send config updates to IFrame
         IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, config)
@@ -177,7 +178,7 @@ export default {
       let { source } = this.focusedWidget.settings
 
       // Source is not a String (defaul is null)
-      if (!_.isString(source))
+      if (!isString(source))
         source = ''
 
       this.dataSource = [ source ]

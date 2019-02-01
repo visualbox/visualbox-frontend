@@ -11,7 +11,7 @@ v-container#dashboard(
 </template>
 
 <script>
-import * as _ from 'lodash'
+import debounce from 'lodash-es/debounce'
 import { mapState, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { DashboardLayout } from '@/components/dashboard'
@@ -35,7 +35,7 @@ export default {
   },
   watch: {
     loaded: {
-      handler: _.debounce(async function (newVal, oldVal) {
+      handler: debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing dashboard
         if (newVal === null || oldVal === null || newVal.id !== oldVal.id)
           return
@@ -47,7 +47,12 @@ export default {
             msg: `Saved changes`,
             timeout: 1500
           })
-        } catch (e) {}
+        } catch (e) {
+          this.setSnackbar({
+            type: 'error',
+            msg: e.message
+          })
+        }
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     }

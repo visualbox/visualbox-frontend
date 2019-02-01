@@ -1,4 +1,5 @@
 import Vue from 'vue'
+// @ts-ignore https://github.com/vuetifyjs/vue-cli-plugin-vuetify/issues/43
 import Vuetify from 'vuetify/lib'
 import 'vuetify/src/stylus/app.styl'
 

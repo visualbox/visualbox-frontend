@@ -34,23 +34,21 @@ v-container(fluid)
         .display-1.font-weight-light.mt-4 by Pontus Edvard Aurdal at the University of Tromsø – the Arctic University of Norway
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import Vivus from 'vivus'
 
-export default {
+export default Vue.extend({
   name: 'Home',
-  data: () => ({
-    vivus: null
-  }),
   mounted () {
-    this.vivus = new Vivus('visualbox-animation', {
+    return new Vivus('visualbox-animation', {
       type: 'sync',
       duration: 100,
       animTimingFunction: Vivus.EASE_IN,
       file: require('../assets/img/visualbox.svg')
     })
   }
-}
+})
 </script>
 
 <style lang="stylus" scoped>

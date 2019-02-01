@@ -55,7 +55,8 @@
 <script>
 import Split from 'split-grid'
 import marked from 'marked'
-import * as _ from 'lodash'
+import get from 'lodash-es/get'
+import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
 import { HelperWidget } from '@/components/helper'
@@ -104,7 +105,7 @@ export default {
   }),
   watch: {
     loaded: {
-      handler: _.debounce(async function (newVal, oldVal) {
+      handler: debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing widget
         if (newVal === null || oldVal === null || newVal.id !== oldVal.id)
           return
@@ -116,13 +117,18 @@ export default {
             msg: `Saved changes`,
             timeout: 1500
           })
-        } catch (e) {}
+        } catch (e) {
+          this.setSnackbar({
+            type: 'error',
+            msg: e.message
+          })
+        }
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     },
     showHelper: {
       immediate: true,
-      handler: function (val) {
+      handler (val) {
         // Remove all
         if (!val) {
           this.split.removeColumnGutter(1)
@@ -155,14 +161,14 @@ export default {
     ...mapGetters('App', ['theme']),
     localTab: {
       get () { return this.tab },
-      set: function (val) { this.WIDGET_SET_TAB(val) }
+      set (val) { this.WIDGET_SET_TAB(val) }
     },
     file () {
       return this.listFiles.find(({ tab }) => tab === this.localTab)
     },
     compiledMarkdown () {
       try {
-        const readme = _.get(this, 'loaded.readme', '')
+        const readme = get(this, 'loaded.readme', '')
         return marked(readme, {
           sanitize: true,
           gfm: true
@@ -181,13 +187,18 @@ export default {
           }
         }
 
-        return _.get(this, `loaded.${this.file.key}`, '')
+        return get(this, `loaded.${this.file.key}`, '')
       },
       set (val) {
         if (this.file.key === 'package') {
           try {
             this.updateLoaded({ package: JSON.parse(val) })
-          } catch (e) {}
+          } catch (e) {
+            this.setSnackbar({
+              type: 'error',
+              msg: e.message
+            })
+          }
 
           return
         }

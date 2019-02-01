@@ -1,5 +1,5 @@
-import * as _ from 'lodash'
 import * as t from '@/store/types'
+import clone from 'lodash-es/clone'
 import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
 
@@ -24,7 +24,7 @@ const mutations = {
     state.focusedIntegration = null
   },
   [t.DASHBOARD_SET_LIST] (state, payload) {
-    state.list = _.clone(payload)
+    state.list = clone(payload)
   },
   [t.DASHBOARD_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -33,17 +33,17 @@ const mutations = {
     state.list = state.list.filter(i => i.id !== id)
   },
   [t.DASHBOARD_SET_LOADED] (state, payload) {
-    state.loaded = _.cloneDeep(payload)
+    state.loaded = cloneDeep(payload)
   },
   [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
     state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   },
   [t.DASHBOARD_COMMIT_LOADED] (state, nullify = false) {
     const { loaded } = state
     let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = _.cloneDeep(loaded)
-    state.list = _.cloneDeep(state.list)
+    state.list[index] = cloneDeep(loaded)
+    state.list = cloneDeep(state.list)
 
     // Used when closing / exiting 'loaded'
     if (nullify)
@@ -68,7 +68,7 @@ const mutations = {
   },
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   },
   [t.DASHBOARD_REMOVE_WIDGET] (state, i) {
     const index = state.loaded.widgets.findIndex(w => w.i === i)
@@ -77,20 +77,20 @@ const mutations = {
       state.focusedWidget = null
 
     state.loaded.widgets.splice(index, 1)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   },
   [t.DASHBOARD_ADD_WIDGET] (state, widget) {
     state.loaded.widgets.push(widget)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   },
   [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
     state.loaded.integrations.push(integration)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   },
   [t.DASHBOARD_REMOVE_INTEGRATION] (state, i) {
     const index = state.loaded.integrations.findIndex(addedIntegration => addedIntegration.i === i)
     state.loaded.integrations.splice(index, 1)
-    state.loaded = _.cloneDeep(state.loaded)
+    state.loaded = cloneDeep(state.loaded)
   }
 }
 

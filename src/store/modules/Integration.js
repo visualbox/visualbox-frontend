@@ -1,5 +1,5 @@
-import * as _ from 'lodash'
 import * as t from '@/store/types'
+import get from 'lodash-es/get'
 import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
 
@@ -24,7 +24,7 @@ const getVersionName = str => {
  * @return {Object}       Integration apckage object
  */
 const getPkg = state => {
-  let pkg = cloneDeep(_.get(state, 'loaded.package', {}))
+  let pkg = cloneDeep(get(state, 'loaded.package', {}))
   if (!pkg.hasOwnProperty('dependencies'))
     pkg.dependencies = {}
   return pkg

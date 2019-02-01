@@ -65,7 +65,7 @@ export default {
     }
   }),
   watch: {
-    '$route.params.id': async function () {
+    async '$route.params.id' () {
       this.tab = 0
       try {
         await this.loadPublic(this.$route.params.id)
@@ -80,8 +80,8 @@ export default {
     ...mapGetters('App', ['theme']),
     loaded () {
       try {
-        const item = this.public.find(item => item.id === this.$route.params.id)
-        return typeof item === 'undefined' ? null : item
+        const item = this.public.find(({ id }) => id === this.$route.params.id)
+        return item || null
       } catch (e) {
         return null
       }

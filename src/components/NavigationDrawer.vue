@@ -56,8 +56,10 @@
       router-view(name="context")
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'NavigationDrawer',
   data: () => ({
     items: [
@@ -71,7 +73,7 @@ export default {
       { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
     ]
   })
-}
+})
 </script>
 
 <style lang="stylus" scoped>

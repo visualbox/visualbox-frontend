@@ -60,7 +60,6 @@ import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
 import { HelperWidget } from '@/components/helper'
-import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'Widget',
@@ -71,7 +70,6 @@ export default {
   },
   data: () => ({
     split: Split({}),
-    FILE_TYPES,
     listFiles: [
       {
         text: 'config.json',

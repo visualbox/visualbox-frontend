@@ -10,6 +10,7 @@ import Cognito from '@/store/modules/Cognito'
 import Dashboard from '@/store/modules/Dashboard'
 import Widget from '@/store/modules/Widget'
 import Integration from '@/store/modules/Integration'
+import Project from '@/store/modules/Project'
 import Data from '@/store/modules/Data'
 
 Vue.use(Vuex)
@@ -21,6 +22,7 @@ const store = new Vuex.Store({
     Dashboard,
     Widget,
     Integration,
+    Project,
     Data
   },
   // eslint-disable-next-line

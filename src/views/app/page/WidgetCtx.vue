@@ -89,14 +89,12 @@ import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { cloneDeep } from '@/lib/utils'
-import FILE_TYPES from '@/lib/fileTypes'
 
 export default Vue.extend({
   name: 'WidgetCtx',
   components: { ContextToolbar },
   data: () => ({
     hoverIndex: null,
-    FILE_TYPES,
     open: {
       files: true,
       dependencies: false,

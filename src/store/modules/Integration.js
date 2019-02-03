@@ -1,61 +1,16 @@
 import * as t from '@/store/types'
-import get from 'lodash-es/get'
 import API from '@/service/API'
 import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
 
-/**
- * Parse the version and name from a string.
- * @param  {String} str Package name
- * @return {Array}      [name, version] array
- */
-const getVersionName = str => {
-  const [ a, b, c ] = str.split('@')
-
-  // Name starts with '@' (e.g. @angular/core)
-  if (str.charAt(0) === '@')
-    return [ `@${b}`, c ]
-  else
-    return [ a, b ]
-}
-
-/**
- * Return a cloned object of an integration package.
- * @param {Object}  state Vuex state object
- * @return {Object}       Integration apckage object
- */
-const getPkg = state => {
-  let pkg = cloneDeep(get(state, 'loaded.package', {}))
-  if (!pkg.hasOwnProperty('dependencies'))
-    pkg.dependencies = {}
-  return pkg
-}
-
 const state = {
   list: [],
-  public: [],
-  loaded: null,
-  tab: 0,
-  showHelper: false,
-  layoutHelper: 'horizontal'
+  public: []
 }
 
 const mutations = {
   [t.INTEGRATION_RESET] (state) {
     state.list = []
     state.public = []
-    state.loaded = null
-    state.tab = 0
-    state.showHelper = false
-    state.layoutHelper = 'horizontal'
-  },
-  [t.INTEGRATION_SET_TAB] (state, payload) {
-    state.tab = payload
-  },
-  [t.INTEGRATION_SET_HELPER] (state, payload) {
-    state.showHelper = !!payload
-  },
-  [t.INTEGRATION_SET_HELPER_LAYOUT] (state, payload) {
-    state.layoutHelper = payload
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
     state.list = cloneDeep(payload)
@@ -65,9 +20,6 @@ const mutations = {
   },
   [t.INTEGRATION_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
-  },
-  [t.INTEGRATION_SET_LOADED] (state, payload) {
-    state.loaded = cloneDeep(payload)
   },
   [t.INTEGRATION_CONCAT_LOADED] (state, payload) {
     let merged = mergeDeep(state.loaded, payload)
@@ -153,10 +105,6 @@ const actions = {
       throw e
     } finally {}
   },
-  // Load an integration by making a local copy
-  load ({ commit, getters }, id) {
-    commit(t.INTEGRATION_SET_LOADED, getters.integrationById(id))
-  },
   // Update a loaded local integration
   updateLoaded ({ commit }, payload = {}) {
     payload.updatedAt = +new Date()
@@ -191,108 +139,6 @@ const actions = {
       throw e
     } finally {
       commit(t.INTEGRATION_SET_PUBLIC, result)
-    }
-  },
-  async resolveDependency ({ dispatch, state }, { action, list }) {
-    if (!list || list.length === 0)
-      return
-    action = action === 'ADD' ? 'ADD' : 'REMOVE'
-
-    const addDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        let { name, version } = deps[i]
-        version = typeof version === 'undefined' ? '*' : version
-        pkg.dependencies[name] = version
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    const addResDependencies = resDependencies => {
-      dispatch('updateLoaded', { resDependencies })
-    }
-
-    const removeDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        const name = deps[i]
-        if (pkg.dependencies.hasOwnProperty(name))
-          delete pkg.dependencies[name]
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    try {
-      // Parse string name and version
-      const newDeps = list.map(d => {
-        let [ name, version ] = getVersionName(d)
-        return { name, version }
-      })
-
-      if (action === 'ADD')
-        addDependencies(newDeps)
-      else
-        removeDependencies(newDeps.map(d => d.name))
-
-      // Resolve dependency list
-      let pkg = getPkg(state)
-      const res = await API.invoke('post', '/resolver', {
-        body: pkg.dependencies
-      })
-
-      // Parse error and revert accordingly
-      if (res.error) {
-        const { error } = res
-
-        switch (error) {
-          case 'PACKAGE_NOT_FOUND':
-            removeDependencies([ res.data.name ])
-            break
-          case 'UNSATISFIED_RANGE':
-            removeDependencies([ res.data.name ])
-            break
-          case 'MISSING_PEERS':
-            const peers = Object.keys(res.data).map(name => {
-              const requester = Object.keys(res.data[name])[0]
-              const version = res.data[name][requester]
-
-              // Add resolved requester dep
-              const [ rname, rversion ] = getVersionName(requester)
-              addDependencies([{
-                name: rname,
-                version: rversion
-              }])
-
-              return `${name}@${version}`
-            })
-
-            // Recursively add peer
-            await dispatch('resolveDependency', {
-              action: 'ADD',
-              list: peers
-            })
-            break
-          // Undo
-          default:
-            if (action === 'ADD')
-              removeDependencies(newDeps.map(d => d.name))
-            else
-              addDependencies(newDeps)
-        }
-      // OK
-      } else {
-        const { appDependencies, resDependencies } = res
-        const deps = Object.keys(appDependencies).map(name => {
-          const version = appDependencies[name].version
-          return { name, version }
-        })
-        const resDeps = Object.keys(resDependencies)
-        console.log(resDeps)
-        addDependencies(deps)
-        addResDependencies(resDeps)
-      }
-    } catch (e) {
-      console.log(e)
     }
   }
 }

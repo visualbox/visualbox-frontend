@@ -8,18 +8,13 @@
   )
     v-layout(column fill-height)
       v-list(two-line)
-        v-tooltip(
+        tooltip(
           v-for="item in items"
           :key="item.title"
-          :open-delay="0"
-          :close-delay="0"
-          color="black"
-          transition="fade-transition"
+          :text="item.title"
           right
         )
-          span {{ item.title }}
           v-list-tile(
-            slot="activator"
             :to="item.to"
             :exact="item.to === '/app'"
           )
@@ -30,18 +25,13 @@
               ) {{ item.icon }}
       v-spacer
       v-list(two-line)
-        v-tooltip(
+        tooltip(
           v-for="item in itemsBottom"
           :key="item.title"
-          :open-delay="0"
-          :close-delay="0"
-          color="black"
-          transition="fade-transition"
+          :text="item.title"
           right
         )
-          span {{ item.title }}
           v-list-tile(
-            slot="activator"
             :to="item.to"
             :exact="item.to === '/app'"
           )
@@ -58,9 +48,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { Tooltip } from '@/components'
 
 export default Vue.extend({
   name: 'NavigationDrawer',
+  components: { Tooltip },
   data: () => ({
     items: [
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
@@ -124,6 +116,8 @@ export default Vue.extend({
     >>> .v-list
       padding 0
       background unset
+      -webkit-transition none !important
+      transition none !important
 
       .v-list__tile
         -webkit-transition none !important
@@ -131,32 +125,6 @@ export default Vue.extend({
 
         &:hover
           background-color $vb-primary-list-hover
-
-      &.editor-list
-        .v-icon, .v-list__tile__content
-          color rgba(255, 255, 255, .7)
-
-        .v-list__tile
-          padding-left 40px
-
-          a, a:active, a:visited
-            color #FFF
-
-            &:hover
-              text-decoration underline
-
-        .no-hover
-          .v-list__tile
-            padding-left 16px
-
-            &:hover
-              background-color unset !important
-
-            &:before
-              display none
-
-        .container
-          padding-left 40px
 
       .active
         .v-icon, .v-list__tile__content

@@ -48,7 +48,6 @@ import marked from 'marked'
 import get from 'lodash-es/get'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, MonacoEditor } from '@/components'
-import FILE_TYPES from '@/lib/fileTypes'
 
 export default {
   name: 'IntegrationPublic',
@@ -57,7 +56,6 @@ export default {
     MonacoEditor
   },
   data: () => ({
-    FILE_TYPES,
     tab: 0,
     monacoOptions: {
       readOnly: true

@@ -96,12 +96,21 @@ input:-webkit-autofill
         background #424242
 
 .editor-tabs
-  .v-tabs__slider-wrapper
+  .v-tabs__item--active
+    box-shadow inset 0 -1px 0 #52b054
+
+  .v-icon
     -webkit-transition none !important
     transition none !important
 
-    .v-tabs__slider
-      height 1px
+    &.ml-2
+      margin-bottom -2px
+
+    &.mdi-circle-medium
+      color #52b054
+
+    &.hidden
+      color transparent
 
   .v-tabs__div:not(.black)
     font-weight unset

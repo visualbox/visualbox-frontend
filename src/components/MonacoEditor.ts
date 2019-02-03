@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export default Vue.extend({
+Vue.component('monaco-editor', Vue.extend({
   name: 'MonacoEditor',
 
   props: {
@@ -152,4 +152,4 @@ export default Vue.extend({
   render (h) {
     return h('div')
   }
-})
+}))

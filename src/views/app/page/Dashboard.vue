@@ -34,6 +34,10 @@ export default {
     }
   },
   watch: {
+    /**
+     * Watch if loaded dashboard changes (in any way)
+     * and debounce a commit so that progress is not lost.
+     */
     loaded: {
       handler: debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing dashboard
@@ -41,9 +45,9 @@ export default {
           return
 
         try {
-          await this.commitLoaded()
+          await this.commit()
           this.setSnackbar({
-            type: '',
+            type: 'info',
             msg: `Saved changes`,
             timeout: 1000
           })
@@ -59,13 +63,13 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded'])
+    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
   },
   beforeDestroy () {
-    this.closeLoaded()
+    this.commit(true)
   }
 }
 </script>

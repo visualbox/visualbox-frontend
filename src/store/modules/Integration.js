@@ -34,6 +34,15 @@ const mutations = {
       if (index < 0)
         integrations.splice(index, 1)
     })
+  },
+  [t.INTEGRATION_SET_PUBLIC] (state, payload) {
+    // Try to find existing
+    const index = state.public.findIndex(item => item.id === payload.id)
+
+    if (index < 0)
+      state.public.push(payload)
+    else
+      Vue.set(state.public, index, payload)
   }
 }
 
@@ -73,19 +82,10 @@ const actions = {
     } finally {}
   },
 
-  async commit ({ commit, getters }, project) {
+  async commit ({ commit }, project) {
     try {
-      const { id } = project
-      const old = getters.integrationById(id)
-      if (!old)
-        return
-
-      const { uid, createdAt } = old
-      project.uid = uid
-      project.createdAt = createdAt
-      project.updatedAt = +new Date()
-
       commit(t.INTEGRATION_COMMIT, project)
+      const { id } = project
       await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {
       throw e

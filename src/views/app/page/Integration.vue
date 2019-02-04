@@ -4,7 +4,7 @@ editor(v-if="ready")
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { Editor } from '@/components'
+import { Editor } from '@/components/editor'
 import { HelperIntegration } from '@/components/helper'
 import EventBus from '@/lib/eventBus'
 

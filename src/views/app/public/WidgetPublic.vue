@@ -50,14 +50,11 @@
 <script>
 import marked from 'marked'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { ContextToolbar, MonacoEditor } from '@/components'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'WidgetPublic',
-  components: {
-    ContextToolbar,
-    MonacoEditor
-  },
+  components: { ContextToolbar },
   data: () => ({
     tab: 0,
     monacoOptions: {

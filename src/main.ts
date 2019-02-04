@@ -13,7 +13,7 @@ import '@/lib/vuetify'
 // Services
 import '@/service/RegisterServiceWorker'
 
-import '@/components/MonacoEditor'
+import '@/components/editor/MonacoEditor'
 import App from '@/App.vue'
 
 Vue.config.productionTip = false

@@ -24,7 +24,7 @@
 <script>
 import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   name: 'DashboardSettings',
@@ -37,12 +37,8 @@ export default {
   computed: {
     ...mapState('Dashboard', ['loaded']),
     label: {
-      get () {
-        return this.loaded.label
-      },
-      set (label) {
-        this.updateLoaded({ label })
-      }
+      get () { return this.loaded.label },
+      set (label) { this.DASHBOARD_CONCAT_LOADED({ label }) }
     },
     bgc: {
       get () {
@@ -51,11 +47,11 @@ export default {
       },
       set: debounce(function (val) {
         const { rgba } = val
-        this.updateLoaded({ settings: { rgba } })
+        this.DASHBOARD_CONCAT_LOADED({ settings: { rgba } })
       }, 20)
     }
   },
-  methods: mapActions('Dashboard', ['updateLoaded'])
+  methods: mapMutations('Dashboard', ['DASHBOARD_CONCAT_LOADED'])
 }
 </script>
 

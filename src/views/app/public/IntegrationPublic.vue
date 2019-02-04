@@ -47,14 +47,11 @@
 import marked from 'marked'
 import get from 'lodash-es/get'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { ContextToolbar, MonacoEditor } from '@/components'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'IntegrationPublic',
-  components: {
-    ContextToolbar,
-    MonacoEditor
-  },
+  components: { ContextToolbar },
   data: () => ({
     tab: 0,
     monacoOptions: {

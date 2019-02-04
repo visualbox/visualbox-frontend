@@ -75,7 +75,7 @@ import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { parseConfig, cloneDeep } from '@/lib/utils'
-import * as projectUtils from '@/lib/utils/projectUtils'
+import { fileContents } from '@/lib/utils/projectUtils'
 import { IFrameHandler } from '@/service'
 
 export default {
@@ -97,7 +97,10 @@ export default {
     ...mapGetters('Data', ['dataTree']),
     ...mapState('Data', ['data']),
 
-    // Focused widget BGC
+    /**
+     * Focused widget BGC. Stored in widget
+     * settings metadata.
+     */
     bgc: {
       get () {
         const { r, g, b, a } = this.focusedWidget.settings.rgba
@@ -108,21 +111,26 @@ export default {
         this.updateFocusedWidget({ settings: { rgba } })
       }, 20)
     },
+
+    /**
+     * Load configuration definition from widget
+     * 'config.json' file and parse it.
+     */
     config () {
-      const { id } = this.focusedWidget
-      const widget = this.widgetById(id)
-      const contents = projectUtils.fileContents(widget, ['config.json'])
-      if (!contents) {
-        return {
-          error: ['Unable to parse widget configuration'],
-          variables: []
-        }
-      }
+      const widget = this.widgetById(this.focusedWidget.id)
+      if (!widget)
+        return { error: ['Unable to load widget'] }
+
+      const contents = fileContents(widget, ['config.json'])
+      if (!contents)
+        return { error: ['Unable to parse widget configuration'] }
+
       return parseConfig(contents)
     }
   },
   watch: {
     focusedWidget: {
+      deep: true,
       handler (newVal, oldVal) {
         // Don't load local config model if not changed
         if (newVal === null)
@@ -145,42 +153,59 @@ export default {
 
         // Load data source
         this.loadDataSource()
-      },
-      deep: true
+      }
     },
 
-    // Re-apply dataSource on data tree
-    // when dialog is opened
+    /**
+     * Re-apply dataSource on data tree
+     * when dialog is opened.
+     */
     dialog: {
       handler (newVal, oldVal) {
         if (oldVal === false)
           this.loadDataSource()
       }
     },
-    // Re-apply dataSource on data tree
+
+    /**
+     * dataTree from Data Vuex module has changed.
+     * Re-apply dataSource on data tree.
+     */
     dataTree: {
+      deep: true,
       handler () {
         this.loadDataSource()
-      },
-      deep: true
+      }
     },
+
+    /**
+     * Model is bound to Input Types component and is changed
+     * whenever the user changes input configurations.
+     */
     model: {
+      deep: true,
       handler (config) {
         this.updateFocusedWidget({ settings: { config } })
+
         // Send config updates to IFrame
         IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, config)
-      },
-      deep: true
+      }
     }
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
     ...mapActions('Dashboard', ['updateFocusedWidget']),
-    // Convenience method for instructing dataTree how to open
+
+    /**
+     * Convenience method for instructing
+     * dataTree how to open.
+     */
     loadDataSource () {
-      // Don't touch dataSource or dataSourceOpen when
-      // user in actively involved
-      if (this.dialog || this.focusedWidget === null)
+      /**
+       * Don't touch dataSource or dataSourceOpen when
+       * user in actively involved.
+       */
+      if (this.dialog || !this.focusedWidget)
         return
 
       let { source } = this.focusedWidget.settings
@@ -201,7 +226,10 @@ export default {
       }, [])
     },
 
-    // Update data source path when dialog is closed
+    /**
+     * Update Widget data source path when
+     * dialog is closed.
+     */
     updateDataSource () {
       this.dialog = false
       const source = this.dataSource[0]

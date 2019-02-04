@@ -11,7 +11,7 @@ export const pathMeta = (path: string) => {
     return null
 
   const pathSplit = path.split('/').filter(i => i !== '')
-  let folders = []
+  let folders: string[] = []
   let name
 
   if (pathSplit.length === 1)
@@ -34,12 +34,12 @@ interface IFilesArr {
 
 export const getUniqueName = (prefix: string, files: IFilesArr[]) => {
   let i = 1
-  let name = prefix
+  let uniqueName = prefix
   while (files.find(({ name }) => name === prefix)) {
-    name = `${prefix} (${i})`
+    uniqueName = `${prefix} (${i})`
     i++
   }
-  return name
+  return uniqueName
 }
 
 export const getFullPath = (folder: string, name: string) => {

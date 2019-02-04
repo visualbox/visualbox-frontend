@@ -23,21 +23,21 @@
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
       v-list-tile-action(v-if="index === hoverIndex")
-        v-btn(
-          flat icon
-          @click.stop="del(item.id)"
-        )
-          v-icon(small) mdi-trash-can-outline
+        tooltip(text="Delete" :open-delay="800" bottom)
+          v-icon(@click.stop="deleteDashboard(item.id)" small) mdi-trash-can-outline
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
-import { ContextToolbar } from '@/components'
+import { ContextToolbar, Tooltip } from '@/components'
 
 export default Vue.extend({
   name: 'DashboardsCtx',
-  components: { ContextToolbar },
+  components: {
+    ContextToolbar,
+    Tooltip
+  },
   data: () => ({
     hoverIndex: null
   }),
@@ -48,6 +48,10 @@ export default Vue.extend({
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Dashboard', ['create', 'del']),
+    deleteDashboard (id: string) {
+      if (confirm('Are you sure you want to delete the dashboard?'))
+        this.del(id)
+    },
     async submit () {
       this.setIsLoading(true)
       try {

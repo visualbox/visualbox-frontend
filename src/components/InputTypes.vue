@@ -37,10 +37,13 @@ div
     //- Slider type
     //- :value="internalValue[field.name]"
     //- @change="v => internalValue[field.name] = v"
+    //-
+    //- v-model="internalValue[field.name]"
     template(v-if="field.type === 'slider'")
       .ma-0 {{ field.label }}
       v-slider.mt-0(
-        v-model="internalValue[field.name]"
+        @change="v => internalValue[field.name] = v"
+        :value="internalValue[field.name]"
         :label="String(internalValue[field.name])"
         :max="field.max"
         :min="field.min"
@@ -91,6 +94,7 @@ div
 </template>
 
 <script>
+import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
 import { proxyValue } from '@/mixins'
 
@@ -105,9 +109,9 @@ export default {
     }
   },
   methods: {
-    inputColor (fieldName, { hex }) {
+    inputColor: debounce(function (fieldName, { hex }) {
       this.internalValue[fieldName] = hex
-    }
+    }, 20)
   }
 }
 </script>

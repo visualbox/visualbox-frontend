@@ -30,6 +30,7 @@ const state = {
   layoutHelper: 'horizontal',
 
   id: null,
+  uid: null,
   files: {},
   dependencies: {},
   settings: {},
@@ -47,6 +48,7 @@ const mutations = {
     state.layoutHelper = 'horizontal'
 
     state.id = null
+    state.uid = null
     state.files = {}
     state.dependencies = {}
     state.settings = {}
@@ -59,6 +61,7 @@ const mutations = {
     const copy = cloneDeep(payload)
 
     state.id = payload.id
+    state.uid = payload.uid
     state.files = parseFiles(copy)
     state.dependencies = parseDependencies(copy)
     state.settings = parseSettings(copy)

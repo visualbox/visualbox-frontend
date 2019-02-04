@@ -5,7 +5,7 @@ editor-ctx(v-if="ready")
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
-import { EditorCtx } from '@/components'
+import { EditorCtx } from '@/components/editor'
 
 export default Vue.extend({
   name: 'IntegrationCtx',

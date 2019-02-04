@@ -26,7 +26,7 @@
     "vivus": "^0.4.4",
     "vue": "^2.5.22",
     "vue-color": "^2.7.0",
-    "vue-grid-layout": "^2.3.0",
+    "vue-grid-layout": "2.3.0",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4",
     "vuetify": "^1.4.2",

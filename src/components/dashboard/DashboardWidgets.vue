@@ -3,20 +3,19 @@
   v-container.pa-3(grid-list-xs)
     v-layout(row wrap)
       v-flex(
-        xs4
-        v-for="(item, index) in list"
+        v-for="(item, index) in widgetList"
         :key="index"
         @click="addWidget(item.id)"
-        justify-center
+        justify-center xs4
       )
         v-card.text-xs-center
           v-card-text
             v-layout(column justify-center fill-height)
               v-icon(
-                v-if="icon(item)"
-                :color="color(item)"
-              ) {{ icon(item) }}
-              .caption {{ name(item) }}
+                v-if="item.icon"
+                :color="item.color"
+              ) {{ item.icon }}
+              .caption {{ item.name }}
 </template>
 
 <script>
@@ -28,20 +27,19 @@ export default {
   name: 'DashboardWidgets',
   computed: {
     ...mapState('Widget', ['list']),
-    ...mapState('Dashboard', ['loaded'])
-  },
-  methods: {
-    ...mapActions('Dashboard', ['addWidget']),
-    color (item) {
-      return packageJson(item, 'color', '#FFF')
-    },
-    icon (item) {
-      return packageJson(item, 'icon', false)
-    },
-    name (item) {
-      return packageJson(item, 'name', 'Untitled')
+    ...mapState('Dashboard', ['loaded']),
+    widgetList () {
+      return this.list.map(widget => {
+        return {
+          id: widget.id,
+          color: packageJson(widget, 'color', '#FFF'),
+          icon: packageJson(widget, 'icon', false),
+          name: packageJson(widget, 'name', 'Untitled')
+        }
+      })
     }
-  }
+  },
+  methods: mapActions('Dashboard', ['addWidget'])
 }
 </script>
 

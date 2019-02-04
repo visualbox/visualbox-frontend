@@ -54,7 +54,7 @@ grid-layout#dashboard-layout(
 
 <script>
 import get from 'lodash-es/get'
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import { cloneDeep, difference } from '@/lib/utils'
 import { IFrameHandler } from '@/service'
@@ -66,8 +66,7 @@ export default {
     GridItem
   },
   data: () => ({
-    layout: [],
-    foo: null
+    layout: []
   }),
   computed: {
     ...mapState('Dashboard', ['loaded', 'isEditing']),
@@ -80,12 +79,12 @@ export default {
   },
   methods: {
     ...mapMutations('Dashboard', [
+      'DASHBOARD_CONCAT_LOADED',
       'DASHBOARD_SET_FOCUSED_WIDGET',
       'DASHBOARD_REMOVE_WIDGET'
     ]),
-    ...mapActions('Dashboard', ['updateLoaded']),
     layoutUpdatedEvent (widgets) {
-      this.updateLoaded({ widgets })
+      this.DASHBOARD_CONCAT_LOADED({ widgets })
     },
     getWidgetStyle (settings) {
       const { r, g, b, a } = settings.rgba
@@ -110,6 +109,7 @@ export default {
   },
   watch: {
     widgets: {
+      deep: true,
       handler (widgets) {
         const layout = this.layout
 
@@ -133,14 +133,13 @@ export default {
             IFrameHandler.generate(newWidgets)
           })
         }
-      },
-      deep: true
+      }
     },
     data: {
+      deep: true,
       handler (newVal) {
         IFrameHandler.onDataChange(this.widgets, newVal)
-      },
-      deep: true
+      }
     }
   },
   created () {

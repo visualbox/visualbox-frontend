@@ -57,11 +57,8 @@
       v-list-tile-content
         v-list-tile-sub-title {{ name(item) }}
       v-list-tile-action(v-if="index === hoverIndex")
-        v-btn(
-          flat icon
-          @click.stop="del(item.id)"
-        )
-          v-icon(small) mdi-trash-can-outline
+        tooltip(text="Delete" :open-delay="800" bottom)
+          v-icon(@click.stop="deleteWidget(item.id)" small) mdi-trash-can-outline
 </template>
 
 <script>
@@ -71,11 +68,14 @@ import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 import { widgetsIndex } from '@/lib/algoliasearch'
 import { packageJson } from '@/lib/utils/projectUtils'
-import { ContextToolbar } from '@/components'
+import { ContextToolbar, Tooltip } from '@/components'
 
 export default {
   name: 'WidgetsCtx',
-  components: { ContextToolbar },
+  components: {
+    ContextToolbar,
+    Tooltip
+  },
   data: () => ({
     showSearch: false,
     loadingSearch: false,
@@ -96,6 +96,10 @@ export default {
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Widget', ['create', 'del']),
+    deleteWidget (id) {
+      if (confirm('Are you sure you want to delete the widget?'))
+        this.del(id)
+    },
     async submit () {
       this.showSearch = false
       this.setIsLoading(true)

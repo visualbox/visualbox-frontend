@@ -95,7 +95,7 @@ Vue.component('monaco-editor', Vue.extend({
 
       this.editor = monacoInstance.editor.create(this.$el, options)
       this.editor.getModel().updateOptions({ tabSize: 2 })
-      
+
       /*
       this.$emit('editorDidMount', this.editor)
       this.editor.onContextMenu((e: monaco.editor.IEditorMouseEvent) => {

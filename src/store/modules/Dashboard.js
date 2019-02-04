@@ -1,12 +1,14 @@
+import Vue from 'vue'
 import * as t from '@/store/types'
 import clone from 'lodash-es/clone'
 import API from '@/service/API'
-import * as projectUtils from '@/lib/utils/projectUtils'
-import { difference, mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
+import { mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
   list: [],
   loaded: null,
+
   isEditing: false,
   isFullscreen: false,
   isAddingIntegration: false,
@@ -24,32 +26,8 @@ const mutations = {
     state.focusedWidget = null
     state.focusedIntegration = null
   },
-  [t.DASHBOARD_SET_LIST] (state, payload) {
-    state.list = clone(payload)
-  },
-  [t.DASHBOARD_CONCAT_LIST] (state, payload) {
-    state.list = state.list.concat(payload)
-  },
-  [t.DASHBOARD_DELETE_LIST] (state, id) {
-    state.list = state.list.filter(i => i.id !== id)
-  },
-  [t.DASHBOARD_SET_LOADED] (state, payload) {
-    state.loaded = cloneDeep(payload)
-  },
-  [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = cloneDeep(state.loaded)
-  },
-  [t.DASHBOARD_COMMIT_LOADED] (state, nullify = false) {
-    const { loaded } = state
-    let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = cloneDeep(loaded)
-    state.list = cloneDeep(state.list)
 
-    // Used when closing / exiting 'loaded'
-    if (nullify)
-      state.loaded = null
-  },
+  //------------ META
   [t.DASHBOARD_SET_EDITING] (state, payload) {
     state.isEditing = payload
   },
@@ -67,31 +45,57 @@ const mutations = {
     state.focusedWidget = null
     state.focusedIntegration = payload
   },
+
+  //------------ LIST
+  [t.DASHBOARD_SET_LIST] (state, payload) {
+    state.list = clone(payload)
+  },
+  [t.DASHBOARD_CONCAT_LIST] (state, payload) {
+    state.list = state.list.concat(payload)
+  },
+  [t.DASHBOARD_DELETE_LIST] (state, id) {
+    state.list = state.list.filter(i => i.id !== id)
+  },
+
+  //------------ LOADED
+  [t.DASHBOARD_SET_LOADED] (state, payload) {
+    state.loaded = cloneDeep(payload)
+  },
+  [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
+    state.loaded = mergeDeep(state.loaded, payload)
+  },
+  [t.DASHBOARD_COMMIT_LOADED] (state) {
+    const { loaded } = state
+    const index = state.list.findIndex(({ id }) => id === loaded.id)
+    if (index >= 0)
+      Vue.set(state.list, index, loaded)
+  },
+
+  //------------ WIDGET /INTEGRATION
   [t.DASHBOARD_CONCAT_FOCUSED] (state, { focused, payload }) {
     focused = mergeDeep(focused, payload)
     state.loaded = cloneDeep(state.loaded)
   },
+  [t.DASHBOARD_ADD_WIDGET] (state, widget) {
+    const index = state.loaded.widgets.length
+    Vue.set(state.loaded.widgets, index, widget)
+  },
+  [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
+    const index = state.loaded.integrations.length
+    Vue.set(state.loaded.integrations, index, integration)
+  },
   [t.DASHBOARD_REMOVE_WIDGET] (state, i) {
     const index = state.loaded.widgets.findIndex(w => w.i === i)
 
+    // Unfocus if currently focused
     if (state.focusedWidget === i)
       state.focusedWidget = null
 
-    state.loaded.widgets.splice(index, 1)
-    state.loaded = cloneDeep(state.loaded)
-  },
-  [t.DASHBOARD_ADD_WIDGET] (state, widget) {
-    state.loaded.widgets.push(widget)
-    state.loaded = cloneDeep(state.loaded)
-  },
-  [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
-    state.loaded.integrations.push(integration)
-    state.loaded = cloneDeep(state.loaded)
+    Vue.delete(state.loaded.widgets, index)
   },
   [t.DASHBOARD_REMOVE_INTEGRATION] (state, i) {
-    const index = state.loaded.integrations.findIndex(addedIntegration => addedIntegration.i === i)
-    state.loaded.integrations.splice(index, 1)
-    state.loaded = cloneDeep(state.loaded)
+    const index = state.loaded.integrations.findIndex(a => a.i === i)
+    Vue.delete(state.loaded.integrations, index)
   }
 }
 
@@ -128,44 +132,38 @@ const actions = {
       throw e
     } finally {}
   },
-  // Load a dashboard by making a local copy
+
+  /**
+   * Load a dashboard by making a copy and
+   * calling Integration/Widget cleaning so that
+   * non-existing Integrations/Widgets gets removed.
+   */
   load ({ commit, getters }, id) {
     const dashboard = getters.dashboardById(id)
     commit(`Integration/${t.INTEGRATION_CLEAN_DASHBOARD}`, dashboard.integrations, { root: true })
     commit(`Widget/${t.WIDGET_CLEAN_DASHBOARD}`, dashboard.widgets, { root: true })
     commit(t.DASHBOARD_SET_LOADED, dashboard)
   },
-  // Update a loaded local dashboard
-  updateLoaded ({ commit, dispatch }, payload = {}) {
-    payload.updatedAt = +new Date()
-    commit(t.DASHBOARD_CONCAT_LOADED, payload)
-  },
-  async closeLoaded ({ commit, dispatch, state, getters }) {
-    dispatch('updateLoaded') // To add timestamp
+  async commit ({ commit, state }, unload = false) {
     try {
-      const { id } = state.loaded
-      const diff = cloneDeep(getters.loadedDiff)
-      commit(t.DASHBOARD_COMMIT_LOADED, true) // Must come before API call
-      commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false) // Close potentially open adding integration
-      commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null) // Close potentially open focused widget
-      commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null) // Close potentially open focused integration
-      await API.invoke('put', `/dashboard/${id}`, { body: diff })
-    } catch (e) {
-      throw e
-    }
-  },
-  // Commit a loaded local dashboard
-  async commitLoaded ({ commit, state, getters }) {
-    try {
-      await API.invoke('put', `/dashboard/${state.loaded.id}`, { body: getters.loadedDiff })
       commit(t.DASHBOARD_COMMIT_LOADED)
+      const loaded = cloneDeep(state.loaded)
+
+      // Unload dashboard, we are exiting
+      if (unload) {
+        commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false)
+        commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null)
+        commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null)
+      }
+
+      const { id } = loaded
+      await API.invoke('put', `/dashboard/${id}`, { body: loaded })
     } catch (e) {
       throw e
     }
   },
   updateFocusedWidget ({ commit, getters }, payload = {}) {
     const focused = getters.focusedWidget
-
     if (focused === null)
       return
 
@@ -173,12 +171,12 @@ const actions = {
   },
   updateFocusedIntegration ({ commit, getters }, payload = {}) {
     const focused = getters.focusedIntegration
-
     if (focused === null)
       return
 
     commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
   },
+
   /**
    * Made as an action so that we can get
    * widget configuration defaults.
@@ -194,7 +192,7 @@ const actions = {
 
     // Fetch widget config
     const w = rootGetters['Widget/widgetById'](id)
-    const contents = projectUtils.fileContents(w, ['config.json'])
+    const contents = fileContents(w, ['config.json'])
     if (!contents)
       throw 'Could not add Widget'
 
@@ -225,6 +223,7 @@ const actions = {
     }
     commit(t.DASHBOARD_ADD_WIDGET, widget)
   },
+
   /**
    * Made as an action since we need to return
    * the integration, so that we can register
@@ -246,41 +245,22 @@ const actions = {
 
 const getters = {
   dashboardById: ({ list }) => id => {
-    return list.find(i => i.id === id)
+    return list.find(i => i.id === id) || null
   },
   integrationByI: ({ loaded }) => i => {
-    return loaded.integrations.find(addedIntegration => addedIntegration.i === i)
-  },
-  // Return diff between loaded and old item in list
-  loadedDiff ({ loaded }, { dashboardById }) {
-    try {
-      let diff = difference(loaded, dashboardById(loaded.id))
-      diff.integrations = loaded.integrations // Cannot take diff on integrations
-      diff.widgets = loaded.widgets // Cannot take diff on widgets
-      return diff
-    } catch (e) {
-      return {}
-    }
+    return loaded.integrations.find(addedIntegration => addedIntegration.i === i) || null
   },
   focusedWidget ({ loaded, focusedWidget }) {
     if (focusedWidget === null)
       return null
 
-    try {
-      return loaded.widgets.find(w => w.i === focusedWidget)
-    } catch (e) {
-      return null
-    }
+    return loaded.widgets.find(({ i }) => i === focusedWidget) || null
   },
   focusedIntegration ({ loaded, focusedIntegration }) {
     if (focusedIntegration === null)
       return null
 
-    try {
-      return loaded.integrations.find(a => a.i === focusedIntegration)
-    } catch (e) {
-      return null
-    }
+    return loaded.integrations.find(({ i }) => i === focusedIntegration) || null
   }
 }
 

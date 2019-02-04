@@ -35,7 +35,7 @@ interface IFilesArr {
 export const getUniqueName = (prefix: string, files: IFilesArr[]) => {
   let i = 1
   let uniqueName = prefix
-  while (files.find(({ name }) => name === prefix)) {
+  while (files.find(({ name }) => name === uniqueName)) {
     uniqueName = `${prefix} (${i})`
     i++
   }

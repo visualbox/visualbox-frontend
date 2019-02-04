@@ -1,5 +1,6 @@
 <template lang="pug">
 editor(v-if="ready")
+  helper-integration(slot="helper")
 </template>
 
 <script>
@@ -22,12 +23,20 @@ export default {
     ...mapActions('App', ['setSnackbar']),
     async saveProject () {
       try {
-        const project = await this.save()
-        await this.commit(project)
+        await this.commit(await this.save())
+      } catch (e) {
+        throw e
+      }
+    }
+  },
+  mounted () {
+    EventBus.$on('vbox:saveProject', async () => {
+      try {
+        await this.saveProject()
         this.setSnackbar({
           type: 'info',
-          msg: `Saved changes`,
-          timeout: 1500
+          msg: `Saved integration`,
+          timeout: 1000
         })
       } catch (e) {
         this.setSnackbar({
@@ -35,17 +44,13 @@ export default {
           msg: e.message
         })
       }
-    }
-  },
-  mounted () {
-    EventBus.$on('vbox:saveProject', this.saveProject)
+    })
 
     const integration = this.integrationById()(this.$route.params.id)
     this.load(integration)
   },
   beforeDestroy () {
     EventBus.$off('vbox:saveProject')
-
     this.saveProject()
   }
 }

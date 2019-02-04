@@ -22,12 +22,20 @@ export default {
     ...mapActions('App', ['setSnackbar']),
     async saveProject () {
       try {
-        const project = await this.save()
-        await this.commit(project)
+        await this.commit(await this.save())
+      } catch (e) {
+        throw e
+      }
+    }
+  },
+  mounted () {
+    EventBus.$on('vbox:saveProject', async () => {
+      try {
+        await this.saveProject()
         this.setSnackbar({
           type: 'info',
-          msg: `Saved changes`,
-          timeout: 1500
+          msg: `Saved widget`,
+          timeout: 1000
         })
       } catch (e) {
         this.setSnackbar({
@@ -35,17 +43,13 @@ export default {
           msg: e.message
         })
       }
-    }
-  },
-  mounted () {
-    EventBus.$on('vbox:saveProject', this.saveProject)
+    })
 
     const widget = this.widgetById()(this.$route.params.id)
     this.load(widget)
   },
   beforeDestroy () {
     EventBus.$off('vbox:saveProject')
-
     this.saveProject()
   }
 }

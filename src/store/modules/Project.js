@@ -44,8 +44,10 @@ const state = {
 const mutations = {
   [t.PROJECT_RESET] (state) {
     state.ready = false
-    state.showHelper = false
-    state.layoutHelper = 'horizontal'
+
+    // These are nice to disable
+    // state.showHelper = false
+    // state.layoutHelper = 'horizontal'
 
     state.id = null
     state.uid = null
@@ -68,7 +70,7 @@ const mutations = {
     state.ready = true
   },
   [t.PROJECT_SAVE] (state) {
-    state.dirty.clear()
+    state.dirty = new Set()
   },
   [t.PROJECT_SET_HELPER] (state, payload) {
     state.showHelper = !!payload
@@ -200,15 +202,17 @@ const actions = {
     if (!type)
       return
 
-    commit(t.PROJECT_CLOSE_OPEN, fullPath)
-
-    if (type === 'file')
+    if (type === 'file') {
+      commit(t.PROJECT_CLOSE_OPEN, fullPath)
       commit(t.PROJECT_DELETE_FILE, fullPath)
-    else {
+    } else {
       const len = fullPath.length
       for (let name in state.files)
-        if (name.substr(0, len) === fullPath)
+        if (name.substr(0, len) === fullPath) {
+          const curFullPath = state.files[name].fullPath
+          commit(t.PROJECT_CLOSE_OPEN, curFullPath)
           commit(t.PROJECT_DELETE_FILE, name)
+        }
     }
   },
 
@@ -217,6 +221,8 @@ const actions = {
     const files = getters.filesInFolder(folder, 'file')
     const name = getUniqueName('New File', files)
     const fullPath = getFullPath(folder, name)
+
+    // May need to set dirty here
 
     const item = {
       fullPath,
@@ -236,6 +242,8 @@ const actions = {
     const name = getUniqueName('New Folder', files)
     const fullPath = getFullPath(folder, name)
 
+    // May need to set dirty here
+
     const item = {
       fullPath,
       name,
@@ -246,7 +254,7 @@ const actions = {
     return item
   },
 
-  renameNestedFile ({ commit, getters }, { fullPath, newName }) {
+  renameNestedFile ({ commit, getters, state }, { fullPath, newName }) {
     if (!isValidPath(fullPath))
       return
 
@@ -256,6 +264,10 @@ const actions = {
 
     const { folders } = pathMeta(fullPath)
     const newFullPath = getFullPath(folders.join('/'), newName)
+
+    // File already exists
+    if (state.files.hasOwnProperty(newFullPath))
+      return
     
     if (type === 'file') {
       commit(t.PROJECT_RENAME_FILE, { fullPath, newFullPath, newName })

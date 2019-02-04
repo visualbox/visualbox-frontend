@@ -10,7 +10,6 @@ class API {
   }
 
   public async invoke (method: string, path: string, opts?: IObject) {
-    console.log('INVOKING', this.isLoggedIn())
     try {
       return this.isLoggedIn()
         ? await ONLINE_DRIVER(method, path, opts)

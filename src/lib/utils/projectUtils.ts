@@ -13,6 +13,6 @@ export const packageJson = (project: object, path: string, def: string) => {
   }
 }
 
-export const fileContents = (project: object, path: string[]) => {
-  return get(project, ['files', ...path, 'contents'], null)
+export const fileContents = (files: object, path: string[]) => {
+  return get(files, [...path, 'contents'], null)
 }

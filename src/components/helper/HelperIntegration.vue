@@ -9,72 +9,30 @@
       :active="tab === 1"
       @click="tab = 1"
     ) Console
-    v-tooltip(
-      :open-delay="0"
-      :close-delay="0"
-      color="black"
-      transition="fade-transition"
-      top
-    )
-      span Clear Console
+    tooltip(text="Clear Console" :open-delay="800" top)
       v-icon.ml(
         @click="consoleBuffer = []"
-        slot="activator"
         color="red"
       ) mdi-cancel
     v-spacer
-    v-tooltip(
-      :open-delay="0"
-      :close-delay="0"
-      color="black"
-      transition="fade-transition"
-      top
-    )
-      span Restart
-      v-icon(
-        @click="forceRestart"
-        slot="activator"
-      ) mdi-restart
-    v-tooltip(
-      :open-delay="0"
-      :close-delay="0"
-      color="black"
-      transition="fade-transition"
-      top
-    )
-      span Freeze Console
+    tooltip(text="Restart" :open-delay="800" top)
+      v-icon(@click="forceRestart") mdi-restart
+    tooltip(text="Freeze Console" :open-delay="800" top)
       v-icon(
         :color="freeze ? 'blue' : ''"
         @click="freeze = !!!freeze"
-        slot="activator"
       ) mdi-snowflake
-    v-tooltip(
-      :open-delay="0"
-      :close-delay="0"
-      color="black"
-      transition="fade-transition"
-      top
-    )
-      span Dock to Bottom
+    tooltip(text="Dock to Bottom" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'primary' : ''"
-        @click="INTEGRATION_SET_HELPER_LAYOUT('horizontal')"
-        slot="activator"
+        @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
-    v-tooltip(
-      :open-delay="0"
-      :close-delay="0"
-      color="black"
-      transition="fade-transition"
-      top
-    )
-      span Dock to Right
+    tooltip(text="Dock to Right" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'vertical' ? 'primary' : ''"
-        @click="INTEGRATION_SET_HELPER_LAYOUT('vertical')"
-        slot="activator"
+        @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
       ) mdi-page-layout-sidebar-right
-    v-icon(@click="INTEGRATION_SET_HELPER(false)") mdi-close
+    v-icon(@click="PROJECT_SET_HELPER(false)") mdi-close
   .pane(:active="tab === 0")
     input-types(
       v-model="model"
@@ -92,15 +50,19 @@
 import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations } from 'vuex'
-import { InputTypes } from '@/components'
+import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
 import { BuildWorker } from '@/service'
 
 const BUFFER_MAX = 100
 
 export default {
   name: 'HelperIntegration',
-  components: { InputTypes },
+  components: {
+    InputTypes,
+    Tooltip
+  },
   data: () => ({
     model: {},
     tab: 1,
@@ -109,13 +71,13 @@ export default {
     freeze: false
   }),
   computed: {
-    ...mapState('Integration', ['loaded', 'layoutHelper']),
+    ...mapState('Project', ['files', 'layoutHelper']),
     parsedConfig () {
-      const config = get(this, 'loaded.config', '')
-      return parseConfig(config)
-    },
-    source () {
-      return get(this, 'loaded.source', '')
+      const contents = fileContents(this.files, ['config.json'])
+      if (!contents)
+        return { error: ['Unable to parse widget configuration'] }
+
+      return parseConfig(contents)
     }
   },
   watch: {
@@ -123,11 +85,13 @@ export default {
       immediate: true,
       deep: true,
       handler () {
-        // Create local config model
-        this.model = this.parsedConfig.variables.reduce((acc, cur) => {
-          acc[cur.name] = cur.default || null
-          return acc
-        }, {})
+        try {
+          // Create local config model
+          this.model = this.parsedConfig.variables.reduce((acc, cur) => {
+            acc[cur.name] = cur.default || null
+            return acc
+          }, {})
+        } catch (e) {}
       }
     },
     model: {
@@ -136,8 +100,9 @@ export default {
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     },
-    source: {
+    files: {
       immediate: true,
+      deep: true,
       handler: debounce(function () {
         this.restartWorker()
       }, process.env.VUE_APP_COMMIT_DEBOUNCE)
@@ -152,7 +117,10 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('Integration', ['INTEGRATION_SET_HELPER_LAYOUT', 'INTEGRATION_SET_HELPER']),
+    ...mapMutations('Project', [
+      'PROJECT_SET_HELPER_LAYOUT',
+      'PROJECT_SET_HELPER'
+    ]),
     forceRestart () {
       this.freeze = false
       this.restartWorker()
@@ -169,13 +137,19 @@ export default {
           this.worker = null
         }
 
-        const loaded = get(this, 'loaded', null)
+        const files = get(this, 'files', null)
         const config = this.model
 
         // Create worker and hook onmessage/onerror callback
-        this.worker = await BuildWorker(loaded, config)
-        this.worker.onmessage = this.onmessage
-        this.worker.onerror = this.onerror
+        this.worker = await BuildWorker(files, config)
+
+        // Failed to start worker
+        if (!this.worker) {
+          this.onerror(new Error('Failed to start Web Worker'))
+        } else {
+          this.worker.onmessage = this.onmessage
+          this.worker.onerror = this.onerror
+        }
       } catch (e) {
         console.log(e)
         this.onerror(new Error('Failed to start Web Worker'))
@@ -197,7 +171,7 @@ export default {
       // e.preventDefault()
       const { message, lineno, colno } = e
       const lines = lineno && colno ? `:${lineno}:${colno}` : ''
-      this.consoleBufferAdd(`Error: ${message}:${lines}`, true)
+      this.consoleBufferAdd(`Error: ${message}${lines}`, true)
     }
   },
   beforeDestroy () {

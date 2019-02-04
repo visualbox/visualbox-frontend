@@ -1,6 +1,16 @@
 import get from 'lodash-es/get'
 import union from 'lodash-es/union'
-import { transform } from '@babel/standalone'
+import { fileContents } from '@/lib/utils/projectUtils'
+// import { transform } from '@babel/standalone'
+
+declare global {
+  interface Window {
+    BlobBuilder: any
+    WebKitBlobBuilder: any
+    MozBlobBuilder: any
+    webkitURL: any
+  }
+}
 
 const getDependencies = (loaded: IObject) => {
   const dependencies = get(loaded, 'package.dependencies', null)
@@ -15,13 +25,13 @@ const getDependencies = (loaded: IObject) => {
  * @param  {Object} config Integration configuration
  * @return {Worker}        New Web Worker
  */
-export default async (loaded: IObject, config: IObject) => {
-  if (!loaded)
-    return new Worker()
+export default async (files: IObject, config: IObject) => {
+  if (!files)
+    return null
 
-  const source = get(loaded, 'source', '')
-  if (source === '')
-    return new Worker()
+  const source = fileContents(files, ['index.js'])
+  if (!source)
+    return null
 
   /*
   // Resolve external dependencies
@@ -41,13 +51,14 @@ export default async (loaded: IObject, config: IObject) => {
   }
   */
 
+  let configStr = '{}'
   try {
-    config = JSON.stringify(config)
+    configStr = JSON.stringify(config)
   } catch (e) {
-    config = '{}'
+    console.log(e)
   }
   const code = `
-    const CONFIG = ${config};
+    const CONFIG = ${configStr};
     ${source}
   `
   console.log(code)

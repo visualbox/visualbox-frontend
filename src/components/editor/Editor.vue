@@ -33,11 +33,11 @@
 
       v-spacer
       v-toolbar-items
-        v-btn(
-          flat
-        )
+        v-btn(@click="formatCode" flat)
           v-icon mdi-auto-fix
         v-btn(
+          :color="showHelper ? 'primary' : ''"
+          @click="PROJECT_SET_HELPER(!showHelper)"
           flat
         )
           v-icon mdi-console
@@ -137,16 +137,21 @@ export default {
 
       const { fullPath } = file
       const fileType = parseFileType(fullPath)
-      const { monacoLanguage } = fileTypeMeta[fileType]
+      const { monacoLanguage } = fileTypeMeta(fileType)
       return monacoLanguage || 'text'
     }
   },
   methods: {
     ...mapMutations('Project', [
+      'PROJECT_RESET',
       'PROJECT_SET_ACTIVE',
       'PROJECT_WRITE_FILE',
-      'PROJECT_CLOSE_OPEN'
+      'PROJECT_CLOSE_OPEN',
+      'PROJECT_SET_HELPER'
     ]),
+    formatCode () {
+      this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
+    },
     fullPathMeta (fullPath) {
       const file = this.fileByFullPath(fullPath)
       if (!file)
@@ -154,7 +159,7 @@ export default {
 
       const { name } = file
       const fileType = parseFileType(name)
-      const { icon, color } = fileTypeMeta[fileType]
+      const { icon, color } = fileTypeMeta(fileType)
 
       return { name, fullPath, icon, color }
     },
@@ -172,7 +177,7 @@ export default {
              : 'mdi-close'
     }
   },
-  watcher: {
+  watch: {
     showHelper: {
       immediate: true,
       handler (val) {
@@ -202,6 +207,9 @@ export default {
         this.split.addColumnGutter(this.$refs.gutter, 1)
       }
     }
+  },
+  beforeDestroy () {
+    this.PROJECT_RESET()
   }
 }
 </script>

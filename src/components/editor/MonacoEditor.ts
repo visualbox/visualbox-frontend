@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import * as monaco from 'monaco-editor'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
+import EventBus from '@/lib/eventBus'
 
 declare global {
   interface Window {
@@ -95,6 +96,9 @@ Vue.component('monaco-editor', Vue.extend({
 
       this.editor = monacoInstance.editor.create(this.$el, options)
       this.editor.getModel().updateOptions({ tabSize: 2 })
+      this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+        EventBus.$emit('vbox:saveProject')
+      })
 
       /*
       this.$emit('editorDidMount', this.editor)

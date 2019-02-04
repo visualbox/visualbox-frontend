@@ -39,8 +39,9 @@
 
     v-treeview(
       v-if="openPanel.files"
-      :active.sync="activeTab"
       :items="projectFiles"
+      :active.sync="activeTab"
+      :open.sync="openTree"
       :edit-file="editFileFullPath"
       item-key="fullPath"
       activatable
@@ -61,9 +62,9 @@
             small
           ) mdi-circle-medium
           v-icon(
-            :color="fileTypeMeta[item.file].color"
+            :color="fileTypeMeta(item.file).color"
             small
-          ) {{ fileTypeMeta[item.file].icon }}
+          ) {{ fileTypeMeta(item.file).icon }}
       template(
         slot="label"
         slot-scope="{ item }"
@@ -118,6 +119,7 @@ export default {
       dependencies: false,
       settings: false
     },
+    openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileFullPath: null,
@@ -179,20 +181,34 @@ export default {
         return newVal
       return null
     },
-    async addFile ({ fullPath }) {
+    async addFile ({ fullPath, type }) {
       try {
         fullPath = fullPath || ''
         const newFile = await this.addNewFile(fullPath)
-        this.editFile(newFile)
+
+        this.$nextTick(() => {
+          // Ensure folder is open when adding file to it
+          if (type === 'folder')
+            this.openTree.push(fullPath)
+
+          this.editFile(newFile)
+        })
       } catch (e) {
         console.log(e)
       }
     },
-    async addFolder ({ fullPath }) {
+    async addFolder ({ fullPath, type }) {
       try {
         fullPath = fullPath || ''
         const newFile = await this.addNewFolder(fullPath)
-        this.editFile(newFile)
+
+        this.$nextTick(() => {
+          // Ensure folder is open when adding folder to it
+          if (type === 'folder')
+            this.openTree.push(fullPath)
+
+          this.editFile(newFile)
+        })
       } catch (e) {
         console.log(e)
       }

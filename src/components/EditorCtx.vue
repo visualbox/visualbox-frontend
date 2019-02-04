@@ -7,6 +7,13 @@
     )
       v-icon mdi-menu-left
     .subheading {{ projectName }}
+    template(v-if="dirty.size > 0")
+      v-spacer
+      v-btn(
+        @click="saveProject"
+        icon
+      )
+        v-icon mdi-floppy
 
   v-list(dense)
     //- Files
@@ -93,6 +100,7 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta } from '@/lib/utils'
+import EventBus from '@/lib/eventBus'
 
 const DOUBLE_CLICK_TIMEOUT = 500
 
@@ -124,6 +132,9 @@ export default {
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
+    },
+    vuexModule () {
+      return startCase(this.type.toLowerCase())
     }
   },
   watch: {
@@ -142,13 +153,15 @@ export default {
     }
   },
   methods: {
+    ...mapActions('App', ['setSnackbar']),
     ...mapActions('Project', [
       'doubleClick',
       'click',
       'addNewFile',
       'addNewFolder',
       'deleteNestedFile',
-      'renameNestedFile'
+      'renameNestedFile',
+      'save'
     ]),
     /**
      * Check if it was a double click by looking
@@ -223,6 +236,12 @@ export default {
       })
       this.editFileFullPath = null
       this.editFileName = null
+    },
+    /**
+     * Save and commit the project.
+     */
+    saveProject () {
+      EventBus.$emit('vbox:saveProject')
     }
   }
 }

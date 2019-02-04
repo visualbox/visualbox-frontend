@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
+import { packageJson } from '@/lib/utils/projectUtils'
 import {
   cloneDeep,
   filesTree,
@@ -9,16 +10,6 @@ import {
   getUniqueName,
   getFullPath
 } from '@/lib/utils'
-
-const packageJson = (files, path, def) => {
-  try {
-    const { contents } = files['package.json']
-    const json = JSON.parse(contents)
-    return get(json, path, def)
-  } catch (e) {
-    return def
-  }
-}
 
 const parseFiles = (opts = {}) => {
   const files = get(opts, 'files', null)
@@ -38,9 +29,11 @@ const state = {
   showHelper: false,
   layoutHelper: 'horizontal',
 
+  id: null,
   files: {},
   dependencies: {},
   settings: {},
+
   active: null,
   open: new Set(),
   dirty: new Set(),
@@ -53,6 +46,7 @@ const mutations = {
     state.showHelper = false
     state.layoutHelper = 'horizontal'
 
+    state.id = null
     state.files = {}
     state.dependencies = {}
     state.settings = {}
@@ -64,10 +58,14 @@ const mutations = {
   [t.PROJECT_SET_LOADED] (state, payload) {
     const copy = cloneDeep(payload)
 
+    state.id = payload.id
     state.files = parseFiles(copy)
     state.dependencies = parseDependencies(copy)
     state.settings = parseSettings(copy)
     state.ready = true
+  },
+  [t.PROJECT_SAVE] (state) {
+    state.dirty.clear()
   },
   [t.PROJECT_SET_HELPER] (state, payload) {
     state.showHelper = !!payload
@@ -108,7 +106,7 @@ const mutations = {
     state.active = payload
   },
   [t.PROJECT_WRITE_FILE] (state, { fullPath, contents }) {
-    if (!file.hasOwnProperty(fullPath))
+    if (!state.files.hasOwnProperty(fullPath))
       return
 
     const file = state.files[fullPath]
@@ -275,12 +273,18 @@ const actions = {
         }
       }
     }
+  },
+
+  save ({ commit }) {
+    commit(t.PROJECT_SAVE)
+    const { id, files, dependencies, settings } = state
+    return { id, files, dependencies, settings }
   }
 }
 
 const getters = {
-  projectName: ({ files }) => {
-    return packageJson(files, 'name', 'Untitled')
+  projectName: state => {
+    return packageJson(state, 'name', 'Untitled')
   },
 
   projectFiles: ({ files }) => {

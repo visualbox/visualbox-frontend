@@ -45,7 +45,7 @@ export default {
           this.setSnackbar({
             type: '',
             msg: `Saved changes`,
-            timeout: 1500
+            timeout: 1000
           })
         } catch (e) {
           this.setSnackbar({

@@ -75,6 +75,7 @@ import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { parseConfig, cloneDeep } from '@/lib/utils'
+import * as projectUtils from '@/lib/utils/projectUtils'
 import { IFrameHandler } from '@/service'
 
 export default {
@@ -110,7 +111,14 @@ export default {
     config () {
       const { id } = this.focusedWidget
       const widget = this.widgetById(id)
-      return parseConfig(widget.config)
+      const contents = projectUtils.fileContents(widget, ['config.json'])
+      if (!contents) {
+        return {
+          error: ['Unable to parse widget configuration'],
+          variables: []
+        }
+      }
+      return parseConfig(contents)
     }
   },
   watch: {

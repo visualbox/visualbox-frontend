@@ -70,6 +70,7 @@ import debounce from 'lodash-es/debounce'
 import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
 import { integrationsIndex } from '@/lib/algoliasearch'
+import { packageJson } from '@/lib/utils/projectUtils'
 import { ContextToolbar } from '@/components'
 
 export default {
@@ -134,7 +135,7 @@ export default {
       })
     }, process.env.VUE_APP_SEARCH_DEBOUNCE),
     name (item) {
-      return get(item, 'package.name', 'Untitled')
+      return packageJson(item, 'name', 'Untitled')
     }
   },
   async mounted () {

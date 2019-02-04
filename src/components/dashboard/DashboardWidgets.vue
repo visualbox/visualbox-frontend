@@ -22,6 +22,7 @@
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapActions } from 'vuex'
+import { packageJson } from '@/lib/utils/projectUtils'
 
 export default {
   name: 'DashboardWidgets',
@@ -32,13 +33,13 @@ export default {
   methods: {
     ...mapActions('Dashboard', ['addWidget']),
     color (item) {
-      return get(item, 'package.color', '#FFF')
+      return packageJson(item, 'color', '#FFF')
     },
     icon (item) {
-      return get(item, 'package.icon', false)
+      return packageJson(item, 'icon', false)
     },
     name (item) {
-      return get(item, 'package.name', 'Undefined')
+      return packageJson(item, 'name', 'Untitled')
     }
   }
 }

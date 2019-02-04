@@ -1,33 +1,17 @@
+import Vue from 'vue'
 import * as t from '@/store/types'
 import API from '@/service/API'
-import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
+import { cloneDeep } from '@/lib/utils'
 
 const state = {
   list: [],
-  public: [],
-  loaded: null,
-  tab: 0,
-  showHelper: false,
-  layoutHelper: 'horizontal'
+  public: []
 }
 
 const mutations = {
   [t.WIDGET_RESET] (state) {
     state.list = []
     state.public = []
-    state.loaded = null
-    state.tab = 0
-    state.showHelper = false
-    state.layoutHelper = 'horizontal'
-  },
-  [t.WIDGET_SET_TAB] (state, payload) {
-    state.tab = payload
-  },
-  [t.WIDGET_SET_HELPER] (state, payload) {
-    state.showHelper = !!payload
-  },
-  [t.WIDGET_SET_HELPER_LAYOUT] (state, payload) {
-    state.layoutHelper = payload
   },
   [t.WIDGET_SET_LIST] (state, payload) {
     state.list = cloneDeep(payload)
@@ -38,30 +22,10 @@ const mutations = {
   [t.WIDGET_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
   },
-  [t.WIDGET_SET_LOADED] (state, payload) {
-    state.loaded = cloneDeep(payload)
-  },
-  [t.WIDGET_CONCAT_LOADED] (state, payload) {
-    let merged = mergeDeep(state.loaded, payload)
-
-    /**
-     * Package needs to be replaced since
-     * deep merge & diff won't handle deletion.
-     */
-    if (payload.hasOwnProperty('package'))
-      merged.package = payload.package
-
-    state.loaded = cloneDeep(merged)
-  },
-  [t.WIDGET_COMMIT_LOADED] (state, nullify = false) {
-    const { loaded } = state
-    let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = cloneDeep(loaded)
-    state.list = cloneDeep(state.list)
-
-    // Used when closing / exiting 'loaded'
-    if (nullify)
-      state.loaded = null
+  [t.WIDGET_COMMIT] (state, project) {
+    const index = state.list.findIndex(({ id }) => id === project.id)
+    if (index >= 0)
+      Vue.set(state.list, index, project)
   },
   [t.WIDGET_CLEAN_DASHBOARD] (state, widgets) {
     // Remove every widget that does not exist in list
@@ -70,16 +34,6 @@ const mutations = {
       if (index < 0)
         widgets.splice(index, 1)
     })
-  },
-  [t.WIDGET_SET_PUBLIC] (state, payload) {
-    // Try to find existing
-    const index = state.public.findIndex(item => item.id === payload.id)
-
-    if (index < 0)
-      state.public.push(payload)
-    else
-      state.public[index] = cloneDeep(payload)
-    state.public = cloneDeep(state.public)
   }
 }
 
@@ -118,35 +72,26 @@ const actions = {
       throw e
     } finally {}
   },
-  // Load a widget by making a local copy
-  load ({ commit, getters }, id) {
-    commit(t.WIDGET_SET_LOADED, getters.widgetById(id))
-  },
-  // Update a loaded local widget
-  updateLoaded ({ commit }, payload = {}) {
-    payload.updatedAt = +new Date()
-    commit(t.WIDGET_CONCAT_LOADED, payload)
-  },
-  async closeLoaded ({ commit, dispatch, state, getters }) {
-    dispatch('updateLoaded') // To add timestamp
+
+  async commit ({ commit, getters }, project) {
     try {
-      const { id } = state.loaded
-      const diff = cloneDeep(getters.loadedDiff)
-      commit(t.WIDGET_COMMIT_LOADED, true) // Must come before API call
-      await API.invoke('put', `/widget/${id}`, { body: diff })
+      const { id } = project
+      const old = getters.widgetById(id)
+      if (!old)
+        return
+
+      const { uid, createdAt } = old
+      project.uid = uid
+      project.createdAt = createdAt
+      project.updatedAt = +new Date()
+
+      commit(t.WIDGET_COMMIT, project)
+      await API.invoke('put', `/widget/${id}`, { body: project })
     } catch (e) {
       throw e
     }
   },
-  // Commit a loaded local widget
-  async commitLoaded ({ commit, state, getters }) {
-    try {
-      await API.invoke('put', `/widget/${state.loaded.id}`, { body: getters.loadedDiff })
-      commit(t.WIDGET_COMMIT_LOADED)
-    } catch (e) {
-      throw e
-    }
-  },
+
   async loadPublic ({ commit }, id) {
     let result = null // Default value
 
@@ -166,27 +111,6 @@ const getters = {
    */
   widgetById: ({ list }) => id => {
     return list.find(i => i.id === id)
-  },
-
-  /**
-   * Return diff between loaded and old item in list
-   */
-  loadedDiff ({ loaded }, getters) {
-    try {
-      const diff = difference(loaded, getters.widgetById(loaded.id))
-
-      /**
-       * If package is in diff, meaning it has been changed,
-       * copy it in its entirety so that deletions are handled
-       * correctly.
-       */
-      if (diff.hasOwnProperty('package'))
-        diff.package = cloneDeep(loaded.package)
-
-      return diff
-    } catch (e) {
-      return {}
-    }
   }
 }
 

@@ -1,6 +1,7 @@
 import * as t from '@/store/types'
 import clone from 'lodash-es/clone'
 import API from '@/service/API'
+import * as projectUtils from '@/lib/utils/projectUtils'
 import { difference, mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
@@ -129,7 +130,7 @@ const actions = {
   },
   // Load a dashboard by making a local copy
   load ({ commit, getters }, id) {
-    let dashboard = getters.dashboardById(id)
+    const dashboard = getters.dashboardById(id)
     commit(`Integration/${t.INTEGRATION_CLEAN_DASHBOARD}`, dashboard.integrations, { root: true })
     commit(`Widget/${t.WIDGET_CLEAN_DASHBOARD}`, dashboard.widgets, { root: true })
     commit(t.DASHBOARD_SET_LOADED, dashboard)
@@ -193,7 +194,11 @@ const actions = {
 
     // Fetch widget config
     const w = rootGetters['Widget/widgetById'](id)
-    const config = parseConfig(w.config)
+    const contents = projectUtils.fileContents(w, ['config.json'])
+    if (!contents)
+      throw 'Could not add Widget'
+
+    const config = parseConfig(contents)
     // Create default config model
     const defaultConfig = config.variables.reduce((acc, cur) => {
       acc[cur.name] = cur.default || null

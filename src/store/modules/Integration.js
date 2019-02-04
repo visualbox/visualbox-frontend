@@ -1,6 +1,7 @@
+import Vue from 'vue'
 import * as t from '@/store/types'
 import API from '@/service/API'
-import { difference, mergeDeep, cloneDeep } from '@/lib/utils'
+import { cloneDeep } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -21,34 +22,10 @@ const mutations = {
   [t.INTEGRATION_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
   },
-  [t.INTEGRATION_CONCAT_LOADED] (state, payload) {
-    let merged = mergeDeep(state.loaded, payload)
-
-    /**
-     * Package needs to be replaced since
-     * deep merge & diff won't handle deletion.
-     */
-    if (payload.hasOwnProperty('package'))
-      merged.package = payload.package
-
-    /**
-     * Package needs to be replaced since
-     * deep merge & diff won't handle deletion.
-     */
-    if (payload.hasOwnProperty('resDependencies'))
-      merged.resDependencies = payload.resDependencies
-
-    state.loaded = cloneDeep(merged)
-  },
-  [t.INTEGRATION_COMMIT_LOADED] (state, nullify = false) {
-    const { loaded } = state
-    let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = cloneDeep(loaded)
-    state.list = cloneDeep(state.list)
-
-    // Used when closing / exiting 'loaded'
-    if (nullify)
-      state.loaded = null
+  [t.INTEGRATION_COMMIT] (state, project) {
+    const index = state.list.findIndex(({ id }) => id === project.id)
+    if (index >= 0)
+      Vue.set(state.list, index, project)
   },
   [t.INTEGRATION_CLEAN_DASHBOARD] (state, integrations) {
     // Remove every integration that does not exist in list
@@ -57,16 +34,6 @@ const mutations = {
       if (index < 0)
         integrations.splice(index, 1)
     })
-  },
-  [t.INTEGRATION_SET_PUBLIC] (state, payload) {
-    // Try to find existing
-    const index = state.public.findIndex(item => item.id === payload.id)
-
-    if (index < 0)
-      state.public.push(payload)
-    else
-      state.public[index] = cloneDeep(payload)
-    state.public = cloneDeep(state.public)
   }
 }
 
@@ -105,31 +72,26 @@ const actions = {
       throw e
     } finally {}
   },
-  // Update a loaded local integration
-  updateLoaded ({ commit }, payload = {}) {
-    payload.updatedAt = +new Date()
-    commit(t.INTEGRATION_CONCAT_LOADED, payload)
-  },
-  async closeLoaded ({ commit, dispatch, state, getters }) {
-    dispatch('updateLoaded') // To add timestamp
+
+  async commit ({ commit, getters }, project) {
     try {
-      const { id } = state.loaded
-      const diff = cloneDeep(getters.loadedDiff)
-      commit(t.INTEGRATION_COMMIT_LOADED, true) // Must come before API call
-      await API.invoke('put', `/integration/${id}`, { body: diff })
+      const { id } = project
+      const old = getters.integrationById(id)
+      if (!old)
+        return
+
+      const { uid, createdAt } = old
+      project.uid = uid
+      project.createdAt = createdAt
+      project.updatedAt = +new Date()
+
+      commit(t.INTEGRATION_COMMIT, project)
+      await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {
       throw e
     }
   },
-  // Commit a loaded local integration
-  async commitLoaded ({ commit, state, getters }) {
-    try {
-      await API.invoke('put', `/integration/${state.loaded.id}`, { body: getters.loadedDiff })
-      commit(t.INTEGRATION_COMMIT_LOADED)
-    } catch (e) {
-      throw e
-    }
-  },
+
   async loadPublic ({ commit }, id) {
     let result = null // Default value
 
@@ -149,29 +111,6 @@ const getters = {
    */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
-  },
-
-  /**
-   * Return diff between loaded and old item in list
-   */
-  loadedDiff ({ loaded }, getters) {
-    try {
-      let diff = difference(loaded, getters.integrationById(loaded.id))
-
-      /**
-       * If package is in diff, meaning it has been changed,
-       * copy it in its entirety so that deletions are handled
-       * correctly.
-       */
-      if (diff.hasOwnProperty('package'))
-        diff.package = cloneDeep(loaded.package)
-      if (diff.hasOwnProperty('resDependencies'))
-        diff.resDependencies = cloneDeep(loaded.resDependencies)
-
-      return diff
-    } catch (e) {
-      return {}
-    }
   }
 }
 

@@ -41,6 +41,8 @@ const getFolder = (out, fullPath) => {
   for (const i in folderPath) {
     const folderName = folderPath[i]
     const found = target.find(({ name, type}) => name === folderName && type === 'folder')
+    if (!found)
+      continue
     target = found.children
   }
 

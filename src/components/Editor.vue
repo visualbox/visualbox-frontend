@@ -92,7 +92,7 @@ export default {
        * Translate fullPath -> tab index
        */
       get () {
-        return this.openTabs.findIndex(({ fullPath }) => fullPath === this.active)
+        return this.openTabs.findIndex(({ fullPath }) => fullPath && fullPath === this.active)
       },
       /**
        * Translate tab index -> fullPath

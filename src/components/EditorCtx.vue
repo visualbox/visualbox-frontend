@@ -80,9 +80,9 @@
         .options(v-if="item.fullPath !== editFileFullPath")
           template(v-if="item.type === 'folder'")
             tooltip(text="Add File" :open-delay="800" bottom)
-              v-icon(@click.stop="addFile(item)" small) mdi-file-plus
+              v-icon(@click="addFile(item)" small) mdi-file-plus
             tooltip(text="Add Folder" :open-delay="800" bottom)
-              v-icon(@click.stop="addFolder(item)" small) mdi-folder-plus
+              v-icon(@click="addFolder(item)" small) mdi-folder-plus
           tooltip(text="Rename" :open-delay="800" bottom)
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
@@ -145,9 +145,10 @@ export default {
     ...mapActions('Project', [
       'doubleClick',
       'click',
-      'add',
-      'delete',
-      'rename'
+      'addNewFile',
+      'addNewFolder',
+      'deleteNestedFile',
+      'renameNestedFile'
     ]),
     /**
      * Check if it was a double click by looking
@@ -165,23 +166,27 @@ export default {
         return newVal
       return null
     },
-    addFile ({ fullPath }) {
-      fullPath = fullPath || ''
-      this.add({
-        fullPath,
-        type: 'file'
-      })
+    async addFile ({ fullPath }) {
+      try {
+        fullPath = fullPath || ''
+        const newFile = await this.addNewFile(fullPath)
+        this.editFile(newFile)
+      } catch (e) {
+        console.log(e)
+      }
     },
-    addFolder ({ fullPath }) {
-      fullPath = fullPath || ''
-      this.add({
-        fullPath,
-        type: 'folder'
-      })
+    async addFolder ({ fullPath }) {
+      try {
+        fullPath = fullPath || ''
+        const newFile = await this.addNewFolder(fullPath)
+        this.editFile(newFile)
+      } catch (e) {
+        console.log(e)
+      }
     },
     deleteFile ({ fullPath }) {
       if (confirm('Are you sure you want to delete the file?'))
-        this.delete(fullPath)
+        this.deleteNestedFile(fullPath)
     },
     /**
      * Edit a file by storing the fullPath of the file
@@ -212,7 +217,7 @@ export default {
       if (this.editFileFullPath === null || this.editFileName === null)
         return
 
-      this.rename({
+      this.renameNestedFile({
         fullPath: this.editFileFullPath,
         newName: this.editFileName
       })

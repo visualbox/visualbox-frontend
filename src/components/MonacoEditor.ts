@@ -95,6 +95,8 @@ Vue.component('monaco-editor', Vue.extend({
 
       this.editor = monacoInstance.editor.create(this.$el, options)
       this.editor.getModel().updateOptions({ tabSize: 2 })
+      
+      /*
       this.$emit('editorDidMount', this.editor)
       this.editor.onContextMenu((e: monaco.editor.IEditorMouseEvent) => {
         this.$emit('contextMenu', e)
@@ -113,11 +115,13 @@ Vue.component('monaco-editor', Vue.extend({
       this.editor.onDidChangeModel((e: monaco.editor.IModelChangedEvent) => {
         this.$emit('model', e)
       })
+      */
       this.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
         const value = this.editor.getValue()
         if (this.value !== value)
           this.$emit('change', value, e)
       })
+      /*
       this.editor.onDidChangeModelDecorations((e: monaco.editor.IModelDecorationsChangedEvent) => {
         this.$emit('modelDecorations', e)
       })
@@ -138,6 +142,7 @@ Vue.component('monaco-editor', Vue.extend({
       this.editor.onMouseLeave((e: monaco.editor.IPartialEditorMouseEvent) => this.$emit('mouseLeave', e))
       this.editor.onMouseMove((e: monaco.editor.IEditorMouseEvent) => this.$emit('mouseMove', e))
       this.editor.onMouseUp((e: monaco.editor.IEditorMouseEvent) => this.$emit('mouseUp', e))
+      */
     },
 
     getMonaco (): any {

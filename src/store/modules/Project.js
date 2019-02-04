@@ -1,7 +1,14 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
-import { cloneDeep, filesTree } from '@/lib/utils'
+import {
+  cloneDeep,
+  filesTree,
+  isValidPath,
+  pathMeta,
+  getUniqueName,
+  getFullPath
+} from '@/lib/utils'
 
 const packageJson = (files, path, def) => {
   try {
@@ -80,16 +87,15 @@ const mutations = {
     state.open.delete(payload)
     state.open = new Set(state.open)
 
-    // Was peeking closed
+    // Was peeking, close
     if (state.peek === payload)
       state.peek = null
 
     // Find new active
     if (state.active === payload) {
-      if (state.open.size <= 0)
-        state.active = null
-      else
-        state.active = [...state.open][state.open.size - 1]
+      state.active = state.open.size <= 0
+                     ? null
+                     : [...state.open][state.open.size - 1]
     }
   },
   [t.PROJECT_SET_PEEK] (state, payload) {
@@ -102,6 +108,9 @@ const mutations = {
     state.active = payload
   },
   [t.PROJECT_WRITE_FILE] (state, { fullPath, contents }) {
+    if (!file.hasOwnProperty(fullPath))
+      return
+
     const file = state.files[fullPath]
     file.lastModified = +new Date()
     file.contents = contents
@@ -116,49 +125,30 @@ const mutations = {
       state.open = new Set(state.open)
     }
   },
-  [t.PROJECT_ADD_FILE] (state, { fullPath, type }) {
-    // Generate new filename
-    const prependPath = (!fullPath || fullPath === '') ? '' : `${fullPath}/`
-    const getFileName = i => type === 'file' ? `New File (${i})` : `New Folder (${i})`
-    let tryName = type === 'file' ? 'New File' : 'New Folder'
-    const existing = Object.keys(state.files)
-
-    let i = 0
-    while (existing.includes(`${prependPath + tryName}`)) {
-      i++
-      tryName = getFileName(i)
-    }
-
-    const newFullPath = prependPath + tryName
-    Vue.set(state.files, newFullPath, {
-      name: tryName,
-      contents: '',
-      fullPath: newFullPath,
-      type
-    })
-    return state.files[newFullPath]
+  [t.PROJECT_ADD_FILE] (state, { fullPath, item }) {
+    if (!isValidPath(fullPath))
+      return
+    Vue.set(state.files, fullPath, item)
   },
-  [t.PROJECT_DELETE_FILE] (state, { fullPath, type }) {
-    if (type === 'folder') {
-      const len = fullPath.length
-      for (let name in state.files) {
-        const subName = name.substr(0, len)
-        if (subName === fullPath)
-          delete state.files[name]
-      }
-    } else
-      delete state.files[fullPath]
-    state.files = cloneDeep(state.files)
-
-    // Dirty
-    if (state.dirty.has(fullPath)) {
-      state.dirty.delete(fullPath)
-      state.dirty = new Set(state.dirty)
-    }
+  [t.PROJECT_DELETE_FILE] (state, fullPath) {
+    if (!isValidPath(fullPath))
+      return
+    Vue.delete(state.files, fullPath)
   },
-  [t.PROJECT_RENAME_FILE] (state, { fullPath, newName }) {
-    // open, dirty, active, peek, files
+  [t.PROJECT_RENAME_FILE] (state, { fullPath, newFullPath, newName }) {
+    if (!isValidPath(fullPath))
+      return
 
+    const copy = cloneDeep(state.files[fullPath])
+    copy.fullPath = newFullPath
+    copy.name = newName
+    Vue.delete(state.files, fullPath)
+    Vue.set(state.files, newFullPath, copy)
+
+    // Handle dirty state
+    state.dirty.delete(fullPath)
+    state.dirty.add(newFullPath)
+    state.dirty = new Set(state.dirty)
   }
 }
 
@@ -173,26 +163,118 @@ const actions = {
   click ({ commit }, fullPath) {
     commit(t.PROJECT_SET_PEEK, fullPath)
   },
-  add ({ commit }, { fullPath, type }) {
-    const newFile = commit(t.PROJECT_ADD_FILE, { fullPath, type })
+
+  addNestedFile ({ commit }, { fullPath, item }) {
+    if (!isValidPath(fullPath))
+      return
+
+    const meta = pathMeta(fullPath)
+
+    // Create necessary folders
+    for (const i in meta.folders) {
+      const curPath = meta.folders.slice(0, i + 1).join('/')
+      const curName = meta.folders[i]
+
+      if (state.files.hasOwnProperty(curPath))
+        continue
+
+      commit(t.PROJECT_ADD_FILE, {
+        fullPath: curPath,
+        item: {
+          fullPath: curPath,
+          name: curName,
+          type: 'folder'
+        }
+      })
+    }
+
+    commit(t.PROJECT_ADD_FILE, { fullPath, item })
   },
-  delete ({ commit, getters }, fullPath) {
-    const file = getters.fileByFullPath(fullPath)
-    if (file)
-      commit(t.PROJECT_DELETE_FILE, file)
+
+  deleteNestedFile ({ commit, getters }, fullPath) {
+    if (!isValidPath(fullPath))
+      return
+
+    const { type } = getters.fileByFullPath(fullPath)
+    if (!type)
+      return
+
     commit(t.PROJECT_CLOSE_OPEN, fullPath)
-  },
-  rename ({ commit, getter }, { fullPath, newName }) {
-    // Construct new fullPath
-    let fullPathSplit = fullPath.split('/')
-    fullPathSplit.pop()
-    const newFullPath = fullPathSplit.join('/') + '/' +
-    fullPathSplit.push()
-    const { type } = getter.fileByFullPath(fullPath)
+
     if (type === 'file')
-      commit(t.PROJECT_RENAME_FILE, { fullPath, newName })
-    else
-      commit(t.PROJECT_RENAME_FOLDER, { fullPath, newName })
+      commit(t.PROJECT_DELETE_FILE, fullPath)
+    else {
+      const len = fullPath.length
+      for (let name in state.files)
+        if (name.substr(0, len) === fullPath)
+          commit(t.PROJECT_DELETE_FILE, name)
+    }
+  },
+
+  addNewFile ({ dispatch, getters }, folder) {
+    // Generate new filename
+    const files = getters.filesInFolder(folder, 'file')
+    const name = getUniqueName('New File', files)
+    const fullPath = getFullPath(folder, name)
+
+    const item = {
+      fullPath,
+      name,
+      type: 'file',
+      contents: '',
+      lastModified: +new Date()
+    }
+
+    dispatch('addNestedFile', { fullPath, item })
+    return item
+  },
+
+  addNewFolder ({ dispatch, getters }, folder) {
+    // Generate new filename (foldername)
+    const files = getters.filesInFolder(folder, 'folder')
+    const name = getUniqueName('New Folder', files)
+    const fullPath = getFullPath(folder, name)
+
+    const item = {
+      fullPath,
+      name,
+      type: 'folder'
+    }
+
+    dispatch('addNestedFile', { fullPath, item })
+    return item
+  },
+
+  renameNestedFile ({ commit, getters }, { fullPath, newName }) {
+    if (!isValidPath(fullPath))
+      return
+
+    const { type } = getters.fileByFullPath(fullPath)
+    if (!type)
+      return
+
+    const { folders } = pathMeta(fullPath)
+    const newFullPath = getFullPath(folders.join('/'), newName)
+    
+    if (type === 'file') {
+      commit(t.PROJECT_RENAME_FILE, { fullPath, newFullPath, newName })
+      commit(t.PROJECT_CLOSE_OPEN, fullPath)
+      commit(t.PROJECT_ADD_OPEN, newFullPath)
+      commit(t.PROJECT_SET_ACTIVE, newFullPath)
+    } else {
+      const len = fullPath.length
+      const files = cloneDeep(state.files) // Mutating iteratee
+      for (let name in files) {
+        if (name.substr(0, len) === fullPath) {
+          const meta = pathMeta(name)
+          commit(t.PROJECT_RENAME_FILE, {
+            fullPath: name,
+            newFullPath: getFullPath(newFullPath, name.substr(len)),
+            newName: meta.name
+          })
+        }
+      }
+    }
   }
 }
 
@@ -207,6 +289,25 @@ const getters = {
 
   fileByFullPath: ({ files }) => fullPath => {
     return get(files, fullPath, null)
+  },
+
+  filesInFolder: ({ files }) => (folder, fileType = 'file') => {
+    const fileValues = Object.values(files)
+
+    // Root
+    if (!folder) {
+      return fileValues.filter(({ fullPath, type }) => {
+        return fullPath.indexOf('/') < 0 && type === fileType
+      })
+    }
+
+    const len = folder.length
+    return fileValues.filter(({ fullPath, type }) => {
+      const preCut = fullPath.substr(len)
+      return preCut !== ''
+             && preCut.indexOf('/') < 0
+             && type === fileType
+    })
   }
 }
 

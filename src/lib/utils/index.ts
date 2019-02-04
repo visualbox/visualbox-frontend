@@ -7,3 +7,9 @@ export { default as getNestedSource } from './getNestedSource'
 export { default as mergeDeep } from './mergeDeep'
 export { default as parseConfig } from './parseConfig'
 export { default as parseFileType } from './parseFileType'
+export {
+  isValidPath,
+  pathMeta,
+  getUniqueName,
+  getFullPath
+} from './projectFs'

@@ -117,11 +117,11 @@ export default {
      * 'config.json' file and parse it.
      */
     config () {
-      const widget = this.widgetById(this.focusedWidget.id)
-      if (!widget)
+      const { files } = this.widgetById(this.focusedWidget.id)
+      if (!files)
         return { error: ['Unable to load widget'] }
 
-      const contents = fileContents(widget, ['config.json'])
+      const contents = fileContents(files, ['config.json'])
       if (!contents)
         return { error: ['Unable to parse widget configuration'] }
 

@@ -62,6 +62,11 @@ export const PROJECT_ADD_FILE = 'PROJECT_ADD_FILE'
 export const PROJECT_DELETE_FILE = 'PROJECT_DELETE_FILE'
 export const PROJECT_RENAME_FILE = 'PROJECT_RENAME_FILE'
 
+// Module: Bundler
+export const BUNDLER_SET_STATUS = 'BUNDLER_SET_STATUS'
+export const BUNDLER_SET_QUEUE = 'BUNDLER_SET_QUEUE'
+export const BUNDLER_SHIFT = 'BUNDLER_SHIFT'
+
 // Module: Data
 export const DATA_RESET = 'DATA_RESET'
 export const DATA_SET_DATA = 'DATA_SET_DATA'

@@ -61,7 +61,7 @@ export default async (files: IObject, config: IObject) => {
     const CONFIG = ${configStr};
     ${source}
   `
-  console.log(code)
+  // console.log(code)
 
   /*
   // Compile code template

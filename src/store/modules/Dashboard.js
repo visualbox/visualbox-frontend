@@ -191,8 +191,8 @@ const actions = {
     }
 
     // Fetch widget config
-    const w = rootGetters['Widget/widgetById'](id)
-    const contents = fileContents(w, ['config.json'])
+    const { files } = rootGetters['Widget/widgetById'](id)
+    const contents = fileContents(files, ['config.json'])
     if (!contents)
       throw 'Could not add Widget'
 

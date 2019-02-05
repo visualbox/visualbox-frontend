@@ -290,8 +290,9 @@ const actions = {
     }
   },
 
-  save ({ commit }) {
-    commit(t.PROJECT_SAVE)
+  save ({ commit }, save = true) {
+    if (save)
+      commit(t.PROJECT_SAVE)
     const { id, files, dependencies, settings } = state
     return { id, files, dependencies, settings }
   }
@@ -304,6 +305,10 @@ const getters = {
 
   projectFiles: ({ files }) => {
     return filesTree(files)
+  },
+
+  projectDependencies: ({ dependencies }) => {
+    return get(dependencies, 'appDependencies', [])
   },
 
   fileByFullPath: ({ files }) => fullPath => {

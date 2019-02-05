@@ -6,6 +6,7 @@ import API from '@/service/API'
 
 // Vuex modules
 import App from '@/store/modules/App'
+import Bundler from '@/store/modules/Bundler'
 import Cognito from '@/store/modules/Cognito'
 import Dashboard from '@/store/modules/Dashboard'
 import Widget from '@/store/modules/Widget'
@@ -18,6 +19,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   modules: {
     App,
+    Bundler,
     Cognito,
     Dashboard,
     Widget,

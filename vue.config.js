@@ -19,12 +19,19 @@ module.exports = {
       })
     ]
   },
+  parallel: false,
   chainWebpack: config => {
     config.module
       .rule('raw')
       .test(/\.md$/)
       .use('raw-loader')
-      .loader('raw-loader')
-      .end()
+        .loader('raw-loader')
+        .end()
+    config.module
+      .rule('worker')
+      .test(/\.worker\.js$/i)
+      .use('worker-loader')
+        .loader('worker-loader')
+        .end()
   }
 }

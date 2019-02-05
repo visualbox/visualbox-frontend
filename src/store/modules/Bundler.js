@@ -43,8 +43,8 @@ const mutations = {
 
     /**
      * If queue already contains project ID,
-     * we can regard it as old and thus discard
-     * it.
+     * we can regard queued item as old and
+     * thus discard it.
      */
     const index = state.queue.findIndex(({ project: { id }}) => id === project.id)
     if (index >= 0) {
@@ -91,9 +91,11 @@ const actions = {
       const type = get(e, 'data.type', 'ERROR')
       const payload = get(e, 'data.payload', '[Bundler]: no error returned')
 
+      commit(t.BUNDLER_SET_STATUS, 'BUNDLE_READY')
+      commit(t.BUNDLER_SET_ACTIVE, null)
+
       if (type === 'BUNDLE_READY') {
         cb(null, payload)
-        commit(t.BUNDLER_SET_ACTIVE, null)
       } else
         cb(payload, null)
 

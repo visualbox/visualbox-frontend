@@ -6,10 +6,6 @@
       color="transparent"
       hide-slider
     )
-      //- README viewer
-      //-v-tab(:ripple="false").black
-        v-icon mdi-card-text
-
       //- Open files
       v-tab(
         v-for="(item, index) in openTabs"
@@ -18,23 +14,26 @@
         :key="index"
         :ripple="false"
       )
-        v-icon.mr-2(:color="item.color") {{ item.icon }}
-        template(v-if="item.peek")
-          i {{ item.name }}
+        //- README viewer
+        v-icon(v-if="item.name === '/~README'") mdi-card-text
         template(v-else)
-          | {{ item.name }}
-        v-icon.ml-2(
-          :class="tabIconHidden(index, item.fullPath)"
-          @click="PROJECT_CLOSE_OPEN(item.fullPath)"
-          @mouseover="hoverIndexIcon = index"
-          @mouseout="hoverIndexIcon = null"
-          small
-        ) {{ tabIcon(index, item.fullPath) }}
+          v-icon.mr-2(:color="item.color") {{ item.icon }}
+          template(v-if="item.peek")
+            i {{ item.name }}
+          template(v-else)
+            | {{ item.name }}
+          v-icon.ml-2(
+            :class="tabIconHidden(index, item.fullPath)"
+            @click="PROJECT_CLOSE_OPEN(item.fullPath)"
+            @mouseover="hoverIndexIcon = index"
+            @mouseout="hoverIndexIcon = null"
+            small
+          ) {{ tabIcon(index, item.fullPath) }}
 
       v-spacer
       v-toolbar-items
         v-btn(
-          v-if="active"
+          v-if="activeTab > 0"
           @click="formatCode"
           flat
         )
@@ -47,7 +46,11 @@
           v-icon mdi-console
   .grid-layout(:class="showHelper ? layoutHelper : 'no-split'")
     .grid-item
-      .monaco(v-if="active")
+      .markdown(
+        v-if="activeTab <= 0"
+        v-html="compiledMarkdown"
+      )
+      .monaco(v-if="activeTab > 0")
         monaco-editor(
           :theme="'vs-' + theme"
           :language="monacoLanguage"
@@ -62,9 +65,13 @@
 
 <script>
 import Split from 'split-grid'
+import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { parseFileType, fileTypeMeta } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
+
+const README_VIEVER_NAME = '/~README'
 
 export default {
   name: 'Editor',
@@ -88,9 +95,6 @@ export default {
     ]),
     ...mapGetters('Project', ['fileByFullPath']),
     ...mapGetters('App', ['theme']),
-    activeFile () {
-      return this.files.hasOwnProperty(this.active) ? this.files[this.active] : null
-    },
     activeTab: {
       /**
        * Translate fullPath -> tab index
@@ -112,6 +116,14 @@ export default {
     openTabs () {
       const open = [...this.open].map(fullPath => this.fullPathMeta(fullPath))
 
+      // Add 'README' tab to beginning with an impossible name
+      open.unshift({
+        name: README_VIEVER_NAME,
+        fullPath: README_VIEVER_NAME,
+        icon: null,
+        color: null
+      })
+
       if (this.peek) {
         const meta = this.fullPathMeta(this.peek)
         if (meta) {
@@ -132,6 +144,14 @@ export default {
       },
       set (contents) {
         this.PROJECT_WRITE_FILE({ fullPath: this.active, contents })
+      }
+    },
+    compiledMarkdown () {
+      try {
+        const contents = fileContents(this.files, ['README.md'])
+        return contents ? marked(contents, { sanitize: true, gfm: true }) : 'No README.md'
+      } catch (e) {
+        return 'No README.md'
       }
     },
     monacoLanguage () {
@@ -212,6 +232,9 @@ export default {
       }
     }
   },
+  mounted () {
+    this.PROJECT_SET_ACTIVE(README_VIEVER_NAME)
+  },
   beforeDestroy () {
     this.PROJECT_RESET()
   }
@@ -226,6 +249,38 @@ export default {
 
   >>> .v-toolbar__content
     padding 0 !important
+
+    .editor-tabs
+      .v-tabs__item--active
+        box-shadow inset 0 -1px 0 #52b054
+
+      .v-icon
+        -webkit-transition none !important
+        transition none !important
+
+        &.ml-2
+          margin-bottom -2px
+
+        &.mdi-circle-medium
+          color #52b054
+
+        &.hidden
+          color transparent
+
+      .v-tabs__div
+        font-weight unset
+        text-transform unset
+
+        .v-tabs__item
+          -webkit-transition none !important
+          transition none !important
+
+          &--active
+            background-color $vb-application
+
+      .v-btn
+        padding 0
+        min-width 48px
 
   .grid-layout
     display grid

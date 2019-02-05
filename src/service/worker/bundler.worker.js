@@ -1,5 +1,6 @@
 import * as rollup from 'rollup/dist/rollup.browser'
 import virtual from './virtual.rollup.plugin'
+import nodent from 'rollup-plugin-nodent'
 import buble from 'rollup-plugin-buble'
 import butternut from 'rollup-plugin-butternut'
 
@@ -13,6 +14,10 @@ const isEntryFile = name => {
 let entryIsFound = false
 let modules = {}
 let warnings = []
+
+onerror = () => {
+  console.log('There is an error inside your worker!')
+}
 
 onmessage = async ({ data }) => {
   try {
@@ -56,6 +61,11 @@ onmessage = async ({ data }) => {
           input: 'index.js', // Entry file
           plugins: [
             virtual(modules),
+            // async/await
+            nodent({
+              promises: true,
+              noRuntime: true
+            }),
             buble(),
             butternut()
           ],
@@ -82,7 +92,8 @@ onmessage = async ({ data }) => {
           sourcemapExcludeSources: true
         }
 
-        const result = await (await rollup.rollup(inputOptions)).generate(outputOptions)
+        const bundle = await rollup.rollup(inputOptions)
+        const result = await bundle.generate(outputOptions)
         postMessage({
           type: 'BUNDLE_READY',
           payload: result.output[0].code

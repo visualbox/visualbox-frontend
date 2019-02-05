@@ -106,7 +106,7 @@ export default {
       immediate: true,
       handler: debounce(function () {
         this.fetchBundle()
-      }, 500)
+      }, 3000)
     },
     freeze (val) {
       if (!val)
@@ -179,12 +179,12 @@ export default {
         this.queueBundle({
           project: await this.save(false),
           cb: (err, code) => {
+            console.log(code)
             if (err) {
               this.println(err, 'red')
               return
             }
             this.startWorker(code)
-            console.log(code)
           }
         })
       } catch (e) {

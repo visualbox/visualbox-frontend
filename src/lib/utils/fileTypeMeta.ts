@@ -32,8 +32,8 @@ export default (fileType: string) => {
       }
     default:
       return {
-        icon: 'mdi-file-outline',
-        color: '#ffffff',
+        icon: 'mdi-file-question',
+        color: '#DDD',
         monacoLanguage: 'text'
       }
   }

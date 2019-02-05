@@ -98,6 +98,11 @@ const actions = {
         cb(null, payload)
       } else
         cb(payload, null)
+      
+      // Write bundle to cache
+      const cacheId = get(project, 'id', null)
+      if (cacheId)
+        CACHE.setItem(cacheId, payload)
 
       /**
        * When done, try shift the next so

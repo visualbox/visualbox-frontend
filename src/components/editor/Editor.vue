@@ -15,7 +15,7 @@
         :ripple="false"
       )
         //- README viewer
-        v-icon(v-if="item.name === '/~README'") mdi-card-text
+        v-icon(v-if="item.name === '/~README'") mdi-eye-outline
         template(v-else)
           v-icon.mr-2(:color="item.color") {{ item.icon }}
           template(v-if="item.peek")

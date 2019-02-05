@@ -1,61 +1,88 @@
 import { BuildWorker } from '@/service'
 
 class WorkerHandler {
-  constructor () {
-    this.integrationById = null
-    this.DATA_SET_DATA = null // Vuex mutation
-    this.DATA_CLEAN_DATA = null // Vuex mutation
-    this.integrations = null
-    this.workers = []
+  attachStore (store) {
+    this.store = store
+    this.workers = {}
   }
 
-  init (integrationById, DATA_SET_DATA, DATA_CLEAN_DATA) {
-    this.integrationById = integrationById
-    this.DATA_SET_DATA = DATA_SET_DATA
-    this.DATA_CLEAN_DATA = DATA_CLEAN_DATA
+  /**
+   * Convenience store mappers.
+   */
+  get integrationById () {
+    return this.store.getters['Integration/integrationById']
   }
 
+  get bundleById () {
+    return this.store.getters['Bundler/bundleById']
+  }
+
+  get setData () {
+    return this.store.mutations['Data/DATA_SET_DATA']
+  }
+
+  get cleanData () {
+    return this.store.mutations['Data/DATA_CLEAN_DATA']
+  }
+
+  /**
+   * Register integrations by first trying
+   * to fetch them from source, and then starting
+   * them with configurations from integration.
+   * If not found, bundle and repeat.
+   */
   register (integrations) {
     integrations.forEach(integration => {
-      // Get ID, source code and config vars from integration
-      const { i, settings: { config } } = integration
-      const { source } = this.integrationById(integration.id)
-      // ^ fetch package to get deps for worker
+      try {
+        // Get dashboard ID, user config and Integration ID
+        const { i, settings: { config } } = integration
+        const { id } = this.integrationById(integration.id)
 
-      // Create worker and hook onmessage callback
-      let worker = BuildWorker(source, config)
-      worker.onmessage = ({ data }) => {
-        this.DATA_SET_DATA({ i, data })
+        // Get bundle by Integration ID from cache
+        this.bundleById(id)
+          .then(bundle => {
+            // Cache miss
+            if (!bundle) {
+              console.log('Integration not found, need to bundle')
+
+            // Cache hit
+            } else {
+              this.workers[i] = BuildWorker(bundle, config)
+              this.workers[i].onmessage = ({ data }) => {
+                this.setData({ i, data })
+              }
+            }
+          })
+
+      } catch (e) {
+        console.log(`Failed to start an integration`)
       }
-
-      // Push worker to worker list
-      this.workers.push({ i, worker })
     })
   }
 
+  /**
+   * End a worker by dashboard ID.
+   * If supplied dashboard ID is null,
+   * end all registered workers.
+   */
   end (i = null) {
-    // End all
     if (i === null) {
-      this.workers.forEach(w => w.worker.terminate())
-      this.DATA_CLEAN_DATA(this.workers.reduce((a, b) => {
-        a.push(b.i)
-        return a
-      }, []))
-      this.workers = []
+      const workers = Object.values(this.workers)
+      const dIDs = Object.keys(this.workers)
+
+      workers.forEach(w => w.terminate())
+      this.cleanData(dIDs)
+      this.workers = {}
 
     // End single
     } else {
-      const index = this.workers.findIndex(w => w.i === i)
-
-      // Not found
-      if (index < 0)
+      if (!this.workers.hasOwnProperty(i))
         return
 
       try {
-        const worker = this.workers[index]
-        worker.worker.terminate()
-        this.DATA_CLEAN_DATA([ worker.i ])
-        this.workers.splice(index, 1)
+        this.workers[i].terminate()
+        this.cleanData([ i ])
+        delete this.workers[i]
       } catch (e) {}
     }
   }

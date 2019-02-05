@@ -4,15 +4,15 @@
     .subheading Add Integration
   .pl-3.pr-3.pb-3
     v-select(
-      :items="list"
+      :items="integrationList"
       v-model="selectedId"
-      item-text="package.name"
+      item-text="name"
       item-value="id"
       label="Select Integration"
       hide-details outline
     )
 
-    template(v-if="config")
+    template(v-if="selectedId")
       v-text-field.mt-3.mb-3(
         v-model="label"
         :rules="[v => !!v || 'Required']"
@@ -23,7 +23,7 @@
       )
       input-types(
         v-model="model"
-        :config="config"
+        :config="parsedConfig"
       )
       v-btn(
         @click="submit"
@@ -36,7 +36,8 @@
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { WorkerHandler } from '@/service'
-import { parseConfig, cloneDeep } from '@/lib/utils'
+import { parseConfig } from '@/lib/utils'
+import { packageJson, fileContents } from '@/lib/utils/projectUtils'
 
 export default {
   name: 'DashboardAddIntegration',
@@ -53,14 +54,30 @@ export default {
     ...mapState('Dashboard', ['isAddingIntegration']),
     ...mapState('Integration', ['list']),
     ...mapGetters('Integration', ['integrationById']),
-    config () {
+    integrationList () {
+      return this.list.map(integration => {
+        return {
+          id: integration.id,
+          name: packageJson(integration, 'name', 'Untitled')
+        }
+      })
+    },
+    parsedConfig () {
       try {
         if (!this.selectedId)
-          return null
+          throw new Error('Unable to parse widget configuration')
+
         const integration = this.integrationById(this.selectedId)
-        return parseConfig(integration.config)
+        if (!integration.hasOwnProperty('files'))
+          throw new Error('Unable to parse widget configuration')
+
+        const contents = fileContents(integration.files, ['config.json'])
+        if (!contents)
+          throw new Error('Unable to parse widget configuration')
+
+        return parseConfig(contents)
       } catch (e) {
-        return null
+        return { error: [e.message] }
       }
     },
     settings () {
@@ -71,23 +88,25 @@ export default {
     }
   },
   watch: {
-    selectedId: {
-      handler (newVal, oldVal) {
-        // Don't load local config model if not changed
-        if (newVal === null)
-          return
-        if ((newVal !== null && oldVal !== null) && newVal.i === oldVal.i)
+    parsedConfig: {
+      deep: true,
+      handler (val) {
+        if (!val || !this.parsedConfig.hasOwnProperty('variables'))
           return
 
         // Create local config model
-        const configModel = this.config.variables.reduce((acc, cur) => {
+        this.model = this.parsedConfig.variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
-
-        this.model = cloneDeep(configModel)
-      },
-      deep: true
+      }
+    },
+    isAddingIntegration (newVal, oldVal) {
+      // Closing
+      if (!newVal && oldVal) {
+        this.selectedId = null
+        this.model = {}
+      }
     }
   },
   methods: {
@@ -98,6 +117,7 @@ export default {
       try {
         if (!this.label || this.label === '')
           return
+
         const integration = await this.addIntegration({
           id: this.selectedId,
           settings: this.settings

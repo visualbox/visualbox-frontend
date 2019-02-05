@@ -11,8 +11,8 @@
     v-list-tile(
       v-for="(item, index) in dashboardIntegrations"
       :key="index"
-      @mouseover="hoverDashboardIndex = index"
-      @mouseout="hoverDashboardIndex = null"
+      @mouseover="hoverIndex = index"
+      @mouseout="hoverIndex = null"
       @click="DASHBOARD_SET_FOCUSED_INTEGRATION(item.i)"
     )
       v-list-tile-content
@@ -33,7 +33,7 @@ import { WorkerHandler } from '@/service'
 export default {
   name: 'DashboardIntegrations',
   data: () => ({
-    hoverDashboardIndex: null
+    hoverIndex: null
   }),
   computed: {
     ...mapState('Dashboard', ['loaded']),
@@ -58,7 +58,6 @@ export default {
     }
   },
   mounted () {
-    WorkerHandler.init(this.integrationById, this.DATA_SET_DATA, this.DATA_CLEAN_DATA)
     WorkerHandler.register(this.dashboardIntegrations)
   },
   beforeDestroy () {

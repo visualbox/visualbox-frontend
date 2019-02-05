@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { sync } from 'vuex-router-sync'
 import router from '@/router'
-import API from '@/service/API'
+import { API, WorkerHandler } from '@/service'
 
 // Vuex modules
 import App from '@/store/modules/App'
@@ -34,7 +34,8 @@ const store = new Vuex.Store({
 // Attach Vue Router sync module to Vuex store
 sync(store, router, { moduleName: 'Route' })
 
-// Attach store instance so API can make use of it
+// Attach store instance so services can use it
 API.attachStore(store)
+WorkerHandler.attachStore(store)
 
 export default store

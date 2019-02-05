@@ -16,11 +16,11 @@
       ) mdi-cancel
     v-spacer
     tooltip(text="Restart" :open-delay="800" top)
-      v-icon(@click="") mdi-restart
+      v-icon(@click="forceRestart") mdi-restart
     tooltip(text="Freeze Console" :open-delay="800" top)
       v-icon(
         :color="freeze ? 'blue' : ''"
-        @click="freeze = !!!freeze"
+        @click="freeze = !freeze"
       ) mdi-snowflake
     tooltip(text="Dock to Bottom" :open-delay="800" top)
       v-icon(
@@ -35,17 +35,15 @@
     v-icon(@click="PROJECT_SET_HELPER(false)") mdi-close
   .pane(:active="tab === 0")
     input-types(
-      v-if="false"
       v-model="model"
       :config="parsedConfig"
     )
   .pane(:active="tab === 1")
-    pre {{ active }} - {{ status }}
     .ln(
       v-for="(item, index) in consoleBuffer"
       :key="index"
-      :error="item.error"
-    ) {{ item.line }}
+      :style="{ 'color': item.color }"
+    ) {{ item.ln }}
 </template>
 
 <script>
@@ -53,7 +51,11 @@ import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { InputTypes, Tooltip } from '@/components'
+import { parseConfig } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
+import { BuildWorker } from '@/service'
 
+const BUFFER_MAX = 100
 
 export default {
   name: 'HelperIntegration',
@@ -64,12 +66,56 @@ export default {
   data: () => ({
     model: {},
     tab: 1,
+    worker: null,
     consoleBuffer: [],
     freeze: false
   }),
   computed: {
-    ...mapState('Project', ['layoutHelper']),
-    ...mapState('Project', ['active', 'status'])
+    ...mapState('Project', ['layoutHelper', 'dirty', 'files']),
+    ...mapState('Bundler', ['active', 'status']),
+    parsedConfig () {
+      const contents = fileContents(this.files, ['config.json'])
+      if (!contents)
+        return { error: ['Unable to parse widget configuration'] }
+      return parseConfig(contents)
+    }
+  },
+  watch: {
+    /**
+     * Re-apply defaults to model bound to input types.
+     */
+    parsedConfig: {
+      immediate: true,
+      deep: true,
+      handler () {
+        if (!this.parsedConfig.hasOwnProperty('variables'))
+          return
+
+        try {
+          // Create local config model
+          this.model = this.parsedConfig.variables.reduce((acc, cur) => {
+            acc[cur.name] = cur.default || null
+            return acc
+          }, {})
+        } catch (e) {
+          console.log(e)
+        }
+      }
+    },
+    dirty: {
+      immediate: true,
+      handler: debounce(function () {
+        this.fetchBundle()
+      }, 500)
+    },
+    freeze (val) {
+      if (!val)
+        this.fetchBundle()
+      else {
+        if (this.worker !== null)
+          this.worker.terminate()
+      }
+    }
   },
   methods: {
     ...mapMutations('Project', [
@@ -77,19 +123,78 @@ export default {
       'PROJECT_SET_HELPER'
     ]),
     ...mapActions('Project', ['save']),
-    ...mapActions('Bundler', ['queueBundle'])
-  },
-  async mounted () {
-    try {
-      this.queueBundle({
-        project: await this.save(),
-        cb: (err, status) => {
-          console.log('Queue bundle ready', err, status)
-        }
+    ...mapActions('Bundler', ['queueBundle']),
+
+    /**
+     * Print a line to the console.
+     */
+    println (ln, color = '#FFF') {
+      if (this.consoleBuffer.length > BUFFER_MAX)
+        this.consoleBuffer.shift()
+      this.consoleBuffer.push({
+        timestamp: +new Date(),
+        ln,
+        color
       })
-    } catch (e) {
-      console.log('Mount bundle error', e)
+    },
+
+    forceRestart () {
+      this.freeze = false
+      this.fetchBundle()
+    },
+
+    async startWorker (code) {
+      // Clear console
+      this.consoleBuffer = []
+      this.println('Restarting...')
+
+      try {
+        // Terminate already running worker
+        if (this.worker !== null)
+          this.worker.terminate()
+
+        this.worker = await BuildWorker(code, this.model) // Possibly injectable?
+        if (!this.worker)
+          throw new Error('Web Worker was not created')
+
+        this.consoleBuffer = []
+
+        // Hook worker messages
+        this.worker.onmessage = ({ data }) => this.println(data)
+        this.worker.onerror = e => {
+          const { message, lineno, colno } = e
+          const lines = lineno && colno ? `:${lineno}:${colno}` : ''
+          this.println(`Error: ${message}${lines}`, 'red')
+        }
+      } catch (e) {
+        this.println(`Failed to start: ${e.message}`, 'red')
+      }
+    },
+
+    async fetchBundle () {
+      if (this.freeze)
+        return
+
+      try {
+        this.queueBundle({
+          project: await this.save(false),
+          cb: (err, code) => {
+            if (err) {
+              this.println(err, 'red')
+              return
+            }
+            this.startWorker(code)
+            console.log(code)
+          }
+        })
+      } catch (e) {
+        console.log('Mount bundle error', e)
+      }
     }
+  },
+  beforeDestroy () {
+    if (this.worker !== null)
+      this.worker.terminate()
   }
 }
 </script>
@@ -139,7 +244,4 @@ export default {
     .ln
       font-family monospace
       word-break break-all
-
-      &[error]
-        color red
 </style>

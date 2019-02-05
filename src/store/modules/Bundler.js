@@ -8,12 +8,9 @@ const CACHE = localforage.createInstance({
   name: 'bundle-cache'
 })
 
-const BUNDLER = new BunderWorker()
-BUNDLER.onmessage = e => {
-  console.log('[main] got message: ', e)
-}
-
 const state = {
+  bundler: new BunderWorker(),
+
   /**
    * Queue contains projects that are
    * waiting to be bundled. A queued
@@ -34,6 +31,9 @@ const state = {
 }
 
 const mutations = {
+  [t.BUNDLER_SET_ACTIVE] (state, payload) {
+    state.active = payload
+  },
   [t.BUNDLER_SET_STATUS] (state, payload) {
     state.status = payload
   },
@@ -48,7 +48,7 @@ const mutations = {
      */
     const index = state.queue.findIndex(({ project: { id }}) => id === project.id)
     if (index >= 0) {
-      state.queue[index].cb('ABORTED', null)
+      state.queue[index].cb('[Bundler]: aborted', null)
       state.queue.splice(index, 1)
     }
 
@@ -60,8 +60,7 @@ const mutations = {
     if (!next)
       return
 
-    console.log('NEXT', next)
-    // state.active = next.project.id
+    state.active = next.project.id
   }
 }
 
@@ -86,8 +85,26 @@ const actions = {
 
     // --- STAGE: READY
     commit(t.BUNDLER_SET_STATUS, 'READY')
-    BUNDLER.postMessage({ type: 'READY' })
-    const { project, cb } = cloneDeep(queue[0])
+    state.bundler.postMessage({ type: 'READY' })
+    const { project, cb } = queue[0] // cloneDeep?
+    state.bundler.onmessage = e => {
+      const type = get(e, 'data.type', 'ERROR')
+      const payload = get(e, 'data.payload', '[Bundler]: no error returned')
+
+      if (type === 'BUNDLE_READY') {
+        cb(null, payload)
+        commit(t.BUNDLER_SET_ACTIVE, null)
+      } else
+        cb(payload, null)
+
+      /**
+       * When done, try shift the next so
+       * that the queue is emptied.
+       */
+      dispatch('queueTryShift')
+    }
+    // state.bundle.onerror
+
     commit(t.BUNDLER_SHIFT)
 
     // --- STAGE: UPLOAD
@@ -100,7 +117,7 @@ const actions = {
         if (type !== 'file')
           continue
 
-        BUNDLER.postMessage({
+        state.bundler.postMessage({
           type: 'ADD_MODULE',
           payload: project.files[i]
         })
@@ -109,13 +126,7 @@ const actions = {
 
     // --- STAGE: BUNDLE
     commit(t.BUNDLER_SET_STATUS, 'BUNDLE')
-    BUNDLER.postMessage({ type: 'BUNDLE' })
-
-    /**
-     * When done, try shift the next so
-     * that the queue is emptied.
-     */
-    dispatch('queueTryShift')
+    state.bundler.postMessage({ type: 'BUNDLE' })
   }
 }
 

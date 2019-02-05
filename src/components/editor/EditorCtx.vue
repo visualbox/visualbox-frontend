@@ -17,25 +17,16 @@
 
   v-list(dense)
     //- Files
-    v-list-tile.no-hover(
-      @mouseover="hoverRoot = true"
-      @mouseout="hoverRoot = null"
-      @click="openPanel.files = !openPanel.files"
-    )
+    v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
       v-list-tile-action
         v-icon {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
-      template(v-if="hoverRoot")
-        v-list-tile-action
-          tooltip(
-            :open-delay="800"
-            text="Add File"
-            bottom
-          )
-            v-icon(@click.stop="addFile" small) mdi-file-plus
-        v-list-tile-action
-          tooltip(text="Add Folder" :open-delay="800" bottom)
-            v-icon(@click.stop="addFolder" small) mdi-folder-plus
+      v-list-tile-action
+        tooltip(text="Add File" :open-delay="800" bottom)
+          v-icon(@click.stop="addFile" small) mdi-file-plus
+      v-list-tile-action
+        tooltip(text="Add Folder" :open-delay="800" bottom)
+          v-icon(@click.stop="addFolder" small) mdi-folder-plus
 
     v-treeview(
       v-if="openPanel.files"
@@ -47,12 +38,9 @@
       activatable
       open-on-click
     )
-      template(
-        slot="prepend"
-        slot-scope="{ item, open, leaf }"
-      )
+      template(#prepend="{ item, open }")
         v-icon(
-          v-if="!item.file"
+          v-if="item.type === 'folder'"
           small
         ) {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
         template(v-else)
@@ -65,10 +53,7 @@
             :color="fileTypeMeta(item.file).color"
             small
           ) {{ fileTypeMeta(item.file).icon }}
-      template(
-        slot="label"
-        slot-scope="{ item }"
-      )
+      template(#label="{ item }")
         input.edit-file-input(
           v-if="item.fullPath === editFileFullPath"
           v-model="editFileName"
@@ -81,16 +66,13 @@
           spellcheck="false"
         )
         span(v-else) {{ item.name }}
-      template(
-        slot="append"
-        slot-scope="{ item }"
-      )
+      template(#append="{ item }")
         .options(v-if="item.fullPath !== editFileFullPath")
           template(v-if="item.type === 'folder'")
             tooltip(text="Add File" :open-delay="800" bottom)
-              v-icon(@click="addFile(item)" small) mdi-file-plus
+              v-icon(@click.stop="addFile(item)" small) mdi-file-plus
             tooltip(text="Add Folder" :open-delay="800" bottom)
-              v-icon(@click="addFolder(item)" small) mdi-folder-plus
+              v-icon(@click.stop="addFolder(item)" small) mdi-folder-plus
           tooltip(text="Rename" :open-delay="800" bottom)
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
@@ -138,7 +120,7 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
-import { fileTypeMeta } from '@/lib/utils'
+import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
 
 const DOUBLE_CLICK_TIMEOUT = 500
@@ -152,7 +134,6 @@ export default {
   data: () => ({
     fileTypeMeta,
     loading: false,
-    hoverRoot: null,
     hoverIndex: null,
     openPanel: {
       files: true,
@@ -191,7 +172,7 @@ export default {
         this.doubleClick(dblClicked)
       else if (newVal)
         this.click(newVal)
-    }
+    },
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
@@ -221,33 +202,33 @@ export default {
       return null
     },
     async addFile ({ fullPath, type }) {
+      this.openPanel.files = true
+
       try {
         fullPath = fullPath || ''
         const newFile = await this.addNewFile(fullPath)
 
-        this.$nextTick(() => {
-          // Ensure folder is open when adding file to it
-          if (type === 'folder')
-            this.openTree.push(fullPath)
+        // Ensure folder is open when adding file to it
+        if (type === 'folder')
+          this.openTree.push(fullPath)
 
-          this.editFile(newFile)
-        })
+        this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
     },
     async addFolder ({ fullPath, type }) {
+      this.openPanel.files = true
+
       try {
         fullPath = fullPath || ''
         const newFile = await this.addNewFolder(fullPath)
 
-        this.$nextTick(() => {
-          // Ensure folder is open when adding folder to it
-          if (type === 'folder')
-            this.openTree.push(fullPath)
+        // Ensure folder is open when adding folder to it
+        if (type === 'folder')
+          this.openTree.push(fullPath)
 
-          this.editFile(newFile)
-        })
+        this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
@@ -329,6 +310,13 @@ export default {
         &:before
           display none
 
+      .v-list__tile__action:not(:first-child)
+        visibility hidden
+
+      &:hover
+        .v-list__tile__action:not(:first-child)
+          visibility visible
+
     .container
       padding-left 40px
 
@@ -389,8 +377,10 @@ export default {
   .dependency-input
     min-height 30px
     font-size 12px
+
     >>> .v-input__slot
       min-height 30px
+
       input
         max-height 30px
         margin-top 0

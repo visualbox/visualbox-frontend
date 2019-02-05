@@ -33,7 +33,11 @@
 
       v-spacer
       v-toolbar-items
-        v-btn(@click="formatCode" flat)
+        v-btn(
+          v-if="active"
+          @click="formatCode"
+          flat
+        )
           v-icon mdi-auto-fix
         v-btn(
           :color="showHelper ? 'primary' : ''"

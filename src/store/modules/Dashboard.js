@@ -195,7 +195,7 @@ const actions = {
     const { files } = rootGetters['Widget/widgetById'](id)
     const contents = fileContents(files, ['config.json'])
     if (!contents)
-      throw 'Could not add Widget'
+      throw 'Could not add Widget, no config.json in Widget'
 
     const config = parseConfig(contents)
     // Create default config model

@@ -176,9 +176,8 @@ export default {
       this.dataTree = dataTree(WorkerHandler.data)
 
       // Convert top-leved ID's into integration names
-      for (let i in this.dataTree) {
+      for (const integration of this.dataTree) {
         try {
-          let integration = this.dataTree[i]
           const { key } = integration
           integration.text = this.integrationByI(key).settings.label || key
         } catch (e) {

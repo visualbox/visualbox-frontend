@@ -21,10 +21,12 @@ v-container(fluid fill-height)
       v-icon.index-icon mdi-hexagon-multiple
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'WidgetsIndex'
-}
+})
 </script>
 
 <style lang="stylus" scoped>

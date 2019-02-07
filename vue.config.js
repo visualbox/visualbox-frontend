@@ -1,10 +1,11 @@
 /* eslint-disable */
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const webpack = require('webpack')
 
 module.exports = {
-  baseUrl: '/',
+  publicPath: '/',
   configureWebpack: {
     node: {
       process: 'mock'
@@ -12,17 +13,25 @@ module.exports = {
     plugins: [
       new VuetifyLoaderPlugin(),
       new MonacoWebpackPlugin(),
+      new BundleAnalyzerPlugin(),
       new webpack.DefinePlugin({
         'process.platform': 0 // bypass process check by Monaco
       })
     ]
   },
+  parallel: false,
   chainWebpack: config => {
     config.module
       .rule('raw')
       .test(/\.md$/)
       .use('raw-loader')
-      .loader('raw-loader')
-      .end()
+        .loader('raw-loader')
+        .end()
+    config.module
+      .rule('worker')
+      .test(/\.worker\.js$/i)
+      .use('worker-loader')
+        .loader('worker-loader')
+        .end()
   }
 }

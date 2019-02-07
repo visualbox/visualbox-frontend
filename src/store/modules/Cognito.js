@@ -23,7 +23,9 @@ const actions = {
       commit('setUser', user)
       return session
     } catch (e) {
-      throw e
+      // Auth may annoyingly throw a string
+      if (e instanceof Error)
+        throw e
     }
   },
 

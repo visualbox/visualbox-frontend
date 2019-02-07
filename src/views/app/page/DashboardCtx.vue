@@ -1,15 +1,29 @@
 <template lang="pug">
-#dashboard-ctx(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+#dashboard-ctx(v-if="loaded")
+  context-toolbar
     v-btn(
       icon
       @click="goBack"
     )
       v-icon mdi-menu-left
     .subheading {{ label }}
+    v-spacer
+    v-btn(
+      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
+      icon
+    )
+      v-icon {{ fullscreenIcon }}
+    template(v-if="isFullscreen")
+      v-spacer
+      span VisualBox.io
+    v-btn(
+      @click="DASHBOARD_SET_EDITING(!isEditing)"
+      icon
+    )
+      v-icon {{ editingIcon }}
 
   v-tabs(
-    :class="{ 'hidden' : focusedIntegration || focusedWidget || isAddingIntegration }"
+    :class="{ 'hidden': focusedIntegration || focusedWidget || isAddingIntegration }"
     color="rgba(0,0,0,0)"
     slider-color="primary"
     grow
@@ -33,37 +47,38 @@
     v-tab-item
       dashboard-settings
 
+  //------------------------------------
+
   //- Adding integration menu
-  v-scroll-x-transition
-    dashboard-add-integration
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-add-integration(v-if="isAddingIntegration")
 
   //- Integration config menu
-  v-scroll-x-transition
-    dashboard-integration-config
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-integration-config(v-if="focusedIntegration")
 
   //- Widet config menu
-  v-scroll-x-transition
-    dashboard-widget-config
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-widget-config(v-if="focusedWidget")
 </template>
 
 <script>
-import * as _ from 'lodash'
-import moment from 'moment'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { ContextToolbar } from '@/components'
 import {
-  AppContextToolbar,
   DashboardIntegrations,
   DashboardWidgets,
   DashboardSettings,
   DashboardAddIntegration,
   DashboardIntegrationConfig,
   DashboardWidgetConfig
-} from '@/components/app'
+} from '@/components/dashboard'
 
 export default {
   name: 'DashboardCtx',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     DashboardIntegrations,
     DashboardWidgets,
     DashboardSettings,
@@ -73,25 +88,35 @@ export default {
   },
   computed: {
     ...mapState('Widget', ['list']),
-    ...mapState('Dashboard', ['loaded', 'isAddingIntegration']),
+    ...mapState('Dashboard', [
+      'loaded',
+      'isAddingIntegration',
+      'isEditing',
+      'isFullscreen'
+    ]),
     ...mapGetters('Dashboard', ['focusedIntegration', 'focusedWidget']),
     label: {
       get () {
-        return _.get(this, 'loaded.label', '')
+        return get(this, 'loaded.label', '')
       },
       set (label) {
         this.updateLoaded({ label })
       }
     },
-    updatedAt () {
-      const { updatedAt } = this.loaded
-      return moment(updatedAt).format('DD/MM HH:mm:ss')
+    editingIcon () {
+      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
+    },
+    fullscreenIcon () {
+      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
     }
   },
   methods: {
     ...mapMutations('Dashboard', [
       'DASHBOARD_SET_FOCUSED_WIDGET',
-      'DASHBOARD_SET_FOCUSED_INTEGRATION'
+      'DASHBOARD_SET_FOCUSED_INTEGRATION',
+      'DASHBOARD_SET_ADDING_INTEGRATION',
+      'DASHBOARD_SET_EDITING',
+      'DASHBOARD_SET_FULLSCREEN'
     ]),
     ...mapActions('Dashboard', ['updateLoaded']),
     goBack () {
@@ -99,6 +124,8 @@ export default {
         this.DASHBOARD_SET_FOCUSED_WIDGET(null)
       else if (this.focusedIntegration)
         this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+      else if (this.isAddingIntegration)
+        this.DASHBOARD_SET_ADDING_INTEGRATION(false)
       else
         this.$router.go(-1)
     }
@@ -108,9 +135,6 @@ export default {
 
 <style lang="stylus" scoped>
 #dashboard-ctx
-  height 100%
-  overflow auto
-
   .v-tabs
     &.hidden
       display none

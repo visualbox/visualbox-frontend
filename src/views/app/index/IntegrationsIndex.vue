@@ -21,10 +21,12 @@ v-container(fluid fill-height)
       v-icon.index-icon mdi-source-fork
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'IntegrationsIndex'
-}
+})
 </script>
 
 <style lang="stylus" scoped>

@@ -1,10 +1,10 @@
 <template lang="pug">
 #help-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Help Center
 
   //- List
-  v-list
+  v-list(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
@@ -17,12 +17,13 @@
         v-icon {{ item.icon }}
 </template>
 
-<script>
-import { AppContextToolbar } from '@/components/app'
+<script lang="ts">
+import Vue from 'vue'
+import { ContextToolbar } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'HelpCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     list: [
       { label: 'Home', icon: 'mdi-home', to: '/app/h' },
@@ -31,11 +32,5 @@ export default {
       { label: 'Configuration Types', icon: 'mdi-json', to: '/app/h/config-types' }
     ]
   })
-}
+})
 </script>
-
-<style lang="stylus" scoped>
-#help-ctx
-  .v-list
-    padding 0
-</style>

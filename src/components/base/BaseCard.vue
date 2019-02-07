@@ -10,8 +10,10 @@ v-card(dark)
   slot
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'BaseCard',
   props: {
     loading: {
@@ -19,7 +21,7 @@ export default {
       default: false
     }
   }
-}
+})
 </script>
 
 <style lang="stylus" scoped>

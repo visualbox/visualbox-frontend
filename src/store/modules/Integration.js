@@ -1,30 +1,22 @@
-import * as _ from 'lodash'
+import Vue from 'vue'
 import * as t from '@/store/types'
-import API from '@aws-amplify/api'
-import config from '@/config'
-import difference from '@/lib/difference'
-import mergeDeep from '@/lib/mergeDeep'
-import cloneDeep from '@/lib/cloneDeep'
+import get from 'lodash-es/get'
+import API from '@/service/API'
+import { fileContents } from '@/lib/utils/projectUtils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
   list: [],
-  public: [],
-  loaded: null,
-  tab: 0
+  public: []
 }
 
 const mutations = {
   [t.INTEGRATION_RESET] (state) {
     state.list = []
     state.public = []
-    state.loaded = null
-    state.tab = 0
-  },
-  [t.INTEGRATION_SET_TAB] (state, payload) {
-    state.tab = payload
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
-    state.list = _.cloneDeep(payload)
+    state.list = cloneDeep(payload)
   },
   [t.INTEGRATION_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -32,22 +24,10 @@ const mutations = {
   [t.INTEGRATION_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
   },
-  [t.INTEGRATION_SET_LOADED] (state, payload) {
-    state.loaded = _.cloneDeep(payload)
-  },
-  [t.INTEGRATION_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = _.cloneDeep(state.loaded)
-  },
-  [t.INTEGRATION_COMMIT_LOADED] (state, nullify = false) {
-    const { loaded } = state
-    let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = _.cloneDeep(loaded)
-    state.list = _.cloneDeep(state.list)
-
-    // Used when closing / exiting 'loaded'
-    if (nullify)
-      state.loaded = null
+  [t.INTEGRATION_COMMIT] (state, project) {
+    const index = state.list.findIndex(({ id }) => id === project.id)
+    if (index >= 0)
+      Vue.set(state.list, index, project)
   },
   [t.INTEGRATION_CLEAN_DASHBOARD] (state, integrations) {
     // Remove every integration that does not exist in list
@@ -64,8 +44,7 @@ const mutations = {
     if (index < 0)
       state.public.push(payload)
     else
-      state.public[index] = _.cloneDeep(payload)
-    state.public = _.cloneDeep(state.public)
+      Vue.set(state.public, index, payload)
   }
 }
 
@@ -74,7 +53,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result = await API.get(config.env, '/integration')
+      result = await API.invoke('get', '/integration')
     } catch (e) {
       throw e
     } finally {
@@ -85,7 +64,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/integration', {
+      result.push(await API.invoke('post', '/integration', {
         body: { id }
       }))
     } catch (e) {
@@ -99,45 +78,27 @@ const actions = {
     commit(t.INTEGRATION_DELETE_LIST, id)
 
     try {
-      await API.del(config.env, `/integration/${id}`)
+      await API.invoke('del', `/integration/${id}`)
     } catch (e) {
       throw e
     } finally {}
   },
-  // Load an integration by making a local copy
-  load ({ commit, getters }, id) {
-    commit(t.INTEGRATION_SET_LOADED, getters.integrationById(id))
-  },
-  // Update a loaded local integration
-  updateLoaded ({ commit, dispatch }, payload = {}) {
-    payload.updatedAt = +new Date()
-    commit(t.INTEGRATION_CONCAT_LOADED, payload)
-  },
-  async closeLoaded ({ commit, dispatch, state, getters }) {
-    dispatch('updateLoaded') // To add timestamp
+
+  async commit ({ commit }, project) {
     try {
-      const { id } = state.loaded
-      const diff = cloneDeep(getters.loadedDiff)
-      commit(t.INTEGRATION_COMMIT_LOADED, true) // Must come before API call
-      await API.put(config.env, `/integration/${id}`, { body: diff })
+      commit(t.INTEGRATION_COMMIT, project)
+      const { id } = project
+      await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {
       throw e
     }
   },
-  // Commit a loaded local integration
-  async commitLoaded ({ commit, state, getters }) {
-    try {
-      await API.put(config.env, `/integration/${state.loaded.id}`, { body: getters.loadedDiff })
-      commit(t.INTEGRATION_COMMIT_LOADED)
-    } catch (e) {
-      throw e
-    }
-  },
+
   async loadPublic ({ commit }, id) {
     let result = null // Default value
 
     try {
-      result = await API.get(config.env, `/integration/${id}`)
+      result = await API.invoke('get', `/integration/${id}`)
     } catch (e) {
       throw e
     } finally {
@@ -147,18 +108,25 @@ const actions = {
 }
 
 const getters = {
-  list (state) {
-    return state.list
-  },
+  /**
+   * Get an integration by ID.
+   */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
   },
-  // Return diff between loaded and old item in list
-  loadedDiff ({ loaded }, getters) {
+
+  /**
+   * Provided an integration ID, parse its config
+   * and return a { variables, error } parsed config.
+   */
+  parsedConfig: (_, getters) => id => {
     try {
-      return difference(loaded, getters.integrationById(loaded.id))
+      const integration = getters.integrationById(id)
+      const files = get(integration, 'files', null)
+      const contents = fileContents(files, ['config.json'])
+      return parseConfig(contents)
     } catch (e) {
-      return {}
+      return { error: [e.message] }
     }
   }
 }

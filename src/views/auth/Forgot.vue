@@ -34,17 +34,18 @@ base-card
       ) Next
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
 import { BaseCard } from '@/components/base'
 
-export default {
+export default Vue.extend({
   name: 'Verify',
   components: { BaseCard },
   data: () => ({
     email: undefined,
     rules: {
-      required: msg => v => !!v || msg
+      required: (msg: string) => (v: boolean) => !!v || msg
     }
   }),
   computed: mapState('App', ['isLoading']),
@@ -72,5 +73,5 @@ export default {
       }
     }
   }
-}
+})
 </script>

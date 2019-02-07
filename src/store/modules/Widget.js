@@ -1,30 +1,22 @@
-import * as _ from 'lodash'
+import Vue from 'vue'
 import * as t from '@/store/types'
-import API from '@aws-amplify/api'
-import config from '@/config'
-import difference from '@/lib/difference'
-import mergeDeep from '@/lib/mergeDeep'
-import cloneDeep from '@/lib/cloneDeep'
+import get from 'lodash-es/get'
+import API from '@/service/API'
+import { fileContents } from '@/lib/utils/projectUtils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
   list: [],
-  public: [],
-  loaded: null,
-  tab: 0
+  public: []
 }
 
 const mutations = {
   [t.WIDGET_RESET] (state) {
     state.list = []
     state.public = []
-    state.loaded = null
-    state.tab = 0
-  },
-  [t.WIDGET_SET_TAB] (state, payload) {
-    state.tab = payload
   },
   [t.WIDGET_SET_LIST] (state, payload) {
-    state.list = _.cloneDeep(payload)
+    state.list = cloneDeep(payload)
   },
   [t.WIDGET_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -32,22 +24,10 @@ const mutations = {
   [t.WIDGET_DELETE_LIST] (state, id) {
     state.list = state.list.filter(i => i.id !== id)
   },
-  [t.WIDGET_SET_LOADED] (state, payload) {
-    state.loaded = _.cloneDeep(payload)
-  },
-  [t.WIDGET_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
-    state.loaded = _.cloneDeep(state.loaded)
-  },
-  [t.WIDGET_COMMIT_LOADED] (state, nullify = false) {
-    const { loaded } = state
-    let index = state.list.findIndex(i => i.id === loaded.id)
-    state.list[index] = _.cloneDeep(loaded)
-    state.list = _.cloneDeep(state.list)
-
-    // Used when closing / exiting 'loaded'
-    if (nullify)
-      state.loaded = null
+  [t.WIDGET_COMMIT] (state, project) {
+    const index = state.list.findIndex(({ id }) => id === project.id)
+    if (index >= 0)
+      Vue.set(state.list, index, project)
   },
   [t.WIDGET_CLEAN_DASHBOARD] (state, widgets) {
     // Remove every widget that does not exist in list
@@ -64,8 +44,7 @@ const mutations = {
     if (index < 0)
       state.public.push(payload)
     else
-      state.public[index] = _.cloneDeep(payload)
-    state.public = _.cloneDeep(state.public)
+      Vue.set(state.public, index, payload)
   }
 }
 
@@ -74,7 +53,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result = await API.get(config.env, '/widget')
+      result = await API.invoke('get', '/widget')
     } catch (e) {
       throw e
     } finally {
@@ -85,7 +64,7 @@ const actions = {
     let result = [] // Default value
 
     try {
-      result.push(await API.post(config.env, '/widget', {
+      result.push(await API.invoke('post', '/widget', {
         body: { id }
       }))
     } catch (e) {
@@ -99,45 +78,27 @@ const actions = {
     commit(t.WIDGET_DELETE_LIST, id)
 
     try {
-      await API.del(config.env, `/widget/${id}`)
+      await API.invoke('del', `/widget/${id}`)
     } catch (e) {
       throw e
     } finally {}
   },
-  // Load a widget by making a local copy
-  load ({ commit, getters }, id) {
-    commit(t.WIDGET_SET_LOADED, getters.widgetById(id))
-  },
-  // Update a loaded local widget
-  updateLoaded ({ commit, dispatch }, payload = {}) {
-    payload.updatedAt = +new Date()
-    commit(t.WIDGET_CONCAT_LOADED, payload)
-  },
-  async closeLoaded ({ commit, dispatch, state, getters }) {
-    dispatch('updateLoaded') // To add timestamp
+
+  async commit ({ commit }, project) {
     try {
-      const { id } = state.loaded
-      const diff = cloneDeep(getters.loadedDiff)
-      commit(t.WIDGET_COMMIT_LOADED, true) // Must come before API call
-      await API.put(config.env, `/widget/${id}`, { body: diff })
+      commit(t.WIDGET_COMMIT, project)
+      const { id } = project
+      await API.invoke('put', `/widget/${id}`, { body: project })
     } catch (e) {
       throw e
     }
   },
-  // Commit a loaded local widget
-  async commitLoaded ({ commit, state, getters }) {
-    try {
-      await API.put(config.env, `/widget/${state.loaded.id}`, { body: getters.loadedDiff })
-      commit(t.WIDGET_COMMIT_LOADED)
-    } catch (e) {
-      throw e
-    }
-  },
+
   async loadPublic ({ commit }, id) {
     let result = null // Default value
 
     try {
-      result = await API.get(config.env, `/widget/${id}`)
+      result = await API.invoke('get', `/widget/${id}`)
     } catch (e) {
       throw e
     } finally {
@@ -147,15 +108,25 @@ const actions = {
 }
 
 const getters = {
+  /**
+   * Get a widget by ID.
+   */
   widgetById: ({ list }) => id => {
     return list.find(i => i.id === id)
   },
-  // Return diff between loaded and old item in list
-  loadedDiff ({ loaded }, getters) {
+
+  /**
+   * Provided an integration ID, parse its config
+   * and return a { variables, error } parsed config.
+   */
+  parsedConfig: (_, getters) => id => {
     try {
-      return difference(loaded, getters.widgetById(loaded.id))
+      const widget = getters.widgetById(id)
+      const files = get(widget, 'files', null)
+      const contents = fileContents(files, ['config.json'])
+      return parseConfig(contents)
     } catch (e) {
-      return {}
+      return { error: [e.message] }
     }
   }
 }

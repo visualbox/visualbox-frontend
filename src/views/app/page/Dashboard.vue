@@ -1,95 +1,79 @@
 <template lang="pug">
-v-container#dashboard.pa-0(
-  v-if="loaded !== null && typeof loaded !== 'undefined'"
+v-container#dashboard(
+  v-if="loaded"
   fluid
 )
-  app-context-toolbar(:class="{ 'fullscreen' : isFullscreen }")
-    v-btn(
-      @click="DASHBOARD_SET_EDITING(!isEditing)"
-      icon
-    )
-      v-icon {{ editingIcon }}
-    template(v-if="isFullscreen")
-      v-spacer
-      span VisualBox.io
-    v-spacer
-    v-btn(
-      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      icon
-    )
-      v-icon {{ fullscreenIcon }}
   v-layout(
-    align-center
     justify-center
     row fill-height
-    :class="{ 'fullscreen' : isFullscreen }"
   )
-    dashboard-layout.elevation-5(:style="style")
+    dashboard-layout(:style="style")
 </template>
 
 <script>
-import * as _ from 'lodash'
-import { mapState, mapMutations, mapActions } from 'vuex'
-import { AppContextToolbar, DashboardLayout } from '@/components/app'
+import debounce from 'lodash-es/debounce'
+import { mapState, mapActions } from 'vuex'
+import { ContextToolbar } from '@/components'
+import { DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
-    AppContextToolbar,
+    ContextToolbar,
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['loaded', 'isEditing', 'isFullscreen']),
+    ...mapState('Dashboard', ['loaded']),
     style () {
-      const { width, height } = this.loaded.settings
       const { r, g, b, a } = this.loaded.settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
-
       return {
         'background-color': bgc,
-        'width': width,
-        'height': height
+        'background-position': 'fixed'
       }
-    },
-    editingIcon () {
-      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
-    },
-    fullscreenIcon () {
-      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
     }
   },
   watch: {
+    /**
+     * Watch if loaded dashboard changes (in any way)
+     * and debounce a commit so that progress is not lost.
+     */
     loaded: {
-      handler: _.debounce(async function (newVal, oldVal) {
+      handler: debounce(async function (newVal, oldVal) {
         // Don't display 'Saved changes' when changing dashboard
         if (newVal === null || oldVal === null || newVal.id !== oldVal.id)
           return
 
+        // Debounce may fire after dashboard has left
+        if (!this.loaded)
+          return
+
         try {
-          await this.commitLoaded()
+          await this.commit()
           this.setSnackbar({
-            type: '',
+            type: 'info',
             msg: `Saved changes`,
-            timeout: 1500
+            timeout: 1000
           })
-        } catch (e) {}
+        } catch (e) {
+          this.setSnackbar({
+            type: 'error',
+            msg: e.message
+          })
+        }
       }, process.env.VUE_APP_COMMIT_DEBOUNCE),
       deep: true
     }
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'closeLoaded', 'commitLoaded']),
-    ...mapMutations('Dashboard', [
-      'DASHBOARD_SET_EDITING',
-      'DASHBOARD_SET_FULLSCREEN'
-    ])
+    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded'])
   },
   mounted () {
     this.load(this.$route.params.id)
   },
   beforeDestroy () {
-    this.closeLoaded()
+    this.commit(true)
   }
 }
 </script>
@@ -97,16 +81,5 @@ export default {
 <style lang="stylus" scoped>
 #dashboard
   height 100%
-
-  .v-toolbar.fullscreen, .layout.fullscreen
-    position fixed
-    left 0
-    right 0
-    z-index 100
-
-  .v-toolbar.fullscreen
-    top 0
-  .layout.fullscreen
-    top 48px
-    bottom 0
+  padding 0
 </style>

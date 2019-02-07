@@ -27,11 +27,11 @@ div
 
 <script>
 import { mapState } from 'vuex'
-import ProxyValue from '@/mixins/proxyValue'
+import { proxyValue } from '@/mixins'
 
 export default {
   name: 'PartialPassword',
-  mixins: [ ProxyValue ],
+  mixins: [ proxyValue ],
   props: ['current'],
   computed: mapState('App', ['isLoading']),
   watch: {

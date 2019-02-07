@@ -1,5 +1,25 @@
+@import './colors'
+
+::-webkit-scrollbar
+  width: 15px
+
+::-webkit-scrollbar-button
+  display none
+
+::-webkit-scrollbar-thumb
+  background-color $vb-scrollbar-thumb
+
+  &:hover
+    background-color $vb-scrollbar-thumb-hover
+  
+  &:active
+    background-color $vb-scrollbar-thumb-active
+
+::-webkit-scrollbar-track
+  background-color transparent
+
 html
-  overflow-y auto !important
+  overflow auto !important
 
 a
   text-decoration none
@@ -10,17 +30,20 @@ input:-webkit-autofill
 input:-webkit-autofill
   -webkit-text-fill-color: white !important
 
+.application
+  background-color $vb-application !important
+
+.no-transition
+  -webkit-transition: none !important
+  transition: none !important
+
 .index-icon
   position absolute
   top 0
   right 0
   font-size 400px
   line-height 250px
-  color rgba(255, 255, 255, .05) !important // rgba(76, 175, 80, .05) !important
-
-.theme--light
-  .index-icon
-    color rgba(0, 0, 0, .05) !important
+  color rgba(255, 255, 255, .025) !important
 
 .markdown
   hr
@@ -37,8 +60,8 @@ input:-webkit-autofill
     margin-bottom 16px
   code, kbd
     padding 1px 5px
-    background #242424
-    color #4caf50
+    background $vb-drawer-ctx
+    color $vb-primary
     font-weight unset
     box-shadow none
     -webkit-box-shadow none
@@ -53,12 +76,6 @@ input:-webkit-autofill
   img
     max-width 100%
 
-.theme--light
-  .markdown
-    code, kbd
-      background rgba(0, 0, 0, .1)
-      color #333
-
 .vc-chrome
   width unset !important
   font-family inherit !important
@@ -66,29 +83,33 @@ input:-webkit-autofill
 
   .vc-chrome-body
     border-radius 0 0 4px 4px
+    background-color #424242
+
+    .vc-chrome-fields
+      .vc-input__input, .vc-input__label
+        color #FFF !important
 
     .vc-checkerboard
       background-repeat repeat
 
-.theme--light
-  .vc-chrome
-    box-shadow unset
-
-.theme--dark
-  .vc-chrome
-    .vc-chrome-body
-      background-color #424242
-
-      .vc-chrome-fields
-        .vc-input__input, .vc-input__label
-          color #FFF !important
-
-      .vc-chrome-toggle-icon
+    .vc-chrome-toggle-icon
         path
           fill #FFF
 
-      .vc-chrome-toggle-icon-highlight
-        background #272727
+    .vc-chrome-toggle-icon-highlight
+        background #424242
+
+.hover-actions
+  .v-list__tile
+    &:hover
+      .v-list__tile__action
+        display flex
+
+    .hover-actions-always
+      display flex !important
+
+    .v-list__tile__action
+      display none
 
 #data-source-tree
   .v-treeview-node__root
@@ -96,12 +117,12 @@ input:-webkit-autofill
 
   span
     &.property
-      color #4caf50
+      color $vb-data-source-tree-prop
     &.number, &.boolean
-      color #2196f3
+      color $vb-data-source-tree-numbool
     &.string
-      color #ff5252
+      color $vb-data-source-tree-string
     &.object
-      color #9a9a9a
+      color $vb-data-source-tree-object
     &.hidden
-      pointer-events #9a9a9a
+      pointer-events none

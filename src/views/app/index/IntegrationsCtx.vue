@@ -1,6 +1,6 @@
 <template lang="pug">
 #integrations-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Manage Integrations
     v-spacer
     v-btn(
@@ -18,63 +18,42 @@
       v-icon mdi-plus-box
 
   //- Search
-  .pa-2(v-if="showSearch")
-    v-text-field.search(
-      @input="search"
-      :loading="loadingSearch"
-      label="Search integrations"
-      solo flat
-      single-line autofocus
-      hide-details
-    )
-  .text-xs-center(v-if="showSearch && showNoHitsSearch")
-    v-icon.mb-3.mt-3 mdi-package-variant
-    .caption No results. Try a different phrase.
-  v-list(v-if="showSearch")
-    v-list-tile(
-      v-for="(item, index) in listSearch"
-      :key="index"
-      :to="`/app/i/${item.objectID}/public`"
-    )
-      v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
+  algolia-search(
+    v-if="showSearch"
+    type="integration"
+  )
 
   //- List
-  v-list(v-if="!showSearch")
+  v-list.hover-actions(
+    v-if="!showSearch"
+    dense
+  )
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
-      @mouseover="hoverIndex = index"
-      @mouseout="hoverIndex = null"
       @click="$router.push(`/app/i/${item.id}`)"
     )
       v-list-tile-content
-        v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action(v-if="index === hoverIndex")
-        v-btn(
-          flat icon
-          @click.stop="del(item.id)"
-        )
-          v-icon(small) mdi-trash-can-outline
+        v-list-tile-sub-title {{ name(item) }}
+      v-list-tile-action
+        tooltip(text="Delete" :open-delay="800" bottom)
+          v-icon(@click.stop="deleteIntegration(item.id)" small) mdi-trash-can-outline
 </template>
 
 <script>
-import * as _ from 'lodash'
-import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
-import { integrationsIndex } from '@/lib/algoliasearch'
-import { AppContextToolbar } from '@/components/app'
+import { packageJson } from '@/lib/utils/projectUtils'
+import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
 
 export default {
   name: 'IntegrationsCtx',
-  components: { AppContextToolbar },
+  components: {
+    ContextToolbar,
+    Tooltip,
+    AlgoliaSearch
+  },
   data: () => ({
-    showSearch: false,
-    loadingSearch: false,
-    listSearch: [],
-    showNoHitsSearch: false,
-    hoverIndex: null,
-    identityId: null
+    showSearch: false
   }),
   computed: {
     ...mapState('App', ['isLoading']),
@@ -88,6 +67,10 @@ export default {
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Integration', ['create', 'del']),
+    deleteIntegration (id) {
+      if (confirm('Are you sure you want to delete the integration?'))
+        this.del(id)
+    },
     async submit () {
       this.showSearch = false
       this.setIsLoading(true)
@@ -102,40 +85,9 @@ export default {
         this.setIsLoading(false)
       }
     },
-    search: _.debounce(function (query) {
-      if (!query || query === '')
-        return
-
-      this.loadingSearch = true
-      this.showNoHitsSearch = false
-
-      integrationsIndex.search({
-        query,
-        attributesToRetrieve: ['objectID', 'label', 'readme', 'updatedAt']
-        // filters: `-uid:'${this.identityId}'`
-      }, (err, result) => {
-        this.loadingSearch = false
-
-        if (err) {
-          this.showNoHitsSearch = true
-          return
-        }
-
-        if (result.hits.length <= 0)
-          this.showNoHitsSearch = true
-        this.listSearch = result.hits
-      })
-    }, process.env.VUE_APP_SEARCH_DEBOUNCE)
-  },
-  async mounted () {
-    const { identityId } = await Auth.currentCredentials()
-    this.identityId = identityId
+    name (item) {
+      return packageJson(item, 'name', 'Untitled')
+    }
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-#integrations-ctx
-  .v-list
-    padding 0
-</style>

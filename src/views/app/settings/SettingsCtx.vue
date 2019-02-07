@@ -1,10 +1,10 @@
 <template lang="pug">
 #settings-ctx
-  app-context-toolbar
+  context-toolbar
     .subheading Settings
 
   //- List
-  v-list
+  v-list(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
@@ -17,23 +17,18 @@
         v-icon {{ item.icon }}
 </template>
 
-<script>
-import { AppContextToolbar } from '@/components/app'
+<script lang="ts">
+import Vue from 'vue'
+import { ContextToolbar } from '@/components'
 
-export default {
+export default Vue.extend({
   name: 'SettingsCtx',
-  components: { AppContextToolbar },
+  components: { ContextToolbar },
   data: () => ({
     list: [
       { label: 'Account', icon: 'mdi-account-circle', to: '/app/s' },
       { label: 'Application', icon: 'mdi-settings', to: '/app/s/app' }
     ]
   })
-}
+})
 </script>
-
-<style lang="stylus" scoped>
-#settings-ctx
-  .v-list
-    padding 0
-</style>

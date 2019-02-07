@@ -18,13 +18,14 @@ v-container(fluid fill-height)
       v-icon.index-icon mdi-creation
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue'
 import { mapState } from 'vuex'
 
-export default {
+export default Vue.extend({
   name: 'DashboardsIndex',
   computed: mapState('Cognito', ['user'])
-}
+})
 </script>
 
 <style lang="stylus" scoped>

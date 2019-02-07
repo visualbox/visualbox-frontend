@@ -1,6 +1,6 @@
 <template lang="pug">
 #widget-public(v-if="loaded !== null && typeof loaded !== 'undefined'")
-  app-context-toolbar
+  context-toolbar
     v-tabs.elevation-0(
       v-model="tab"
       color="rgba(0,0,0,0)"
@@ -50,14 +50,11 @@
 <script>
 import marked from 'marked'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { AppContextToolbar, MonacoEditor } from '@/components/app'
+import { ContextToolbar } from '@/components'
 
 export default {
   name: 'WidgetPublic',
-  components: {
-    AppContextToolbar,
-    MonacoEditor
-  },
+  components: { ContextToolbar },
   data: () => ({
     tab: 0,
     monacoOptions: {
@@ -65,7 +62,7 @@ export default {
     }
   }),
   watch: {
-    '$route.params.id': async function () {
+    async '$route.params.id' () {
       this.tab = 0
       try {
         await this.loadPublic(this.$route.params.id)
@@ -80,8 +77,8 @@ export default {
     ...mapGetters('App', ['theme']),
     loaded () {
       try {
-        const item = this.public.find(item => item.id === this.$route.params.id)
-        return typeof item === 'undefined' ? null : item
+        const item = this.public.find(({ id }) => id === this.$route.params.id)
+        return item || null
       } catch (e) {
         return null
       }

@@ -1,2 +1,2 @@
-/*         /index.html   200
-/cors/*    https://9n5l06hoph.execute-api.eu-west-1.amazonaws.com/dev/cors?url=:splat 200
+/cors?url=*    https://9n5l06hoph.execute-api.eu-west-1.amazonaws.com/dev/cors?url=:splat   200
+/*             /index.html   200

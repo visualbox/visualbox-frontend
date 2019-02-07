@@ -1,6 +1,6 @@
 import Vue from 'vue'
+import get from 'lodash-es/get'
 import * as t from '@/store/types'
-import clone from 'lodash-es/clone'
 import API from '@/service/API'
 import { fileContents } from '@/lib/utils/projectUtils'
 import { mergeDeep, cloneDeep, parseConfig } from '@/lib/utils'
@@ -48,7 +48,7 @@ const mutations = {
 
   //------------ LIST
   [t.DASHBOARD_SET_LIST] (state, payload) {
-    state.list = clone(payload)
+    state.list = cloneDeep(payload)
   },
   [t.DASHBOARD_CONCAT_LIST] (state, payload) {
     state.list = state.list.concat(payload)
@@ -151,6 +151,7 @@ const actions = {
 
       // Unload dashboard, we are exiting
       if (unload) {
+        commit(t.DASHBOARD_SET_LOADED, null)
         commit(t.DASHBOARD_SET_ADDING_INTEGRATION, false)
         commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null)
         commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null)
@@ -181,7 +182,7 @@ const actions = {
    * Made as an action so that we can get
    * widget configuration defaults.
    */
-  addWidget ({ commit, rootGetters }, id) {
+  addWidget ({ commit, state, rootGetters }, id) {
     // Generate widget ID
     let n = 0
     let i = `_${n}`
@@ -225,6 +226,43 @@ const actions = {
   },
 
   /**
+   * Same as addWidget() but use existing
+   * widget configuration instead.
+   */
+  copyWidget ({ commit, state, }, i) {
+    // Generate widget ID
+    let n = 0
+    let ni = `_${n}`
+    while (typeof state.loaded.widgets.find(w => w.i === ni) !== 'undefined') {
+      n++
+      ni = `_${n}`
+    }
+
+    // Fetch original widget config
+    const originalWidget = state.loaded.widgets.find(w => w.i === i)
+    if (typeof originalWidget === 'undefined')
+      return
+    
+    const w = get(originalWidget, 'w', null)
+    const h = get(originalWidget, 'h', null)
+    const id = get(originalWidget, 'id', null)
+    const settings = get(originalWidget, 'settings', null)
+    if (!w || !h || !id || !settings)
+      return
+    
+    const widget = {
+      x: 0,
+      y: 0,
+      w,
+      h,
+      i: ni,
+      id,
+      settings: cloneDeep(settings)
+    }
+    commit(t.DASHBOARD_ADD_WIDGET, widget)
+  },
+
+  /**
    * Made as an action since we need to return
    * the integration, so that we can register
    * in in WorkerHandler.
@@ -251,13 +289,13 @@ const getters = {
     return loaded.integrations.find(addedIntegration => addedIntegration.i === i) || null
   },
   focusedWidget ({ loaded, focusedWidget }) {
-    if (focusedWidget === null)
+    if (loaded === null || focusedWidget === null)
       return null
 
     return loaded.widgets.find(({ i }) => i === focusedWidget) || null
   },
   focusedIntegration ({ loaded, focusedIntegration }) {
-    if (focusedIntegration === null)
+    if (loaded === null || focusedIntegration === null)
       return null
 
     return loaded.integrations.find(({ i }) => i === focusedIntegration) || null

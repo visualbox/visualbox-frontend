@@ -1,5 +1,5 @@
 <template lang="pug">
-#dashboard-integration-config(v-if="focusedIntegration")
+#dashboard-integration-config
   context-toolbar
     .subheading Edit Integration
   .pl-3.pr-3.pb-3
@@ -18,11 +18,13 @@
 </template>
 
 <script>
+import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { WorkerHandler } from '@/service'
-import { parseConfig, cloneDeep } from '@/lib/utils'
+import { parseConfig } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
 
 export default {
   name: 'DashboardIntegrationConfig',
@@ -31,16 +33,14 @@ export default {
     InputTypes
   },
   data: () => ({
-    model: {},
-    label: ''
+    label: '',
+    model: {}
   }),
   computed: {
     ...mapGetters('Dashboard', ['focusedIntegration']),
-    ...mapGetters('Integration', ['integrationById']),
+    ...mapGetters('Integration', ['parsedConfig']),
     config () {
-      const { id } = this.focusedIntegration
-      const integration = this.integrationById(id)
-      return parseConfig(integration.config)
+      return this.parsedConfig(this.focusedIntegration.id)
     },
     settings () {
       return {
@@ -50,47 +50,53 @@ export default {
     }
   },
   watch: {
-    focusedIntegration: {
-      handler (newVal, oldVal) {
-        // Don't load local config model if not changed
-        if (newVal === null)
-          return
-        if ((newVal !== null && oldVal !== null) && newVal.i === oldVal.i)
-          return
-
-        // Create local config model
-        const configModel = this.config.variables.reduce((acc, cur) => {
-          acc[cur.name] = cur.default || null
-          return acc
-        }, {})
-
-        // Apply integration config model on local (true) model
-        for (const name in this.focusedIntegration.settings.config) {
-          if (configModel.hasOwnProperty(name))
-            configModel[name] = this.focusedIntegration.settings.config[name]
-        }
-        this.model = cloneDeep(configModel)
-        this.label = cloneDeep(this.focusedIntegration.settings.label)
-      },
-      deep: true
-    },
+    /**
+     * Watch when settings have changed by the user.
+     */
     settings: {
+      deep: true,
       handler (settings) {
         this.updateFocusedIntegration({ settings })
-        // Send argument bcs debounce may fire when this.focusedIntegration value is gone
+
+        /**
+         * Send argument because debounce may fire
+         * when this.focusedIntegration value is gone.
+         */
         this.restartFocusedWorker(this.focusedIntegration)
-      },
-      deep: true
+      }
     }
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
     restartFocusedWorker: debounce(integration => {
-      // Restart worker
       WorkerHandler.end(integration.i)
       WorkerHandler.register([ integration ])
-    }, 3000)
+    }, 2000)
+  },
+
+  /**
+   * Monkey-patch integration defaults and
+   * user input on model at mount.
+   */
+  mounted () {
+    try {
+      const variables = get(this.config, 'variables', null)
+      const configModel = variables.reduce((acc, cur) => {
+        acc[cur.name] = cur.default || null
+        return acc
+      }, {})
+
+      // Apply user input
+      for (const name in this.focusedIntegration.settings.config) {
+        if (configModel.hasOwnProperty(name))
+          configModel[name] = this.focusedIntegration.settings.config[name]
+      }
+      this.model = configModel
+      this.label = this.focusedIntegration.settings.label
+    } catch (e) {
+      console.log()
+    }
   }
 }
 </script>

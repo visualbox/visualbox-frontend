@@ -7,8 +7,9 @@ grid-layout#dashboard-layout(
   :is-draggable="isEditing"
   :is-resizable="isEditing"
   :use-css-transforms="true"
+  :class="{ 'no-transition': !isEditing }"
   @layout-updated="layoutUpdatedEvent"
-  @click.native.capture="blurWidget"
+  @click.native.capture="DASHBOARD_SET_FOCUSED_WIDGET(null)"
 )
   grid-item(
     v-for="item in layout"
@@ -19,7 +20,7 @@ grid-layout#dashboard-layout(
     :h="item.h"
     :i="item.i"
     :style="getWidgetStyle(item.settings)"
-    :class="{ 'focused' : isFocused(item.i) }"
+    :class="{ 'focused' : isFocused(item.i), 'no-transition': !isEditing }"
   )
     v-speed-dial(
       direction="bottom"
@@ -29,13 +30,19 @@ grid-layout#dashboard-layout(
     )
       v-btn(
         slot="activator"
-        @click.native.stop="focusWidget(item.i)"
+        @click.native.stop="DASHBOARD_SET_FOCUSED_WIDGET(item.i)"
         color="grey darken-3"
         dark fab small
       )
         v-icon mdi-pencil
       v-btn(
-        @click.native.stop="removeWidget(item.i)"
+        @click.native.stop="copyWidget(item.i)"
+        color="primary"
+        fab dark small
+      )
+        v-icon mdi-content-copy
+      v-btn(
+        @click.native.stop="DASHBOARD_REMOVE_WIDGET(item.i)"
         color="red"
         fab dark small
       )
@@ -54,10 +61,11 @@ grid-layout#dashboard-layout(
 
 <script>
 import get from 'lodash-es/get'
-import { mapState, mapMutations, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import { cloneDeep, difference } from '@/lib/utils'
 import { IFrameHandler } from '@/service'
+import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'DashboardLayout',
@@ -70,7 +78,6 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['loaded', 'isEditing']),
-    ...mapState('Data', ['data']),
     ...mapGetters('Dashboard', ['focusedWidget']),
     ...mapGetters('Widget', ['widgetById']),
     widgets () {
@@ -83,6 +90,7 @@ export default {
       'DASHBOARD_SET_FOCUSED_WIDGET',
       'DASHBOARD_REMOVE_WIDGET'
     ]),
+    ...mapActions('Dashboard', ['copyWidget']),
     layoutUpdatedEvent (widgets) {
       this.DASHBOARD_CONCAT_LOADED({ widgets })
     },
@@ -90,18 +98,6 @@ export default {
       const { r, g, b, a } = settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
       return { 'background-color': bgc }
-    },
-    focusWidget (i) {
-      if (!this.isEditing)
-        this.DASHBOARD_SET_FOCUSED_WIDGET(i)
-    },
-    blurWidget () {
-      if (!this.isEditing)
-        this.DASHBOARD_SET_FOCUSED_WIDGET(null)
-    },
-    removeWidget (i) {
-      if (!this.isEditing)
-        this.DASHBOARD_REMOVE_WIDGET(i)
     },
     isFocused (wI) {
       return wI === get(this, 'focusedWidget.i', null)
@@ -134,20 +130,20 @@ export default {
           })
         }
       }
-    },
-    data: {
-      deep: true,
-      handler (newVal) {
-        IFrameHandler.onDataChange(this.widgets, newVal)
-      }
     }
   },
   created () {
     this.layout = cloneDeep(this.widgets)
   },
   mounted () {
-    IFrameHandler.init(this.widgetById, this.$refs)
+    IFrameHandler.attachRefs(this.$refs)
     IFrameHandler.generate(this.widgets)
+    EventBus.$on('vbox:dataChanged:layout', ({ i, data }) => {
+      IFrameHandler.onDataChange(this.widgets, i, data)
+    })
+  },
+  beforeDestroy () {
+    EventBus.$off('vbox:dataChanged:layout')
   }
 }
 </script>

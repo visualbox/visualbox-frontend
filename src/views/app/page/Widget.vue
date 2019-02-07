@@ -1,18 +1,19 @@
 <template lang="pug">
 editor(v-if="ready")
+  helper-widget(slot="helper")
 </template>
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { Editor } from '@/components/editor'
-// import { HelperWidget } from '@/components/helper'
+import { HelperWidget } from '@/components/helper'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'Widget',
   components: {
-    Editor
-    // HelperWidget
+    Editor,
+    HelperWidget
   },
   computed: mapState('Project', ['ready']),
   methods: {

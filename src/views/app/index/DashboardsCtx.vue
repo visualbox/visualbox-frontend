@@ -12,17 +12,15 @@
       v-icon mdi-plus-box
 
   //- List
-  v-list(dense)
+  v-list.hover-actions(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
-      @mouseover="hoverIndex = index"
-      @mouseout="hoverIndex = null"
       @click="$router.push(`/app/d/${item.id}`)"
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action(v-if="index === hoverIndex")
+      v-list-tile-action
         tooltip(text="Delete" :open-delay="800" bottom)
           v-icon(@click.stop="deleteDashboard(item.id)" small) mdi-trash-can-outline
 </template>
@@ -38,9 +36,6 @@ export default Vue.extend({
     ContextToolbar,
     Tooltip
   },
-  data: () => ({
-    hoverIndex: null
-  }),
   computed: {
     ...mapState('App', ['isLoading']),
     ...mapState('Dashboard', ['list'])

@@ -23,7 +23,7 @@ div
           )
           | {{ field.label }}
         color-picker(
-          :value="internalValue[field.name]"
+          :value="internalValue[field.name] || '#FFF'"
           @input="v => inputColor(field.name, v)"
         )
     //- Switch type

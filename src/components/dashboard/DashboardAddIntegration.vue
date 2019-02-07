@@ -1,5 +1,5 @@
 <template lang="pug">
-#dashboard-add-integration(v-if="isAddingIntegration")
+#dashboard-add-integration
   context-toolbar
     .subheading Add Integration
   .pl-3.pr-3.pb-3
@@ -23,7 +23,7 @@
       )
       input-types(
         v-model="model"
-        :config="parsedConfig"
+        :config="config"
       )
       v-btn(
         @click="submit"
@@ -33,11 +33,11 @@
 </template>
 
 <script>
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
 import { WorkerHandler } from '@/service'
-import { parseConfig } from '@/lib/utils'
-import { packageJson, fileContents } from '@/lib/utils/projectUtils'
+import { packageJson } from '@/lib/utils/projectUtils'
 
 export default {
   name: 'DashboardAddIntegration',
@@ -51,9 +51,7 @@ export default {
     model: {}
   }),
   computed: {
-    ...mapState('Dashboard', ['isAddingIntegration']),
     ...mapState('Integration', ['list']),
-    ...mapGetters('Integration', ['integrationById']),
     integrationList () {
       return this.list.map(integration => {
         return {
@@ -62,23 +60,8 @@ export default {
         }
       })
     },
-    parsedConfig () {
-      try {
-        if (!this.selectedId)
-          throw new Error('Unable to parse widget configuration')
-
-        const integration = this.integrationById(this.selectedId)
-        if (!integration.hasOwnProperty('files'))
-          throw new Error('Unable to parse widget configuration')
-
-        const contents = fileContents(integration.files, ['config.json'])
-        if (!contents)
-          throw new Error('Unable to parse widget configuration')
-
-        return parseConfig(contents)
-      } catch (e) {
-        return { error: [e.message] }
-      }
+    config () {
+      return this.parsedConfig()(this.selectedId)
     },
     settings () {
       return {
@@ -88,24 +71,21 @@ export default {
     }
   },
   watch: {
-    parsedConfig: {
-      deep: true,
-      handler (val) {
-        if (!val || !this.parsedConfig.hasOwnProperty('variables'))
-          return
-
-        // Create local config model
-        this.model = this.parsedConfig.variables.reduce((acc, cur) => {
-          acc[cur.name] = cur.default || null
-          return acc
-        }, {})
-      }
-    },
-    isAddingIntegration (newVal, oldVal) {
-      // Closing
-      if (!newVal && oldVal) {
-        this.selectedId = null
-        this.model = {}
+    /**
+     * Create model by patching parsed
+     * config defaults to it.
+     */
+    selectedId: {
+      handler () {
+        try {
+          const variables = get(this.config, 'variables', null)
+          this.model = variables.reduce((acc, cur) => {
+            acc[cur.name] = cur.default || null
+            return acc
+          }, {})
+        } catch (e) {
+          console.log(e)
+        }
       }
     }
   },
@@ -113,6 +93,7 @@ export default {
     ...mapActions('App', ['setSnackbar']),
     ...mapMutations('Dashboard', ['DASHBOARD_SET_ADDING_INTEGRATION']),
     ...mapActions('Dashboard', ['addIntegration']),
+    ...mapGetters('Integration', ['parsedConfig']),
     async submit () {
       try {
         if (!this.label || this.label === '')

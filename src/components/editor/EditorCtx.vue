@@ -15,10 +15,10 @@
       )
         v-icon mdi-floppy
 
-  v-list(dense)
+  v-list.hover-actions(dense)
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
-      v-list-tile-action
+      v-list-tile-action.hover-actions-always
         v-icon {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
       v-list-tile-action
@@ -80,7 +80,7 @@
 
     //- Dependencies
     v-list-tile.no-hover(@click="openPanel.dependencies = !openPanel.dependencies")
-      v-list-tile-action
+      v-list-tile-action.hover-actions-always
         v-icon {{ openPanel.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Dependencies
     template(v-if="openPanel.dependencies")
@@ -134,7 +134,6 @@ export default {
   data: () => ({
     fileTypeMeta,
     loading: false,
-    hoverIndex: null,
     openPanel: {
       files: true,
       dependencies: false,
@@ -309,13 +308,6 @@ export default {
 
         &:before
           display none
-
-      .v-list__tile__action:not(:first-child)
-        visibility hidden
-
-      &:hover
-        .v-list__tile__action:not(:first-child)
-          visibility visible
 
     .container
       padding-left 40px

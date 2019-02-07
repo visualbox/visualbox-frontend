@@ -1,5 +1,5 @@
 <template lang="pug">
-#dashboard-widget-config(v-if="focusedWidget")
+#dashboard-widget-config
   context-toolbar
     .subheading Edit Widget
   .pl-3.pr-3.pb-3
@@ -69,14 +69,16 @@
 </template>
 
 <script>
+import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
 import isString from 'lodash-es/isString'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import { parseConfig, cloneDeep } from '@/lib/utils'
+import { parseConfig, cloneDeep, dataTree } from '@/lib/utils'
 import { fileContents } from '@/lib/utils/projectUtils'
-import { IFrameHandler } from '@/service'
+import { IFrameHandler, WorkerHandler } from '@/service'
+import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'DashboardWidgetConfig',
@@ -87,15 +89,14 @@ export default {
   },
   data: () => ({
     model: {},
+    dataTree: [],
     dataSource: [],
     dataSourceOpen: [],
     dialog: false
   }),
   computed: {
-    ...mapGetters('Dashboard', ['focusedWidget']),
-    ...mapGetters('Widget', ['widgetById']),
-    ...mapGetters('Data', ['dataTree']),
-    ...mapState('Data', ['data']),
+    ...mapGetters('Dashboard', ['focusedWidget', 'integrationByI']),
+    ...mapGetters('Widget', ['parsedConfig']),
 
     /**
      * Focused widget BGC. Stored in widget
@@ -111,45 +112,32 @@ export default {
         this.updateFocusedWidget({ settings: { rgba } })
       }, 20)
     },
-
-    /**
-     * Load configuration definition from widget
-     * 'config.json' file and parse it.
-     */
     config () {
-      const { files } = this.widgetById(this.focusedWidget.id)
-      if (!files)
-        return { error: ['Unable to load widget'] }
-
-      const contents = fileContents(files, ['config.json'])
-      if (!contents)
-        return { error: ['Unable to parse widget configuration'] }
-
-      return parseConfig(contents)
+      return this.parsedConfig(this.focusedWidget.id)
+    },
+    widgetI () {
+      return get(this.focusedWidget, 'i', null)
     }
   },
   watch: {
-    focusedWidget: {
-      deep: true,
-      handler (newVal, oldVal) {
-        // Don't load local config model if not changed
-        if (newVal === null)
-          return
-        if ((newVal !== null && oldVal !== null) && newVal.i === oldVal.i)
+    widgetI: {
+      immediate: true,
+      handler (val) {
+        if (!val)
           return
 
-        // Create local config model
-        const configModel = this.config.variables.reduce((acc, cur) => {
+        const variables = get(this.config, 'variables', null)
+        const configModel = variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
 
-        // Apply widget config model on local (true) model
+        // Apply user input
         for (const name in this.focusedWidget.settings.config) {
           if (configModel.hasOwnProperty(name))
             configModel[name] = this.focusedWidget.settings.config[name]
         }
-        this.model = cloneDeep(configModel)
+        this.model = configModel
 
         // Load data source
         this.loadDataSource()
@@ -157,30 +145,18 @@ export default {
     },
 
     /**
-     * Re-apply dataSource on data tree
+     * Re-calculate data tree
      * when dialog is opened.
      */
     dialog: {
       handler (newVal, oldVal) {
-        if (oldVal === false)
-          this.loadDataSource()
+        if (newVal && !oldVal)
+          this.recalculateDataTree()
       }
     },
 
     /**
-     * dataTree from Data Vuex module has changed.
-     * Re-apply dataSource on data tree.
-     */
-    dataTree: {
-      deep: true,
-      handler () {
-        this.loadDataSource()
-      }
-    },
-
-    /**
-     * Model is bound to Input Types component and is changed
-     * whenever the user changes input configurations.
+     * Watch when settings have changed by the user.
      */
     model: {
       deep: true,
@@ -188,13 +164,31 @@ export default {
         this.updateFocusedWidget({ settings: { config } })
 
         // Send config updates to IFrame
-        IFrameHandler.postMessage('sendConfig', this.focusedWidget.i, config)
+        IFrameHandler.postMessage('sendConfig', this.widgetI, config)
       }
     }
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
     ...mapActions('Dashboard', ['updateFocusedWidget']),
+
+    recalculateDataTree () {
+      this.dataTree = dataTree(WorkerHandler.data)
+
+      // Convert top-leved ID's into integration names
+      for (let i in this.dataTree) {
+        try {
+          let integration = this.dataTree[i]
+          const { key } = integration
+          integration.text = this.integrationByI(key).settings.label || key
+        } catch (e) {
+          continue
+        }
+      }
+      console.log('recalculated')
+
+      this.loadDataSource()
+    },
 
     /**
      * Convenience method for instructing
@@ -203,9 +197,9 @@ export default {
     loadDataSource () {
       /**
        * Don't touch dataSource or dataSourceOpen when
-       * user in actively involved.
+       * user is actively involved.
        */
-      if (this.dialog || !this.focusedWidget)
+      if (this.dialog)
         return
 
       let { source } = this.focusedWidget.settings
@@ -235,9 +229,20 @@ export default {
       const source = this.dataSource[0]
       this.updateFocusedWidget({ settings: { source } })
 
-      // Send data source data updates to IFrame
-      IFrameHandler.onDataSourceChange(this.focusedWidget, this.data)
+      // Signal that Widget has updated its source
+      IFrameHandler.onDataSourceChange(this.widgetI, source)
     }
+  },
+  mounted () {
+    /**
+     * Data from WorkerHandler has changed.
+     * Re-calculate data tree and re-apply
+     * dataSource on data tree.
+     */
+    EventBus.$on('vbox:dataChanged:config', this.recalculateDataTree)
+  },
+  beforeDestroy () {
+    EventBus.$off('vbox:dataChanged:config')
   }
 }
 </script>

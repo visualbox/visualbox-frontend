@@ -9,11 +9,11 @@ declare global {
 
 /**
  * Build a Web Worker for an integration.
- * @param  {String} source Integration source code
+ * @param  {String} code   Integration source code
  * @param  {Object} config Integration configuration
  * @return {Worker}        New Web Worker
  */
-export default async (code: string, config?: IObject) => {
+export default (code: string, config?: IObject) => {
   let configString
   try {
     configString = JSON.stringify(config)

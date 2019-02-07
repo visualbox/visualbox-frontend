@@ -7,34 +7,28 @@
   ) Add Integration
 
   //- Added
-  v-list(dense)
+  v-list.hover-actions(dense)
     v-list-tile(
       v-for="(item, index) in dashboardIntegrations"
       :key="index"
-      @mouseover="hoverIndex = index"
-      @mouseout="hoverIndex = null"
       @click="DASHBOARD_SET_FOCUSED_INTEGRATION(item.i)"
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.settings.label }}
-      v-list-tile-action(v-if="index === hoverDashboardIndex")
-        v-btn(
-          flat icon
-          @click.stop="removeIntegration(item.i)"
-        )
-          v-icon(small) mdi-minus-circle-outline
+      v-list-tile-action
+        tooltip(text="Delete" :open-delay="800" bottom)
+          v-icon(@click.stop="removeIntegration(item.i)" small) mdi-trash-can-outline
 </template>
 
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapGetters } from 'vuex'
+import { Tooltip } from '@/components'
 import { WorkerHandler } from '@/service'
 
 export default {
   name: 'DashboardIntegrations',
-  data: () => ({
-    hoverIndex: null
-  }),
+  components: { Tooltip },
   computed: {
     ...mapState('Dashboard', ['loaded']),
     ...mapGetters('Integration', ['integrationById']),
@@ -47,10 +41,6 @@ export default {
       'DASHBOARD_SET_ADDING_INTEGRATION',
       'DASHBOARD_REMOVE_INTEGRATION',
       'DASHBOARD_SET_FOCUSED_INTEGRATION'
-    ]),
-    ...mapMutations('Data', [
-      'DATA_SET_DATA',
-      'DATA_CLEAN_DATA'
     ]),
     removeIntegration (i) {
       this.DASHBOARD_REMOVE_INTEGRATION(i)
@@ -65,6 +55,3 @@ export default {
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-</style>

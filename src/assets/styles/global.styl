@@ -33,6 +33,10 @@ input:-webkit-autofill
 .application
   background-color $vb-application !important
 
+.no-transition
+  -webkit-transition: none !important
+  transition: none !important
+
 .index-icon
   position absolute
   top 0
@@ -94,6 +98,18 @@ input:-webkit-autofill
 
     .vc-chrome-toggle-icon-highlight
         background #424242
+
+.hover-actions
+  .v-list__tile
+    &:hover
+      .v-list__tile__action
+        display flex
+
+    .hover-actions-always
+      display flex !important
+
+    .v-list__tile__action
+      display none
 
 #data-source-tree
   .v-treeview-node__root

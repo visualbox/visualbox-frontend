@@ -44,6 +44,10 @@ export default {
         if (newVal === null || oldVal === null || newVal.id !== oldVal.id)
           return
 
+        // Debounce may fire after dashboard has left
+        if (!this.loaded)
+          return
+
         try {
           await this.commit()
           this.setSnackbar({

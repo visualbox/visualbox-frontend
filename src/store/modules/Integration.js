@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
+import get from 'lodash-es/get'
 import API from '@/service/API'
-import { cloneDeep } from '@/lib/utils'
+import { fileContents } from '@/lib/utils/projectUtils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -111,6 +113,21 @@ const getters = {
    */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
+  },
+
+  /**
+   * Provided an integration ID, parse its config
+   * and return a { variables, error } parsed config.
+   */
+  parsedConfig: (_, getters) => id => {
+    try {
+      const integration = getters.integrationById(id)
+      const files = get(integration, 'files', null)
+      const contents = fileContents(files, ['config.json'])
+      return parseConfig(contents)
+    } catch (e) {
+      return { error: [e.message] }
+    }
   }
 }
 

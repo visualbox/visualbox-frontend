@@ -1,6 +1,11 @@
 import { BuildWorker } from '@/service'
+import EventBus from '@/lib/eventBus'
 
 class WorkerHandler {
+  constructor () {
+    this.data = {}
+  }
+
   attachStore (store) {
     this.store = store
     this.workers = {}
@@ -9,20 +14,28 @@ class WorkerHandler {
   /**
    * Convenience store mappers.
    */
-  get integrationById () {
-    return this.store.getters['Integration/integrationById']
+  integrationById (id) {
+    return this.store.getters['Integration/integrationById'](id)
   }
 
-  get bundleById () {
-    return this.store.getters['Bundler/bundleById']
+  bundleById (id) {
+    return this.store.getters['Bundler/bundleById'](id)
   }
 
-  get setData () {
-    return this.store.mutations['Data/DATA_SET_DATA']
+  queueBundle (payload) {
+    return this.store.dispatch('Bundler/queueBundle', payload)
   }
 
-  get cleanData () {
-    return this.store.mutations['Data/DATA_CLEAN_DATA']
+  setData (i, data) {
+    this.data[i] = data
+    EventBus.$emit('vbox:dataChanged:layout', { i, data })
+    EventBus.$emit('vbox:dataChanged:config')
+  }
+
+  cleanData (is) {
+    is.forEach(i => {
+      delete this.data[i]
+    })
   }
 
   /**
@@ -35,27 +48,42 @@ class WorkerHandler {
     integrations.forEach(integration => {
       try {
         // Get dashboard ID, user config and Integration ID
-        const { i, settings: { config } } = integration
-        const { id } = this.integrationById(integration.id)
+        const { i, id, settings: { config } } = integration
+        // const { id } = this.integrationById(integration.id)
 
         // Get bundle by Integration ID from cache
         this.bundleById(id)
           .then(bundle => {
             // Cache miss
             if (!bundle) {
-              console.log('Integration not found, need to bundle')
+              console.log('cache miss')
+              const project = this.integrationById(id)
+              this.queueBundle({
+                project,
+                cb: (err, code) => {
+                  if (err) {
+                    console.log(`Failed to start an integration`, err)
+                    return
+                  }
+                  this.workers[i] = BuildWorker(code, config)
+                  this.workers[i].onmessage = ({ data }) => {
+                    this.setData(i, data)
+                  }
+                }
+              })
 
             // Cache hit
             } else {
+              console.log('cache hit')
               this.workers[i] = BuildWorker(bundle, config)
               this.workers[i].onmessage = ({ data }) => {
-                this.setData({ i, data })
+                this.setData(i, data)
               }
             }
           })
 
       } catch (e) {
-        console.log(`Failed to start an integration`)
+        console.log(`Failed to start an integration`, e)
       }
     })
   }

@@ -43,20 +43,18 @@
         v-list-tile-sub-title {{ name(item) }}
 
   //- List
-  v-list(
+  v-list.hover-actions(
     v-if="!showSearch"
     dense
   )
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
-      @mouseover="hoverIndex = index"
-      @mouseout="hoverIndex = null"
       @click="$router.push(`/app/i/${item.id}`)"
     )
       v-list-tile-content
         v-list-tile-sub-title {{ name(item) }}
-      v-list-tile-action(v-if="index === hoverIndex")
+      v-list-tile-action
         tooltip(text="Delete" :open-delay="800" bottom)
           v-icon(@click.stop="deleteIntegration(item.id)" small) mdi-trash-can-outline
 </template>
@@ -81,7 +79,6 @@ export default {
     loadingSearch: false,
     listSearch: [],
     showNoHitsSearch: false,
-    hoverIndex: null,
     identityId: null
   }),
   computed: {

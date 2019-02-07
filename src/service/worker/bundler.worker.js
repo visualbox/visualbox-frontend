@@ -2,12 +2,13 @@ import * as rollup from 'rollup/dist/rollup.browser'
 import virtual from './virtual.rollup.plugin'
 import nodent from 'rollup-plugin-nodent'
 import buble from 'rollup-plugin-buble'
-import butternut from 'rollup-plugin-butternut'
+import butternut from './butternut.rollup.plugin'
 
 const isEntryFile = name => {
   return [
     'index.js',
-    'main.js'
+    'main.js',
+    'index.html'
   ].includes(name)
 }
 
@@ -67,7 +68,7 @@ onmessage = async ({ data }) => {
               noRuntime: true
             }),
             buble(),
-            butternut()
+            // butternut()
           ],
           onwarn (warning) {
             warnings.push(warning)

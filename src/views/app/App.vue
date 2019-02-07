@@ -5,20 +5,29 @@
   .grid-item.gutter(ref="gutter")
   .grid-item
     v-scroll-x-transition(mode="out-in")
-      router-view(v-if="appIsReady")
+      router-view(
+        v-if="appIsReady"
+        :class="{ 'no-transition': disableTransition }"
+      )
 </template>
 
-<script lang="ts">
-import Vue from 'vue'
-// @ts-ignore
+<script>
 import Split from 'split-grid'
 import { mapState, mapActions } from 'vuex'
 import { NavigationDrawer } from '@/components'
 
-export default Vue.extend({
+export default {
   name: 'App',
   components: { NavigationDrawer },
-  computed: mapState('App', ['appIsReady']),
+  computed: {
+    ...mapState('App', ['appIsReady']),
+    ...mapState('Route', ['path']),
+    disableTransition () {
+      return [
+        'dashboard'
+      ].includes(this.name)
+    }
+  },
   methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),
   async mounted () {
     Split({
@@ -41,7 +50,7 @@ export default Vue.extend({
       this.setIsLoading(false)
     }
   }
-})
+}
 </script>
 
 <style lang="stylus" scoped>

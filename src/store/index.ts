@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { sync } from 'vuex-router-sync'
 import router from '@/router'
-import { API, WorkerHandler } from '@/service'
+import { API, WorkerHandler, IFrameHandler } from '@/service'
 
 // Vuex modules
 import App from '@/store/modules/App'
@@ -12,7 +12,6 @@ import Dashboard from '@/store/modules/Dashboard'
 import Widget from '@/store/modules/Widget'
 import Integration from '@/store/modules/Integration'
 import Project from '@/store/modules/Project'
-import Data from '@/store/modules/Data'
 
 Vue.use(Vuex)
 
@@ -24,8 +23,7 @@ const store = new Vuex.Store({
     Dashboard,
     Widget,
     Integration,
-    Project,
-    Data
+    Project
   },
   // eslint-disable-next-line
   strict: process.env.NODE_ENV !== 'production'
@@ -37,5 +35,6 @@ sync(store, router, { moduleName: 'Route' })
 // Attach store instance so services can use it
 API.attachStore(store)
 WorkerHandler.attachStore(store)
+IFrameHandler.attachStore(store)
 
 export default store

@@ -96,13 +96,13 @@ const actions = {
 
       if (type === 'BUNDLE_READY') {
         cb(null, payload)
+
+        // Write bundle to cache
+        const cacheId = get(project, 'id', null)
+        if (cacheId)
+          CACHE.setItem(cacheId, payload)
       } else
         cb(payload, null)
-      
-      // Write bundle to cache
-      const cacheId = get(project, 'id', null)
-      if (cacheId)
-        CACHE.setItem(cacheId, payload)
 
       /**
        * When done, try shift the next so

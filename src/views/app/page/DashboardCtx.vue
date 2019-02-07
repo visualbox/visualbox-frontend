@@ -23,7 +23,7 @@
       v-icon {{ editingIcon }}
 
   v-tabs(
-    :class="{ 'hidden' : focusedIntegration || focusedWidget || isAddingIntegration }"
+    :class="{ 'hidden': focusedIntegration || focusedWidget || isAddingIntegration }"
     color="rgba(0,0,0,0)"
     slider-color="primary"
     grow
@@ -47,17 +47,19 @@
     v-tab-item
       dashboard-settings
 
+  //------------------------------------
+
   //- Adding integration menu
-  v-scroll-x-transition
-    dashboard-add-integration
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-add-integration(v-if="isAddingIntegration")
 
   //- Integration config menu
-  v-scroll-x-transition
-    dashboard-integration-config
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-integration-config(v-if="focusedIntegration")
 
   //- Widet config menu
-  v-scroll-x-transition
-    dashboard-widget-config
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-widget-config(v-if="focusedWidget")
 </template>
 
 <script>

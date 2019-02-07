@@ -47,9 +47,8 @@
 </template>
 
 <script>
-import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 import { fileContents } from '@/lib/utils/projectUtils'
@@ -76,7 +75,7 @@ export default {
     parsedConfig () {
       const contents = fileContents(this.files, ['config.json'])
       if (!contents)
-        return { error: ['Unable to parse widget configuration'] }
+        return { error: ['Unable to parse integration configuration'] }
       return parseConfig(contents)
     }
   },
@@ -115,7 +114,8 @@ export default {
         if (this.worker !== null)
           this.worker.terminate()
       }
-    }
+    },
+    // Wather for model? so that config changes will take effect
   },
   methods: {
     ...mapMutations('Project', [
@@ -213,7 +213,7 @@ export default {
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 5px 6px
+      padding 5px 6px 4px
       display inline-block
       cursor pointer
 
@@ -235,7 +235,7 @@ export default {
     visibility hidden
     padding 16px
     position absolute
-    top 30px; right 0; left 0; bottom 0;
+    top 31px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]

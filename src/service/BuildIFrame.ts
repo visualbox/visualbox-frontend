@@ -1,20 +1,21 @@
 /**
  * Build an IFrame URI string for a widget.
- * @param  {String} source Integration source code
- * @param  {Object} config Integration configuration
+ * @param  {String} code   Widget source code
+ * @param  {Object} config Widget configuration
  * @return {String}        URI encoded string
  */
-export default (source: string, config: IObject) => {
-  // Compile code template
-  let configParsed: string
+export default (code: string, config: IObject) => {
+  let configString
   try {
-    configParsed = JSON.stringify(config)
+    configString = JSON.stringify(config)
   } catch (e) {
-    configParsed = '{}'
+    configString = '{}'
   }
-  let code = `
+
+  // Inject stringified CONFIG
+  code = `
     <script type="text/javascript">
-      window.CONFIG = ${configParsed};
+      window.CONFIG = ${configString};
       window.DATA = null;
 
       window.addEventListener('message', function (event) {
@@ -44,7 +45,7 @@ export default (source: string, config: IObject) => {
         }
       }, false);
     </script>
-    ${source}
+    ${code}
   `
 
   try {

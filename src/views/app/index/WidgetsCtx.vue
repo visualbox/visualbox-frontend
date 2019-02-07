@@ -18,29 +18,10 @@
       v-icon mdi-plus-box
 
   //- Search
-  .pa-2(v-if="showSearch")
-    v-text-field.search(
-      @input="search"
-      :loading="loadingSearch"
-      label="Search widgets"
-      solo flat
-      single-line autofocus
-      hide-details
-    )
-  .text-xs-center(v-if="showSearch && showNoHitsSearch")
-    v-icon.mb-3.mt-3 mdi-package-variant
-    .caption No results. Try a different phrase.
-  v-list(
+  algolia-search(
     v-if="showSearch"
-    dense
+    type="widget"
   )
-    v-list-tile(
-      v-for="(item, index) in listSearch"
-      :key="index"
-      :to="`/app/w/${item.objectID}/public`"
-    )
-      v-list-tile-content
-        v-list-tile-sub-title {{ name(item) }}
 
   //- List
   v-list.hover-actions(
@@ -60,26 +41,19 @@
 </template>
 
 <script>
-import get from 'lodash-es/get'
-import debounce from 'lodash-es/debounce'
-import Auth from '@aws-amplify/auth'
 import { mapState, mapActions } from 'vuex'
-import { widgetsIndex } from '@/lib/algoliasearch'
 import { packageJson } from '@/lib/utils/projectUtils'
-import { ContextToolbar, Tooltip } from '@/components'
+import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
 
 export default {
   name: 'WidgetsCtx',
   components: {
     ContextToolbar,
-    Tooltip
+    Tooltip,
+    AlgoliaSearch
   },
   data: () => ({
-    showSearch: false,
-    loadingSearch: false,
-    listSearch: [],
-    showNoHitsSearch: false,
-    identityId: null
+    showSearch: false
   }),
   computed: {
     ...mapState('App', ['isLoading']),
@@ -111,37 +85,9 @@ export default {
         this.setIsLoading(false)
       }
     },
-    search: debounce(function (query) {
-      if (!query || query === '')
-        return
-
-      this.loadingSearch = true
-      this.showNoHitsSearch = false
-
-      widgetsIndex.search({
-        query,
-        attributesToRetrieve: ['objectID', 'package', 'readme', 'updatedAt']
-        // filters: `-uid:'${this.identityId}'`
-      }, (err, result) => {
-        this.loadingSearch = false
-
-        if (err) {
-          this.showNoHitsSearch = true
-          return
-        }
-
-        if (result.hits.length <= 0)
-          this.showNoHitsSearch = true
-        this.listSearch = result.hits
-      })
-    }, process.env.VUE_APP_SEARCH_DEBOUNCE),
     name (item) {
       return packageJson(item, 'name', 'Untitled')
     }
-  },
-  async mounted () {
-    const { identityId } = await Auth.currentCredentials()
-    this.identityId = identityId
   }
 }
 </script>

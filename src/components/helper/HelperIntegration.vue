@@ -162,6 +162,7 @@ export default {
         // Hook worker messages
         this.worker.onmessage = ({ data }) => this.println(data)
         this.worker.onerror = e => {
+          // e.preventDefault()
           const { message, lineno, colno } = e
           const lines = lineno && colno ? `:${lineno}:${colno}` : ''
           this.println(`Error: ${message}${lines}`, 'red')
@@ -179,7 +180,6 @@ export default {
         this.queueBundle({
           project: await this.save(false),
           cb: (err, code) => {
-            console.log(code)
             if (err) {
               this.println(err, 'red')
               return

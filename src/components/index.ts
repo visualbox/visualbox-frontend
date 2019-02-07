@@ -1,3 +1,4 @@
+export { default as AlgoliaSearch } from './AlgoliaSearch.vue'
 export { default as Tooltip } from '@/components/Tooltip.vue'
 export { default as ContextToolbar } from './ContextToolbar.vue'
 export { default as NavigationDrawer } from './NavigationDrawer.vue'

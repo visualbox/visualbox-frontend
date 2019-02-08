@@ -87,8 +87,6 @@
       v-list-tile(
         v-for="(item, index) in projectDependencies"
         :key="'d' + index"
-        @mouseover="hoverIndex = index"
-        @mouseout="hoverIndex = null"
         @click=""
       )
         v-list-tile-action
@@ -183,6 +181,7 @@ export default {
       'addNewFolder',
       'deleteNestedFile',
       'renameNestedFile',
+      'resolveDependency',
       'save'
     ]),
     /**
@@ -279,6 +278,38 @@ export default {
     saveProject () {
       EventBus.$emit('vbox:saveProject')
     },
+
+    // ---------------------------------------------------
+    async addDependency () {
+      this.loading = true
+      const dependency = this.newDependency
+      this.newDependency = ''
+      try {
+        await this.resolveDependency({
+          action: 'ADD',
+          list: [ dependency ]
+        })
+      } catch (e) {
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+    async removeDependency (dependency) {
+      this.loading = true
+      try {
+        await this.resolveDependency({
+          action: 'REMOVE',
+          list: [ dependency ]
+        })
+      } catch (e) {
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+    // ---------------------------------------------------
+
     /**
      * Need to calculate destination because
      * confusion can arise if coming from

@@ -11,6 +11,39 @@ import {
   getFullPath
 } from '@/lib/utils'
 
+/*
+**
+ * Parse the version and name from a string.
+ * @param  {String} str Package name
+ * @return {Array}      [name, version] array
+ *
+const getVersionName = str => {
+  const [ a, b, c ] = str.split('@')
+
+  // Name starts with '@' (e.g. @angular/core)
+  if (str.charAt(0) === '@')
+    return [ `@${b}`, c ]
+  else
+    return [ a, b ]
+}
+
+**
+ * Return a cloned object of an integration package.
+ * @param {Object}  state Vuex state object
+ * @return {Object}       Integration apckage object
+ *
+const getPkg = state => {
+  try {
+    let pkg = cloneDeep(get(state, ['loaded', 'files', 'package.json'], ''))
+    if (!pkg.hasOwnProperty('dependencies'))
+      pkg.dependencies = {}
+    return pkg
+  } catch (e) {
+    return null
+  }
+}
+*/
+
 const parseFiles = (opts = {}) => {
   const files = get(opts, 'files', null)
   return !files ? {} : cloneDeep(files)
@@ -308,77 +341,10 @@ const actions = {
     dispatch('Bundler/invalidateCache', id, { root: true })
 
     return { id, files, dependencies, settings }
-  }
-}
-
-const getters = {
-  projectName: state => {
-    return packageJson(state, 'name', 'Untitled')
   },
 
-  projectFiles: ({ files }) => {
-    return filesTree(files)
-  },
-
-  projectDependencies: ({ dependencies }) => {
-    return get(dependencies, 'appDependencies', [])
-  },
-
-  fileByFullPath: ({ files }) => fullPath => {
-    return get(files, fullPath, null)
-  },
-
-  filesInFolder: ({ files }) => (folder = null, fileType = 'file') => {
-    const fileValues = Object.values(files)
-
-    // Root
-    if (!folder) {
-      return fileValues.filter(({ fullPath, type }) => {
-        return fullPath.indexOf('/') < 0 && type === fileType
-      })
-    }
-
-    const len = folder.length
-    return fileValues.filter(({ fullPath, type }) => {
-      const preCut = fullPath.substr(len)
-      return preCut !== ''
-             && preCut.indexOf('/') < 0
-             && type === fileType
-    })
-  }
-}
-
-
-/*
-**
- * Parse the version and name from a string.
- * @param  {String} str Package name
- * @return {Array}      [name, version] array
- *
-const getVersionName = str => {
-  const [ a, b, c ] = str.split('@')
-
-  // Name starts with '@' (e.g. @angular/core)
-  if (str.charAt(0) === '@')
-    return [ `@${b}`, c ]
-  else
-    return [ a, b ]
-}
-
-**
- * Return a cloned object of an integration package.
- * @param {Object}  state Vuex state object
- * @return {Object}       Integration apckage object
- *
-const getPkg = state => {
-  let pkg = cloneDeep(get(state, 'loaded.package', {}))
-  if (!pkg.hasOwnProperty('dependencies'))
-    pkg.dependencies = {}
-  return pkg
-}
-
-
-async resolveDependency ({ dispatch, state }, { action, list }) {
+  /*
+  async resolveDependency ({ dispatch, state }, { action, list }) {
     if (!list || list.length === 0)
       return
     action = action === 'ADD' ? 'ADD' : 'REMOVE'
@@ -480,7 +446,52 @@ async resolveDependency ({ dispatch, state }, { action, list }) {
       console.log(e)
     }
   }
-*/
+  */
+}
+
+const getters = {
+  projectName: state => {
+    return packageJson(state, 'name', 'Untitled')
+  },
+
+  projectFiles: ({ files }) => {
+    return filesTree(files)
+  },
+
+  projectDependencies: ({ dependencies }) => {
+    const deps = get(dependencies, 'appDependencies', {})
+    return Object.keys(deps).reduce((a, b) => {
+      a.push({
+        name: b,
+        version: list[b]
+      })
+      return a
+    }, [])
+  },
+
+  fileByFullPath: ({ files }) => fullPath => {
+    return get(files, fullPath, null)
+  },
+
+  filesInFolder: ({ files }) => (folder = null, fileType = 'file') => {
+    const fileValues = Object.values(files)
+
+    // Root
+    if (!folder) {
+      return fileValues.filter(({ fullPath, type }) => {
+        return fullPath.indexOf('/') < 0 && type === fileType
+      })
+    }
+
+    const len = folder.length
+    return fileValues.filter(({ fullPath, type }) => {
+      const preCut = fullPath.substr(len)
+      return preCut !== ''
+             && preCut.indexOf('/') < 0
+             && type === fileType
+    })
+  }
+}
 
 export default {
   namespaced: true,

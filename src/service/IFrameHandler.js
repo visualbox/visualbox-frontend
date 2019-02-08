@@ -41,8 +41,14 @@ class IFrameHandler {
         // Create iframe content with injected config vars
         this.refs[i][0].src = BuildIFrame(contents, config)
 
-        // Try to send initial data
-        this.onDataSourceChange(i, source)
+        /**
+         * Try to send initial data with a
+         * 2s timeout to let the window
+         * render.
+         */
+        setTimeout(() => {
+          this.onDataSourceChange(i, source)
+        }, 2000)
       } catch (e) {
         console.log('Failed to generate a widget')
       }

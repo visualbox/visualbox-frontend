@@ -45,19 +45,37 @@ class WorkerHandler {
    * If not found, bundle and repeat.
    */
   register (integrations) {
+    /**
+     * Create a ID -> [ { i, config }] map
+     * so that we only have to bundle unique integrations.
+     */
+    const uniqueIntegrations = {}
     integrations.forEach(integration => {
       try {
-        // Get dashboard ID, user config and Integration ID
         const { i, id, settings: { config } } = integration
-        // const { id } = this.integrationById(integration.id)
 
+        // Not seen already
+        if (!uniqueIntegrations.hasOwnProperty(id))
+          uniqueIntegrations[id] = []
+
+        // Add integration user config
+        uniqueIntegrations[id].push({ i, config })
+      } catch (e) {
+        console.log('Failed to register an integration', e)
+      }
+    })
+
+    Object.keys(uniqueIntegrations).forEach(id => {
+      try {
         // Get bundle by Integration ID from cache
         this.bundleById(id)
           .then(bundle => {
             // Cache miss
             if (!bundle) {
               console.log('cache miss')
+
               const project = this.integrationById(id)
+              // BUG: two consecutive integrations may cause abort
               this.queueBundle({
                 project,
                 cb: (err, code) => {
@@ -65,25 +83,29 @@ class WorkerHandler {
                     console.log(`Failed to start an integration`, err)
                     return
                   }
-                  this.workers[i] = BuildWorker(code, config)
-                  this.workers[i].onmessage = ({ data }) => {
-                    this.setData(i, data)
-                  }
+                  uniqueIntegrations[id].forEach(({ i, config }) => {
+                    this.workers[i] = BuildWorker(code, config)
+                    this.workers[i].onmessage = ({ data }) => {
+                      this.setData(i, data)
+                    }
+                  })
                 }
               })
 
             // Cache hit
             } else {
               console.log('cache hit')
-              this.workers[i] = BuildWorker(bundle, config)
-              this.workers[i].onmessage = ({ data }) => {
-                this.setData(i, data)
-              }
+
+              uniqueIntegrations[id].forEach(({ i, config }) => {
+                this.workers[i] = BuildWorker(bundle, config)
+                this.workers[i].onmessage = ({ data }) => {
+                  this.setData(i, data)
+                }
+              })
             }
           })
-
       } catch (e) {
-        console.log(`Failed to start an integration`, e)
+        console.log('Failed to start an integration', e)
       }
     })
   }

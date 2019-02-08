@@ -53,6 +53,16 @@
 }
 ```
 
+## Date
+```
+{
+  "type": "date",
+  "name": String (required),
+  "label": String (required),
+  "default": String (optional)
+}
+```
+
 ## Select
 ```
 {

@@ -56,7 +56,7 @@ const actions = {
     commit(`Dashboard/${t.DASHBOARD_RESET}`, null, { root: true })
     commit(`Widget/${t.WIDGET_RESET}`, null, { root: true })
     commit(`Integration/${t.INTEGRATION_RESET}`, null, { root: true })
-    commit(`Data/${t.DATA_RESET}`, null, { root: true })
+    commit(`Project/${t.PROJECT_RESET}`, null, { root: true })
   }
 }
 

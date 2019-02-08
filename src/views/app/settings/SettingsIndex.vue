@@ -2,7 +2,7 @@
 v-container(fluid fill-height)
   v-layout(column)
 
-    v-container.pa-0.pb-5
+    v-container().pa-0.pb-5
       .headline.mb-3 User Information
       v-layout
         v-flex(xs12)
@@ -183,4 +183,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.container
+  max-width 800px
 </style>

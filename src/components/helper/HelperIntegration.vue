@@ -188,7 +188,7 @@ export default {
           }
         })
       } catch (e) {
-        console.log('Mount bundle error', e)
+        this.println(`Failed to bundle: ${e.message}`, 'red')
       }
     }
   },

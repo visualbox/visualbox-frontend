@@ -10,7 +10,7 @@ v-container(fluid)
           .display-3.font-weight-light.mb-4 visualization toolbox
           div
             v-btn.primary--text(
-              to="/auth/signup"
+              to="/app/d"
               color="white"
             ) Get Started
             v-btn(

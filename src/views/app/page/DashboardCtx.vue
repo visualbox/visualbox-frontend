@@ -13,9 +13,6 @@
       icon
     )
       v-icon {{ fullscreenIcon }}
-    template(v-if="isFullscreen")
-      v-spacer
-      span VisualBox.io
     v-btn(
       @click="DASHBOARD_SET_EDITING(!isEditing)"
       icon
@@ -126,8 +123,10 @@ export default {
         this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
       else if (this.isAddingIntegration)
         this.DASHBOARD_SET_ADDING_INTEGRATION(false)
-      else
+      else {
+        this.DASHBOARD_SET_EDITING(false)
         this.$router.go(-1)
+      }
     }
   }
 }

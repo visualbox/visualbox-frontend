@@ -7,13 +7,13 @@ import { cloneDeep, parseConfig } from '@/lib/utils'
 
 const state = {
   list: [],
-  public: []
+  public: null
 }
 
 const mutations = {
   [t.INTEGRATION_RESET] (state) {
     state.list = []
-    state.public = []
+    state.public = null
   },
   [t.INTEGRATION_SET_LIST] (state, payload) {
     state.list = cloneDeep(payload)
@@ -38,13 +38,7 @@ const mutations = {
     })
   },
   [t.INTEGRATION_SET_PUBLIC] (state, payload) {
-    // Try to find existing
-    const index = state.public.findIndex(item => item.id === payload.id)
-
-    if (index < 0)
-      state.public.push(payload)
-    else
-      Vue.set(state.public, index, payload)
+    state.public = payload
   }
 }
 
@@ -96,6 +90,7 @@ const actions = {
 
   async loadPublic ({ commit }, id) {
     let result = null // Default value
+    commit(t.INTEGRATION_SET_PUBLIC, null)
 
     try {
       result = await API.invoke('get', `/integration/${id}`)

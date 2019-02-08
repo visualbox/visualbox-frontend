@@ -1,6 +1,8 @@
 # Integrations
 ---
 
+[ OUTDATED, PENDING UPDATE ]
+
 Integrations are composed of three files; **README**, **source** and **config**.
 
 ## README

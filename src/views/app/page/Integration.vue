@@ -49,7 +49,7 @@ export default {
     const integration = this.integrationById()(this.$route.params.id)
     this.load(integration)
   },
-  beforeDestroy () {
+  async beforeDestroy () {
     EventBus.$off('vbox:saveProject')
     this.saveProject()
   }

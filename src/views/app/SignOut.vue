@@ -8,7 +8,7 @@ import { mapActions } from 'vuex'
 export default Vue.extend({
   name: 'SignOut',
   methods: {
-    ...mapActions('App', ['setIsLoading', 'setSnackbar', 'reset']),
+    ...mapActions('App', ['setIsLoading', 'reset']),
     ...mapActions('Cognito', ['signOut'])
   },
   async mounted () {
@@ -17,10 +17,7 @@ export default Vue.extend({
       await this.signOut()
       this.reset()
     } catch (e) {
-      this.setSnackbar({
-        type: 'error',
-        msg: e.message
-      })
+      // Silent
     } finally {
       this.setIsLoading(false)
       this.$router.push('/')

@@ -3,6 +3,14 @@ v-container#dashboard(
   v-if="loaded"
   fluid
 )
+  context-toolbar(v-if="isFullscreen")
+    v-spacer
+    v-btn(
+      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
+      flat
+    ) VisualBox.io
+    v-spacer
+
   v-layout(
     justify-center
     row fill-height
@@ -12,7 +20,7 @@ v-container#dashboard(
 
 <script>
 import debounce from 'lodash-es/debounce'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar } from '@/components'
 import { DashboardLayout } from '@/components/dashboard'
 
@@ -23,7 +31,7 @@ export default {
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['loaded']),
+    ...mapState('Dashboard', ['loaded', 'isFullscreen']),
     style () {
       const { r, g, b, a } = this.loaded.settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
@@ -67,7 +75,8 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded'])
+    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded']),
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FULLSCREEN'])
   },
   mounted () {
     this.load(this.$route.params.id)

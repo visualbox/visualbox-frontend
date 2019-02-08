@@ -21,14 +21,12 @@ export default Vue.extend({
     ...mapState('App', ['sessionIsReady']),
     ...mapGetters('App', ['theme'])
   },
-  methods: mapActions('App', ['initSession', 'setSnackbar']),
+  methods: mapActions('App', ['initSession']),
   async mounted () {
     try {
       await this.initSession()
     } catch (e) {
       // Silent
-    } finally {
-      this.setSnackbar({ msg: 'App inited' })
     }
   }
 })

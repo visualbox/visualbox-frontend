@@ -3,7 +3,7 @@
   context-toolbar
     v-btn(
       icon
-      @click="$router.go(-1)"
+      @click="goBack"
     )
       v-icon mdi-menu-left
     .subheading {{ projectName }}
@@ -147,6 +147,7 @@ export default {
     newDependency: null
   }),
   computed: {
+    ...mapState('Route', ['path']),
     ...mapState('Project', ['active', 'dirty']),
     ...mapGetters('Project', [
       'projectName',
@@ -277,6 +278,18 @@ export default {
      */
     saveProject () {
       EventBus.$emit('vbox:saveProject')
+    },
+    /**
+     * Need to calculate destination because
+     * confusion can arise if coming from
+     * public site.
+     */
+    goBack () {
+      try {
+        this.$router.push(this.path.split('/').splice(0, 3).join('/'))
+      } catch (e) {
+        this.$router.push('/app/d')
+      }
     }
   }
 }

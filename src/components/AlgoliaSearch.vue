@@ -53,7 +53,7 @@ export default {
       this.index.search({
         query,
         attributesToRetrieve: ['objectID', 'package', 'readme', 'updatedAt'],
-        facetFilters: `uid:-'${this.identityId}'`
+        // facetFilters: `uid:-'${this.identityId}'`
       }, (err, result) => {
         this.loading = false
 
@@ -76,7 +76,7 @@ export default {
     this.identityId = identityId
 
     if (this.type === 'widget') {
-      this.urlPath = 'i'
+      this.urlPath = 'w'
       this.phrase = 'widgets'
       this.index = widgetsIndex
     } else {

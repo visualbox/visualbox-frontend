@@ -28,22 +28,24 @@ class IFrameHandler {
    */
   generate (widgets) {
     widgets.forEach(widget => {
-      // Get source code and config vars from widget
-      const { i, id, settings: { config, source } } = widget
+      try {
+        // Get source code and config vars from widget
+        const { i, id, settings: { config, source } } = widget
 
-      // BUNDLE?
-      const { files } = this.widgetById(id)
-      const contents = fileContents(files, ['index.html'])
-      if (!contents)
-        console.log('Could not read index.html')
+        // BUNDLE?
+        const { files } = this.widgetById(id)
+        const contents = fileContents(files, ['index.html'])
+        if (!contents)
+          console.log('Could not read index.html')
 
-      // Create iframe content with injected config vars
-      this.refs[i][0].src = BuildIFrame(contents, config)
+        // Create iframe content with injected config vars
+        this.refs[i][0].src = BuildIFrame(contents, config)
 
-      // Try to send initial data
-      setTimeout(() => {
+        // Try to send initial data
         this.onDataSourceChange(i, source)
-      }, 2000)
+      } catch (e) {
+        console.log('Failed to generate a widget')
+      }
     })
   }
 

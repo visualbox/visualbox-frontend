@@ -101,6 +101,13 @@ export default {
         }
       }
     },
+    tab: {
+      immediate: true,
+      handler (val) {
+        if (val === 1)
+          this.forceRestart()
+      }
+    },
     dirty: {
       immediate: true,
       handler: debounce(function () {
@@ -176,6 +183,10 @@ export default {
       if (this.freeze)
         return
 
+      // Clear console
+      this.consoleBuffer = []
+      this.println('Restarting...')
+
       try {
         this.queueBundle({
           project: await this.save(false),
@@ -232,14 +243,14 @@ export default {
         margin-left 10px
 
   .pane
-    visibility hidden
+    display none
     padding 16px
     position absolute
     top 31px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]
-      visibility visible
+      display block
 
     .ln
       font-family monospace

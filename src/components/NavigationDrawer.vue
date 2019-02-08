@@ -126,6 +126,9 @@ export default Vue.extend({
         &:hover
           background-color $vb-primary-list-hover
 
+        &--active, &--active:hover
+          background-color $vb-primary-list-active !important
+
       .active
         .v-icon, .v-list__tile__content
           color unset

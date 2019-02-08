@@ -1,5 +1,5 @@
 <template lang="pug">
-#app
+#app(:class="{ 'fullscreen' : isFullscreen }")
   .grid-item
     navigation-drawer
   .grid-item.gutter(ref="gutter")
@@ -21,6 +21,7 @@ export default {
   components: { NavigationDrawer },
   computed: {
     ...mapState('App', ['appIsReady']),
+    ...mapState('Dashboard', ['isFullscreen']),
     ...mapState('Route', ['path']),
     disableTransition () {
       return [
@@ -61,6 +62,13 @@ export default {
   grid-template none / 1fr 0 3fr
   position absolute
   top 0; right 0; left 0; bottom 0;
+
+  &.fullscreen
+    grid-template none / 100%
+    grid-template-columns unset !important
+
+    .grid-item:first-child, .grid-item:nth-child(2)
+      display none
 
   .grid-item
     position relative

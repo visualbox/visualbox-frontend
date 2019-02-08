@@ -13,8 +13,6 @@
     )
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
-      v-list-tile-action
-        v-icon {{ item.icon }}
 </template>
 
 <script lang="ts">
@@ -26,10 +24,10 @@ export default Vue.extend({
   components: { ContextToolbar },
   data: () => ({
     list: [
-      { label: 'Home', icon: 'mdi-home', to: '/app/h' },
-      { label: 'Integrations', icon: 'mdi-source-fork', to: '/app/h/integrations' },
-      { label: 'Widgets', icon: 'mdi-hexagon-multiple', to: '/app/h/widgets' },
-      { label: 'Configuration Types', icon: 'mdi-json', to: '/app/h/config-types' }
+      { label: 'Home', to: '/app/h' },
+      { label: 'Integrations', to: '/app/h/integrations' },
+      { label: 'Widgets', to: '/app/h/widgets' },
+      { label: 'Configuration Types', to: '/app/h/config-types' }
     ]
   })
 })

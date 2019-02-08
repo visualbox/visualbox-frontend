@@ -156,9 +156,17 @@ const mutations = {
 }
 
 const actions = {
-  load ({ commit }, project) {
+  load ({ commit, getters }, project) {
     commit(t.PROJECT_RESET)
     commit(t.PROJECT_SET_LOADED, project)
+
+    // Try to open defaults
+    const defaults = ['README.md', 'index.js', 'index.html', 'package.json', 'config.json']
+    const rootFiles = getters.filesInFolder().map(({ name }) => name)
+    defaults.filter(v => -1 !== rootFiles.indexOf(v)).forEach(file => {
+      commit(t.PROJECT_ADD_OPEN, file)
+    })
+
   },
   doubleClick ({ commit }, fullPath) {
     commit(t.PROJECT_ADD_OPEN, fullPath)
@@ -290,10 +298,15 @@ const actions = {
     }
   },
 
-  save ({ commit }, save = true) {
+  save ({ commit, dispatch }, save = true) {
     if (save)
       commit(t.PROJECT_SAVE)
+
     const { id, files, dependencies, settings } = state
+
+    // Invalidate Cached project
+    dispatch('Bundler/invalidateCache', id, { root: true })
+
     return { id, files, dependencies, settings }
   }
 }
@@ -315,7 +328,7 @@ const getters = {
     return get(files, fullPath, null)
   },
 
-  filesInFolder: ({ files }) => (folder, fileType = 'file') => {
+  filesInFolder: ({ files }) => (folder = null, fileType = 'file') => {
     const fileValues = Object.values(files)
 
     // Root

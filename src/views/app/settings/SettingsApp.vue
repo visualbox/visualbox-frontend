@@ -8,6 +8,7 @@ v-container(fluid fill-height)
       @change="changeTheme"
       label="Light"
       color="primary"
+      disabled
     )
 </template>
 
@@ -50,4 +51,6 @@ export default Vue.extend({
 </script>
 
 <style lang="stylus" scoped>
+.container
+  max-width 800px
 </style>

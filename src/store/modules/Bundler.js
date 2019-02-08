@@ -2,7 +2,6 @@ import localforage from 'localforage'
 import get from 'lodash-es/get'
 import * as t from '@/store/types'
 import BunderWorker from '@/service/worker/bundler.worker'
-import { cloneDeep } from '@/lib/utils'
 
 const CACHE = localforage.createInstance({
   name: 'bundle-cache'
@@ -134,6 +133,10 @@ const actions = {
     // --- STAGE: BUNDLE
     commit(t.BUNDLER_SET_STATUS, 'BUNDLE')
     state.bundler.postMessage({ type: 'BUNDLE' })
+  },
+
+  invalidateCache (_, id) {
+    CACHE.removeItem(id)
   }
 }
 

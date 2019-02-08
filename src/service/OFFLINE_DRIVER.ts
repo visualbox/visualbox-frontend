@@ -4,6 +4,7 @@ import localforage from 'localforage'
 import _API from '@aws-amplify/api'
 import config from '@/config'
 import { mergeDeep } from '@/lib/utils'
+import PRESETS from '@/lib/PRESETS'
 
 const { env } = config
 const API = localforage.createInstance({
@@ -37,6 +38,26 @@ const setList = async (key: string, value: any, matchKey: string) => {
   }
 }
 
+const delList = async (key: string, id: string) => {
+  try {
+    let list = await API.getItem(key)
+
+    /**
+     * Not an Array. Create Array and return.
+     */
+    if (!isArray(list))
+      return await API.setItem(key, [])
+
+    // Filter away item
+    list = list.filter(item => item.id !== id)
+
+    // Write back
+    return API.setItem(key, list)
+  } catch (e) {
+    throw e
+  }
+}
+
 const post = async (type: string, item: IObject) => {
   try {
     const key = `${type}/${item.id}`
@@ -45,6 +66,18 @@ const post = async (type: string, item: IObject) => {
     // Update list
     await setList(type, item, 'id')
     return item
+  } catch (e) {
+    throw e
+  }
+}
+
+const del = async (type: string, id: string) => {
+  try {
+    const key = `${type}/${id}`
+    await API.removeItem(key)
+
+    // Update list
+    await delList(type, id)
   } catch (e) {
     throw e
   }
@@ -118,16 +151,34 @@ export default async (method: string, path: string, opts?: IObject) => {
          */
         if (opts) {
           /**
-           * POST /dashboard { id: x }
+           * POST /integration { id: x }
            * Copy existing integration
            */
-          if (resource === 'integration') {
+          if (resource === 'integration' && opts.body.id) {
+            const integration = await _API.get(env, `/integration/${opts.body.id}`, null)
+
+            // Re-assign write protected properties
+            integration.uid = 0
+            integration.id = uuid.v1()
+            integration.createdAt = Date.now()
+            integration.updatedAt = Date.now()
+
+            return post('/integration', integration)
 
           /**
            * POST /widget { id: x }
            * Copy existing widget
            */
-          } else if (resource === 'widget') {
+          } else if (resource === 'widget' && opts.body.id) {
+            const widget = await _API.get(env, `/widget/${opts.body.id}`, null)
+
+            // Re-assign write protected properties
+            widget.uid = 0
+            widget.id = uuid.v1()
+            widget.createdAt = Date.now()
+            widget.updatedAt = Date.now()
+
+            return post('/widget', widget)
 
           /**
            * POST /resolver { name, version }
@@ -147,12 +198,7 @@ export default async (method: string, path: string, opts?: IObject) => {
             id: uuid.v1(),
             label: 'New Dashboard',
             settings: {
-              rgba: {
-                r: 241,
-                g: 241,
-                b: 241,
-                a: 1
-              }
+              rgba: { r: 241, g: 241, b: 241, a: 1 }
             },
             widgets: [],
             integrations: [],
@@ -162,48 +208,26 @@ export default async (method: string, path: string, opts?: IObject) => {
         /**
          * POST /integration
          * Create a new integration
-         * TODO: support POST /integration/{id} for copying integration
          */
         } else if (resource === 'integration') {
-          return post('/integration', {
+          return post('/integration', Object.assign(PRESETS.BLANK_INTEGRATION, {
             uid: 0,
             id: uuid.v1(),
-            source: '// Source code\n',
-            readme: '# Readme\n',
-            config: '[]\n',
-            package: {
-              name: 'New Integration',
-              version: '1.0.0',
-              public: false,
-              tags: [],
-              dependencies: {}
-            },
-            updatedAt: Date.now(),
-            createdAt: Date.now()
-          })
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          }))
 
         /**
          * POST /widget
          * Create a new widget
-         * TODO: support POST /widget/{id} for copying widget
          */
         } else if (resource === 'widget') {
-          return post('/widget', {
+          return post('/widget', Object.assign(PRESETS.BLANK_WIDGET, {
             uid: 0,
             id: uuid.v1(),
-            source: '<span>Source code</span>\n',
-            readme: '# Readme\n',
-            config: '[]\n',
-            package: {
-              name: 'New Widget',
-              version: '1.0.0',
-              public: false,
-              tags: [],
-              dependencies: {}
-            },
-            updatedAt: Date.now(),
-            createdAt: Date.now()
-          })
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          }))
         }
         break
       case 'put':
@@ -237,7 +261,35 @@ export default async (method: string, path: string, opts?: IObject) => {
             return await putParam('/integration', id, body)
         }
         break
-      // case 'del': return API.del(env, path, opts)
+      case 'del':
+        /**
+         * Param is present.
+         */
+        if (param) {
+          const id = param
+
+          /**
+           * DELETE /dashboard/{id}
+           * Delete a dashboard
+           */
+          if (resource === 'dashboard')
+            return del('/dashboard', id)
+
+          /**
+           * DELETE /integration/{id}
+           * Delete an integration
+           */
+          else if (resource === 'integration')
+            return del('/integration', id)
+
+          /**
+           * DELETE /widget/{id}
+           * Delete a widget
+           */
+          else if (resource === 'widget')
+            return del('/widget', id)
+        }
+
       // case 'head': return API.head(env, path, opts)
       default:
         console.warn(`OFFLINE: ${method} not applicable`)

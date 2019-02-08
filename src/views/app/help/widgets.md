@@ -1,6 +1,8 @@
 # Widgets
 ---
 
+[ OUTDATED, PENDING UPDATE ]
+
 Widgets are composed of three files; **README**, **source** and **config**.
 
 ## README

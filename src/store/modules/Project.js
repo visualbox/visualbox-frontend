@@ -1,7 +1,12 @@
 import Vue from 'vue'
+import API from '@/service/API'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
-import { packageJson } from '@/lib/utils/projectUtils'
+import {
+  packageJson,
+  parseNameVersion,
+  clonePackageJson
+} from '@/lib/utils/projectUtils'
 import {
   cloneDeep,
   filesTree,
@@ -10,39 +15,6 @@ import {
   getUniqueName,
   getFullPath
 } from '@/lib/utils'
-
-/*
-**
- * Parse the version and name from a string.
- * @param  {String} str Package name
- * @return {Array}      [name, version] array
- *
-const getVersionName = str => {
-  const [ a, b, c ] = str.split('@')
-
-  // Name starts with '@' (e.g. @angular/core)
-  if (str.charAt(0) === '@')
-    return [ `@${b}`, c ]
-  else
-    return [ a, b ]
-}
-
-**
- * Return a cloned object of an integration package.
- * @param {Object}  state Vuex state object
- * @return {Object}       Integration apckage object
- *
-const getPkg = state => {
-  try {
-    let pkg = cloneDeep(get(state, ['loaded', 'files', 'package.json'], ''))
-    if (!pkg.hasOwnProperty('dependencies'))
-      pkg.dependencies = {}
-    return pkg
-  } catch (e) {
-    return null
-  }
-}
-*/
 
 const parseFiles = (opts = {}) => {
   const files = get(opts, 'files', null)
@@ -185,6 +157,9 @@ const mutations = {
     state.dirty.delete(fullPath)
     state.dirty.add(newFullPath)
     state.dirty = new Set(state.dirty)
+  },
+  [t.PROJECT_SET_DEPENDENCIES] (state, payload) {
+    state.dependencies = payload
   }
 }
 
@@ -343,40 +318,68 @@ const actions = {
     return { id, files, dependencies, settings }
   },
 
-  /*
-  async resolveDependency ({ dispatch, state }, { action, list }) {
+  /**
+   * Resolve dependency tree.
+   * action: ADD|REMOVE
+   * list: string[]
+   */
+  async resolveDependency ({ commit, state }, { action, list }) {
     if (!list || list.length === 0)
       return
+
+    // We can only ADD or REMOVE a list of dependencies
     action = action === 'ADD' ? 'ADD' : 'REMOVE'
 
+    /**
+     * Add dependencies to package.json.
+     * Copy existing package.json, ensure 'dependencies'
+     * property is present and add new dependencies
+     * to it before write string back to file.
+     */
     const addDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        let { name, version } = deps[i]
-        version = typeof version === 'undefined' ? '*' : version
-        pkg.dependencies[name] = version
+      try {
+        let pkg = clonePackageJson(state)
+        for (let { name, version } of deps)
+          pkg.dependencies[name] = version || '*'
+        commit(t.PROJECT_WRITE_FILE, {
+          fullPath: 'package.json',
+          contents: JSON.stringify(pkg)
+        })
+      } catch (e) {
+        console.log(e)
       }
-      dispatch('updateLoaded', { package: pkg })
+    }
+
+    /**
+     * Remove dependencies from package.json.
+     * Copy existing package.json, ensure 'dependencies'
+     * property is present and remove dependencies
+     * by name from it before write string back to file.
+     */
+    const removeDependencies = deps => {
+      try {
+        let pkg = clonePackageJson(state)
+        for (const name of deps) {
+          if (pkg.dependencies.hasOwnProperty(name))
+            delete pkg.dependencies[name]
+        }
+        commit(t.PROJECT_WRITE_FILE, {
+          fullPath: 'package.json',
+          contents: JSON.stringify(pkg)
+        })
+      } catch (e) {
+        console.log(e)
+      }
     }
 
     const addResDependencies = resDependencies => {
-      dispatch('updateLoaded', { resDependencies })
-    }
-
-    const removeDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        const name = deps[i]
-        if (pkg.dependencies.hasOwnProperty(name))
-          delete pkg.dependencies[name]
-      }
-      dispatch('updateLoaded', { package: pkg })
+      console.log('Addresdeps', resDependencies)
     }
 
     try {
-      // Parse string name and version
-      const newDeps = list.map(d => {
-        let [ name, version ] = getVersionName(d)
+      // Parse package name and version
+      const newDeps = list.map(str => {
+        let [ name, version ] = parseNameVersion(str)
         return { name, version }
       })
 
@@ -386,10 +389,8 @@ const actions = {
         removeDependencies(newDeps.map(d => d.name))
 
       // Resolve dependency list
-      let pkg = getPkg(state)
-      const res = await API.invoke('post', '/resolver', {
-        body: pkg.dependencies
-      })
+      let { dependencies } = clonePackageJson(state)
+      const res = await API.invoke('post', '/resolver', { body: dependencies })
 
       // Parse error and revert accordingly
       if (res.error) {
@@ -408,11 +409,13 @@ const actions = {
               const version = res.data[name][requester]
 
               // Add resolved requester dep
-              const [ rname, rversion ] = getVersionName(requester)
-              addDependencies([{
-                name: rname,
-                version: rversion
-              }])
+              const [ rname, rversion ] = parseNameVersion(requester)
+              addDependencies([
+                {
+                  name: rname,
+                  version: rversion
+                }
+              ])
 
               return `${name}@${version}`
             })
@@ -431,22 +434,12 @@ const actions = {
               addDependencies(newDeps)
         }
       // OK
-      } else {
-        const { appDependencies, resDependencies } = res
-        const deps = Object.keys(appDependencies).map(name => {
-          const version = appDependencies[name].version
-          return { name, version }
-        })
-        const resDeps = Object.keys(resDependencies)
-        console.log(resDeps)
-        addDependencies(deps)
-        addResDependencies(resDeps)
-      }
+      } else
+        commit(t.PROJECT_SET_DEPENDENCIES, res)
     } catch (e) {
       console.log(e)
     }
   }
-  */
 }
 
 const getters = {

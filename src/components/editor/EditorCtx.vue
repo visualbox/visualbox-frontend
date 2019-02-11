@@ -79,45 +79,13 @@
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
 
     //- Dependencies
-    v-list-tile.no-hover(@click="openPanel.dependencies = !openPanel.dependencies")
-      v-list-tile-action.hover-actions-always
-        v-icon {{ openPanel.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-      v-list-tile-content Dependencies
-    template(v-if="openPanel.dependencies")
-      v-list-tile(
-        v-for="(item, index) in projectDependencies"
-        :key="'d' + index"
-        @click=""
-      )
-        v-list-tile-action
-          v-icon(small color="blue") mdi-package-variant-closed
-        v-list-tile-content
-          a(
-            :href="'https://www.npmjs.com/package/' + item.name"
-            target="_new"
-          ) {{ item.name }}
-        v-list-tile-action
-          v-btn(
-            v-if="index === hoverIndex"
-            @click.stop=""
-            flat icon
-          )
-            v-icon(small) mdi-trash-can-outline
-          .grey--text.pr-2(v-else) {{ item.version }}
-      v-container.pt-2
-        v-text-field.dependency-input(
-          v-model="newDependency"
-          @keyup.enter.native=""
-          :loading="loading"
-          :disabled="loading"
-          placeholder="Enter package name"
-          hide-details outline single-line
-        )
+    editor-dependencies
 </template>
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
+import EditorDependencies from './EditorDependencies'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
 
@@ -127,31 +95,25 @@ export default {
   name: 'EditorCtx',
   components: {
     ContextToolbar,
-    Tooltip
+    Tooltip,
+    EditorDependencies
   },
   data: () => ({
     fileTypeMeta,
-    loading: false,
     openPanel: {
       files: true,
-      dependencies: false,
       settings: false
     },
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileFullPath: null,
-    editFileName: null,
-    newDependency: null
+    editFileName: null
   }),
   computed: {
     ...mapState('Route', ['path']),
     ...mapState('Project', ['active', 'dirty']),
-    ...mapGetters('Project', [
-      'projectName',
-      'projectFiles',
-      'projectDependencies'
-    ]),
+    ...mapGetters('Project', ['projectName', 'projectFiles']),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
@@ -181,7 +143,6 @@ export default {
       'addNewFolder',
       'deleteNestedFile',
       'renameNestedFile',
-      'resolveDependency',
       'save'
     ]),
     /**
@@ -278,38 +239,6 @@ export default {
     saveProject () {
       EventBus.$emit('vbox:saveProject')
     },
-
-    // ---------------------------------------------------
-    async addDependency () {
-      this.loading = true
-      const dependency = this.newDependency
-      this.newDependency = ''
-      try {
-        await this.resolveDependency({
-          action: 'ADD',
-          list: [ dependency ]
-        })
-      } catch (e) {
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
-    async removeDependency (dependency) {
-      this.loading = true
-      try {
-        await this.resolveDependency({
-          action: 'REMOVE',
-          list: [ dependency ]
-        })
-      } catch (e) {
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
-    // ---------------------------------------------------
-
     /**
      * Need to calculate destination because
      * confusion can arise if coming from
@@ -409,15 +338,4 @@ export default {
 
         .v-icon
           padding-right 10px
-
-  .dependency-input
-    min-height 30px
-    font-size 12px
-
-    >>> .v-input__slot
-      min-height 30px
-
-      input
-        max-height 30px
-        margin-top 0
 </style>

@@ -29,9 +29,9 @@ export const parseNameVersion = (str: string): [ string, string ] => {
 
   // Name starts with '@' (e.g. @angular/core)
   if (str.charAt(0) === '@')
-    return [ `@${b}`, c ]
+    return [ `@${b}`, c || '*' ]
   else
-    return [ a, b ]
+    return [ a, b || '*' ]
 }
 
 /**

@@ -17,11 +17,8 @@
           target="_new"
         ) {{ item.name }}
       v-list-tile-action
-        v-btn(
-          @click.stop=""
-          flat icon
-        )
-          v-icon(small) mdi-trash-can-outline
+        tooltip(text="Delete" :open-delay="800" bottom)
+          v-icon(@click.stop="removeDependency(item.name)" small) mdi-trash-can-outline
         .grey--text.pr-2 {{ item.version }}
     v-container.pt-2
       v-text-field.dependency-input(
@@ -36,11 +33,13 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { Tooltip } from '@/components'
 
 const DOUBLE_CLICK_TIMEOUT = 500
 
 export default {
   name: 'EditorDependencies',
+  components: { Tooltip },
   data: () => ({
     open: false,
     loading: false,
@@ -86,6 +85,23 @@ export default {
 @import '../../assets/styles/colors';
 
 #editor-dependencies
+  .v-list__tile
+    .v-list__tile__action
+      display flex
+
+      .v-tooltip
+        display none
+
+    &:hover
+      .v-list__tile__action
+        display flex
+
+        .grey--text
+          display none
+
+        .v-tooltip
+          display flex
+
   .dependency-input
     min-height 30px
     font-size 12px

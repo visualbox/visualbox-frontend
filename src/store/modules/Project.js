@@ -21,11 +21,16 @@ const parseFiles = (opts = {}) => {
   return !files ? {} : cloneDeep(files)
 }
 
-const parseDependencies = (ops = {}) => {
-  return {}
+const parseDependencies = (opts = {}) => {
+  const appDependencies = get(opts, 'dependencies.appDependencies', {})
+  const resDependencies = get(opts, 'dependencies.resDependencies', {})
+  return {
+    appDependencies,
+    resDependencies
+  }
 }
 
-const parseSettings = (ops = {}) => {
+const parseSettings = (opts = {}) => {
   return {}
 }
 
@@ -323,7 +328,7 @@ const actions = {
    * action: ADD|REMOVE
    * list: string[]
    */
-  async resolveDependency ({ commit, state }, { action, list }) {
+  async resolveDependency ({ commit, dispatch, state }, { action, list }) {
     if (!list || list.length === 0)
       return
 
@@ -338,13 +343,24 @@ const actions = {
      */
     const addDependencies = deps => {
       try {
+        // Write to package.json
         let pkg = clonePackageJson(state)
         for (let { name, version } of deps)
           pkg.dependencies[name] = version || '*'
         commit(t.PROJECT_WRITE_FILE, {
           fullPath: 'package.json',
-          contents: JSON.stringify(pkg)
+          contents: JSON.stringify(pkg, null, 2)
         })
+
+        // Write to dependencies property
+        let dependencies = cloneDeep(state.dependencies)
+        for (const { name, version } of deps) {
+          if (dependencies.appDependencies.hasOwnProperty(name))
+            dependencies.appDependencies[name].version = version
+          else
+            dependencies.appDependencies[name] = { version }
+        }
+        commit(t.PROJECT_SET_DEPENDENCIES, dependencies)
       } catch (e) {
         console.log(e)
       }
@@ -358,6 +374,7 @@ const actions = {
      */
     const removeDependencies = deps => {
       try {
+        // Write to package.json
         let pkg = clonePackageJson(state)
         for (const name of deps) {
           if (pkg.dependencies.hasOwnProperty(name))
@@ -365,15 +382,19 @@ const actions = {
         }
         commit(t.PROJECT_WRITE_FILE, {
           fullPath: 'package.json',
-          contents: JSON.stringify(pkg)
+          contents: JSON.stringify(pkg, null, 2)
         })
+
+        // Write to dependencies property
+        let dependencies = cloneDeep(state.dependencies)
+        for (const name of Object.keys(dependencies.appDependencies)) {
+          if (deps.includes(name))
+            delete dependencies.appDependencies[name]
+        }
+        commit(t.PROJECT_SET_DEPENDENCIES, dependencies)
       } catch (e) {
         console.log(e)
       }
-    }
-
-    const addResDependencies = resDependencies => {
-      console.log('Addresdeps', resDependencies)
     }
 
     try {
@@ -398,10 +419,10 @@ const actions = {
 
         switch (error) {
           case 'PACKAGE_NOT_FOUND':
-            removeDependencies([ res.data.name ])
+            removeDependencies(newDeps.map(d => d.name))
             break
           case 'UNSATISFIED_RANGE':
-            removeDependencies([ res.data.name ])
+            removeDependencies(newDeps.map(d => d.name))
             break
           case 'MISSING_PEERS':
             const peers = Object.keys(res.data).map(name => {
@@ -434,8 +455,15 @@ const actions = {
               addDependencies(newDeps)
         }
       // OK
-      } else
+      } else {
+        const { appDependencies } = res
+        const deps = Object.keys(appDependencies).map(name => {
+          const version = appDependencies[name].version
+          return { name, version }
+        })
+        addDependencies(deps)
         commit(t.PROJECT_SET_DEPENDENCIES, res)
+      }
     } catch (e) {
       console.log(e)
     }
@@ -453,13 +481,10 @@ const getters = {
 
   projectDependencies: ({ dependencies }) => {
     const deps = get(dependencies, 'appDependencies', {})
-    return Object.keys(deps).reduce((a, b) => {
-      a.push({
-        name: b,
-        version: list[b]
-      })
-      return a
-    }, [])
+    return Object.keys(deps).map(name => {
+      const version = deps[name].version
+      return { name, version }
+    })
   },
 
   fileByFullPath: ({ files }) => fullPath => {

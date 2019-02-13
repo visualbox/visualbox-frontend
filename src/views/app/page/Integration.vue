@@ -1,19 +1,19 @@
 <template lang="pug">
 editor(v-if="ready")
-  helper-integration(slot="helper")
+  helper-container(slot="helper")
 </template>
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { Editor } from '@/components/editor'
-import { HelperIntegration } from '@/components/helper'
+import { HelperContainer } from '@/components/helper'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'Integration',
   components: {
     Editor,
-    HelperIntegration
+    HelperContainer
   },
   computed: mapState('Project', ['ready']),
   methods: {

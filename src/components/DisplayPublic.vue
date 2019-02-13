@@ -52,8 +52,13 @@ export default {
     async submit () {
       this.setIsLoading(true)
       try {
-        const { id } = this.loaded
-        await this.$store.dispatch(this.createAction, id)
+        const { id, runtime = 'nodejs' } = this.loaded
+
+        let payload = id
+        if (this.type === 'widget')
+          payload = { id, runtime }
+
+        await this.$store.dispatch(this.createAction, payload)
         this.$router.push(`/app/${this.urlPath}`)
       } catch (e) {
         this.setSnackbar({

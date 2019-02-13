@@ -11,7 +11,7 @@
       v-icon(v-if="showSearch") mdi-close
     v-btn(
       icon
-      @click="submit"
+      @click="addIntegration"
       :loading="isLoading"
       :disabled="isLoading"
     )
@@ -44,6 +44,7 @@
 import { mapState, mapActions } from 'vuex'
 import { packageJson } from '@/lib/utils/projectUtils'
 import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
+import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'IntegrationsCtx',
@@ -65,25 +66,13 @@ export default {
     }
   },
   methods: {
-    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Integration', ['create', 'del']),
+    ...mapActions('Integration', ['del']),
+    addIntegration () {
+      EventBus.$emit('vbox:addIntegration')
+    },
     deleteIntegration (id) {
       if (confirm('Are you sure you want to delete the integration?'))
         this.del(id)
-    },
-    async submit () {
-      this.showSearch = false
-      this.setIsLoading(true)
-      try {
-        await this.create()
-      } catch (e) {
-        this.setSnackbar({
-          type: 'error',
-          msg: e.message
-        })
-      } finally {
-        this.setIsLoading(false)
-      }
     },
     name (item) {
       return packageJson(item, 'name', 'Untitled')

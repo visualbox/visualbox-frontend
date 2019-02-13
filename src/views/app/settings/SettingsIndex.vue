@@ -1,11 +1,11 @@
 <template lang="pug">
-v-container(fluid fill-height)
+v-container(fill-height)
   v-layout(column)
 
-    v-container().pa-0.pb-5
+    v-container.pa-0.pb-5
       .headline.mb-3 User Information
       v-layout
-        v-flex(xs12)
+        v-flex
           v-text-field(
             v-model="name"
             :disabled="loading.info"
@@ -25,7 +25,7 @@ v-container(fluid fill-height)
     v-container.pa-0.pb-5
       .headline.mb-3 Change Email
       v-layout
-        v-flex(xs12)
+        v-flex
           v-text-field(
             v-model="email"
             :disabled="loading.changeEmail"
@@ -42,10 +42,10 @@ v-container(fluid fill-height)
           outline
         ) Change
 
-    v-container.pa-0.pb-5
+    v-container.pa-0.pb-5(grid-list-lg)
       .headline.mb-3 Change Password
       v-layout(wrap)
-        v-flex.pr-2(xs12 sm6)
+        v-flex(xs12 sm6)
           v-text-field(
             v-model="password"
             :disabled="loading.changePassword"
@@ -54,7 +54,7 @@ v-container(fluid fill-height)
             type="password"
             outline
           )
-        v-flex.pl-2(xs12 sm6)
+        v-flex(xs12 sm6)
           v-text-field(
             v-model="newPassword"
             :disabled="loading.changePassword"
@@ -63,7 +63,7 @@ v-container(fluid fill-height)
             type="password"
             outline
           )
-        v-flex.pb-4(xs12)
+        v-flex.pb-4
           v-messages(:value="['Use a password with 6 or more characters']")
       v-layout
         v-btn.ma-0(

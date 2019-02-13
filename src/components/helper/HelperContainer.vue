@@ -38,6 +38,12 @@ import { parseConfig } from '@/lib/utils'
 import { fileContents } from '@/lib/utils/projectUtils'
 import { BuildWorker } from '@/service'
 import API from '@/service/API'
+import PubNub from 'pubnub'
+
+const pubnub = new PubNub({
+  publishKey: 'pub-c-69e6e696-f97d-4d5f-9e5b-fb902f093347',
+  subscribeKey: 'sub-c-03f905e2-2f2e-11e9-b681-be2e977db94e'
+})
 
 const BUFFER_MAX = 100
 
@@ -100,6 +106,22 @@ export default {
         }
       })
       console.log('Result', result)
+      pubnub.subscribe({
+        channels: [result.token],
+        withPresence: true
+      });
+
+      pubnub.addListener({
+        message (m) {
+          console.log('Got message from container: ', m)
+        },
+        presence (p) {
+          console.log('PRESENCE', p)
+        },
+        status (s) {
+          console.log('STATUS', s)
+        }
+      })
     } catch (e) {
       console.log('Error', e)
     }

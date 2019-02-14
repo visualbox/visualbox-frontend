@@ -14,7 +14,14 @@ v-container(fill-height)
 
     //- Adding integration preconfig
     v-container(v-if="isAdding")
-      .headline.mb-3 Select Runtime
+      .headline.mb-3 Name
+      v-layout
+        v-flex
+          v-text-field(
+            hide-details single-line
+            outline
+          )
+      .headline.mb-3.mt-4 Select Runtime
       v-layout
         v-flex
           v-select(
@@ -26,8 +33,9 @@ v-container(fill-height)
             hide-details single-line
             outline
           )
-            template(slot="prepend")
-              v-icon.mr-2(:color="selectedRuntime.color") {{ selectedRuntime.icon }}
+            template(#selection="{ item }")
+              v-icon.mr-3(:color="item.color") {{ item.icon }}
+              span {{ item.text }}
             template(#item="{ item }")
               v-icon.mr-3(:color="item.color") {{ item.icon }}
               span {{ item.text }}
@@ -42,7 +50,7 @@ v-container(fill-height)
           :loading="isLoading"
           @click="submit"
           color="primary"
-          outline
+          large outline
         ) Create
 </template>
 
@@ -88,12 +96,7 @@ export default {
     ],
     runtime: 'nodejs'
   }),
-  computed: {
-    ...mapState('App', ['isLoading']),
-    selectedRuntime () {
-      return this.runtimes.find(({ runtime }) => runtime === this.runtime)
-    }
-  },
+  computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Integration', ['create']),

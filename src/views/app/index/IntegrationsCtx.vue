@@ -34,7 +34,7 @@
       @click="$router.push(`/app/i/${item.id}`)"
     )
       v-list-tile-content
-        v-list-tile-sub-title {{ name(item) }}
+        v-list-tile-sub-title {{ item.settings.name || 'Untitled' }}
       v-list-tile-action
         tooltip(text="Delete" :open-delay="800" bottom)
           v-icon(@click.stop="deleteIntegration(item.id)" small) mdi-trash-can-outline
@@ -42,7 +42,6 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { packageJson } from '@/lib/utils/projectUtils'
 import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
 import EventBus from '@/lib/eventBus'
 
@@ -73,9 +72,6 @@ export default {
     deleteIntegration (id) {
       if (confirm('Are you sure you want to delete the integration?'))
         this.del(id)
-    },
-    name (item) {
-      return packageJson(item, 'name', 'Untitled')
     }
   }
 }

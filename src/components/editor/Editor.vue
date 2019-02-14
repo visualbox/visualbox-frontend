@@ -16,6 +16,8 @@
       )
         //- README viewer
         v-icon(v-if="item.name === '/~README'") mdi-eye-outline
+        //- SETTINGS viewer
+        v-icon(v-else-if="item.name === '/~SETTINGS'") mdi-settings-outline
         template(v-else)
           v-icon.mr-2(:color="item.color") {{ item.icon }}
           template(v-if="item.peek")
@@ -33,7 +35,7 @@
       v-spacer
       v-toolbar-items
         v-btn(
-          v-if="activeTab > 0"
+          v-if="activeTab > 1"
           @click="formatCode"
           flat
         )
@@ -50,7 +52,8 @@
         v-if="activeTab <= 0"
         v-html="compiledMarkdown"
       )
-      .monaco(v-if="activeTab > 0")
+      editor-settings(v-if="activeTab === 1")
+      .monaco(v-if="activeTab > 1")
         monaco-editor(
           :theme="'vs-' + theme"
           :language="monacoLanguage"
@@ -68,15 +71,18 @@ import Split from 'split-grid'
 import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
+import EditorSettings from '@/components/editor/EditorSettings'
 import { parseFileType, fileTypeMeta } from '@/lib/utils'
 import { fileContents } from '@/lib/utils/projectUtils'
 
 const README_VIEVER_NAME = '/~README'
+const SETTINGS_VIEVER_NAME = '/~SETTINGS'
 
 export default {
   name: 'Editor',
   components: {
-    ContextToolbar
+    ContextToolbar,
+    EditorSettings
   },
   data: () => ({
     split: Split({}),
@@ -115,6 +121,14 @@ export default {
     },
     openTabs () {
       const open = [...this.open].map(fullPath => this.fullPathMeta(fullPath))
+
+      // Add 'SETTINGS' tab to beginning with an impossible name
+      open.unshift({
+        name: SETTINGS_VIEVER_NAME,
+        fullPath: SETTINGS_VIEVER_NAME,
+        icon: null,
+        color: null
+      })
 
       // Add 'README' tab to beginning with an impossible name
       open.unshift({

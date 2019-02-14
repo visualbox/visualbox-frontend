@@ -1,12 +1,6 @@
 import Vue from 'vue'
-import API from '@/service/API'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
-import {
-  packageJson,
-  parseNameVersion,
-  clonePackageJson
-} from '@/lib/utils/projectUtils'
 import {
   cloneDeep,
   filesTree,
@@ -21,17 +15,8 @@ const parseFiles = (opts = {}) => {
   return !files ? {} : cloneDeep(files)
 }
 
-const parseDependencies = (opts = {}) => {
-  const appDependencies = get(opts, 'dependencies.appDependencies', {})
-  const resDependencies = get(opts, 'dependencies.resDependencies', {})
-  return {
-    appDependencies,
-    resDependencies
-  }
-}
-
-const parseSettings = (opts = {}) => {
-  return {}
+const parseSettings = ({ name = 'Untitled' }) => {
+  return { name }
 }
 
 const state = {
@@ -42,7 +27,6 @@ const state = {
   id: null,
   uid: null,
   files: {},
-  dependencies: {},
   settings: {},
 
   active: null,
@@ -62,7 +46,6 @@ const mutations = {
     state.id = null
     state.uid = null
     state.files = {}
-    state.dependencies = {}
     state.settings = {}
     state.active = null
     state.open.clear()
@@ -75,7 +58,6 @@ const mutations = {
     state.id = payload.id
     state.uid = payload.uid
     state.files = parseFiles(copy)
-    state.dependencies = parseDependencies(copy)
     state.settings = parseSettings(copy)
     state.ready = true
   },
@@ -162,9 +144,6 @@ const mutations = {
     state.dirty.delete(fullPath)
     state.dirty.add(newFullPath)
     state.dirty = new Set(state.dirty)
-  },
-  [t.PROJECT_SET_DEPENDENCIES] (state, payload) {
-    state.dependencies = payload
   }
 }
 
@@ -321,170 +300,12 @@ const actions = {
     dispatch('Bundler/invalidateCache', id, { root: true })
 
     return { id, files, dependencies, settings }
-  },
-
-  /**
-   * Resolve dependency tree.
-   * action: ADD|REMOVE
-   * list: string[]
-   */
-  async resolveDependency ({ commit, dispatch, state }, { action, list }) {
-    if (!list || list.length === 0)
-      return
-
-    // We can only ADD or REMOVE a list of dependencies
-    action = action === 'ADD' ? 'ADD' : 'REMOVE'
-
-    /**
-     * Add dependencies to package.json.
-     * Copy existing package.json, ensure 'dependencies'
-     * property is present and add new dependencies
-     * to it before write string back to file.
-     */
-    const addDependencies = deps => {
-      try {
-        // Write to package.json
-        let pkg = clonePackageJson(state)
-        for (let { name, version } of deps)
-          pkg.dependencies[name] = version || '*'
-        commit(t.PROJECT_WRITE_FILE, {
-          fullPath: 'package.json',
-          contents: JSON.stringify(pkg, null, 2)
-        })
-
-        // Write to dependencies property
-        let dependencies = cloneDeep(state.dependencies)
-        for (const { name, version } of deps) {
-          if (dependencies.appDependencies.hasOwnProperty(name))
-            dependencies.appDependencies[name].version = version
-          else
-            dependencies.appDependencies[name] = { version }
-        }
-        commit(t.PROJECT_SET_DEPENDENCIES, dependencies)
-      } catch (e) {
-        console.log(e)
-      }
-    }
-
-    /**
-     * Remove dependencies from package.json.
-     * Copy existing package.json, ensure 'dependencies'
-     * property is present and remove dependencies
-     * by name from it before write string back to file.
-     */
-    const removeDependencies = deps => {
-      try {
-        // Write to package.json
-        let pkg = clonePackageJson(state)
-        for (const name of deps) {
-          if (pkg.dependencies.hasOwnProperty(name))
-            delete pkg.dependencies[name]
-        }
-        commit(t.PROJECT_WRITE_FILE, {
-          fullPath: 'package.json',
-          contents: JSON.stringify(pkg, null, 2)
-        })
-
-        // Write to dependencies property
-        let dependencies = cloneDeep(state.dependencies)
-        for (const name of Object.keys(dependencies.appDependencies)) {
-          if (deps.includes(name))
-            delete dependencies.appDependencies[name]
-        }
-        commit(t.PROJECT_SET_DEPENDENCIES, dependencies)
-      } catch (e) {
-        console.log(e)
-      }
-    }
-
-    try {
-      // Parse package name and version
-      const newDeps = list.map(str => {
-        let [ name, version ] = parseNameVersion(str)
-        return { name, version }
-      })
-
-      if (action === 'ADD')
-        addDependencies(newDeps)
-      else
-        removeDependencies(newDeps.map(d => d.name))
-
-      // Resolve dependency list
-      let { dependencies } = clonePackageJson(state)
-      const res = await API.invoke('post', '/resolver', { body: dependencies })
-
-      // Parse error and revert accordingly
-      if (res.error) {
-        const { error } = res
-
-        switch (error) {
-          case 'PACKAGE_NOT_FOUND':
-            removeDependencies(newDeps.map(d => d.name))
-            break
-          case 'UNSATISFIED_RANGE':
-            removeDependencies(newDeps.map(d => d.name))
-            break
-          case 'MISSING_PEERS':
-            const peers = Object.keys(res.data).map(name => {
-              const requester = Object.keys(res.data[name])[0]
-              const version = res.data[name][requester]
-
-              // Add resolved requester dep
-              const [ rname, rversion ] = parseNameVersion(requester)
-              addDependencies([
-                {
-                  name: rname,
-                  version: rversion
-                }
-              ])
-
-              return `${name}@${version}`
-            })
-
-            // Recursively add peer
-            await dispatch('resolveDependency', {
-              action: 'ADD',
-              list: peers
-            })
-            break
-          // Undo
-          default:
-            if (action === 'ADD')
-              removeDependencies(newDeps.map(d => d.name))
-            else
-              addDependencies(newDeps)
-        }
-      // OK
-      } else {
-        const { appDependencies } = res
-        const deps = Object.keys(appDependencies).map(name => {
-          const version = appDependencies[name].version
-          return { name, version }
-        })
-        addDependencies(deps)
-        commit(t.PROJECT_SET_DEPENDENCIES, res)
-      }
-    } catch (e) {
-      console.log(e)
-    }
   }
 }
 
 const getters = {
-  projectName: state => {
-    return packageJson(state, 'name', 'Untitled')
-  },
-
   projectFiles: ({ files }) => {
     return filesTree(files)
-  },
-
-  projectDependencies: ({ dependencies }) => {
-    const deps = get(dependencies, 'appDependencies', {})
-    return Object.keys(deps).map(name => {
-      const version = deps[name].version
-      return { name, version }
-    })
   },
 
   fileByFullPath: ({ files }) => fullPath => {

@@ -6,7 +6,7 @@
       @click="goBack"
     )
       v-icon mdi-menu-left
-    .subheading {{ projectName }}
+    .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
       v-btn(
@@ -77,15 +77,11 @@
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
-
-    //- Dependencies
-    editor-dependencies
 </template>
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
-import EditorDependencies from './EditorDependencies'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
 
@@ -95,8 +91,7 @@ export default {
   name: 'EditorCtx',
   components: {
     ContextToolbar,
-    Tooltip,
-    EditorDependencies
+    Tooltip
   },
   data: () => ({
     fileTypeMeta,
@@ -112,8 +107,8 @@ export default {
   }),
   computed: {
     ...mapState('Route', ['path']),
-    ...mapState('Project', ['active', 'dirty']),
-    ...mapGetters('Project', ['projectName', 'projectFiles']),
+    ...mapState('Project', ['settings', 'active', 'dirty']),
+    ...mapGetters('Project', ['projectFiles']),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
@@ -123,7 +118,7 @@ export default {
     /**
      * localActive is the write-to variable after a
      * mutation of active is changed in this component.
-     * THis is so that we can intervene and check if
+     * This is so that we can intervene and check if
      * it was a double click or a single click.
      */
     localActive ([ newVal ], [ oldVal ]) {

@@ -15,16 +15,18 @@
       v-model="model"
       :config="config"
     )
+    v-btn(
+      @click="submit"
+      color="primary"
+      outline block large
+    ) Save
 </template>
 
 <script>
 import get from 'lodash-es/get'
-import debounce from 'lodash-es/debounce'
-import { mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import { WorkerHandler } from '@/service'
-import { parseConfig } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 
 export default {
   name: 'DashboardIntegrationConfig',
@@ -37,42 +39,24 @@ export default {
     model: {}
   }),
   computed: {
+    ...mapState('Dashboard', ['integrationConfigMap']),
     ...mapGetters('Dashboard', ['focusedIntegration']),
-    ...mapGetters('Integration', ['parsedConfig']),
     config () {
-      return this.parsedConfig(this.focusedIntegration.id)
-    },
-    settings () {
-      return {
-        label: this.label,
-        config: this.model
-      }
-    }
-  },
-  watch: {
-    /**
-     * Watch when settings have changed by the user.
-     */
-    settings: {
-      deep: true,
-      handler (settings) {
-        this.updateFocusedIntegration({ settings })
-
-        /**
-         * Send argument because debounce may fire
-         * when this.focusedIntegration value is gone.
-         */
-        this.restartFocusedWorker(this.focusedIntegration)
-      }
+      const { id, version } = this.focusedIntegration
+      const hash = `${id}:${version}`
+      return parseConfig(this.integrationConfigMap[hash])
     }
   },
   methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
-    restartFocusedWorker: debounce(integration => {
-      WorkerHandler.end(integration.i)
-      WorkerHandler.register([ integration ])
-    }, 2000)
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
+    submit () {
+      this.updateFocusedIntegration({
+        label: this.label,
+        model: this.model
+      })
+      this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+    }
   },
 
   /**
@@ -80,23 +64,9 @@ export default {
    * user input on model at mount.
    */
   mounted () {
-    try {
-      const variables = get(this.config, 'variables', null)
-      const configModel = variables.reduce((acc, cur) => {
-        acc[cur.name] = cur.default || null
-        return acc
-      }, {})
-
-      // Apply user input
-      for (const name in this.focusedIntegration.settings.config) {
-        if (configModel.hasOwnProperty(name))
-          configModel[name] = this.focusedIntegration.settings.config[name]
-      }
-      this.model = configModel
-      this.label = this.focusedIntegration.settings.label
-    } catch (e) {
-      console.log()
-    }
+    const { label, model } = this.focusedIntegration
+    this.label = label
+    this.model = cloneDeep(model)
   }
 }
 </script>

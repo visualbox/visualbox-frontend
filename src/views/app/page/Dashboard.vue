@@ -13,25 +13,42 @@ v-container#dashboard(
 
   v-layout(
     justify-center
-    row fill-height
+    row
+    :fill-height="!isLoading"
   )
-    dashboard-layout(:style="style")
+    dashboard-loading(v-if="isLoading")
+    explorer(
+      v-if="isExploring"
+      :config="explorer"
+    )
+    dashboard-layout(
+      v-if="!isExploring"
+      :style="style"
+    )
 </template>
 
 <script>
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { ContextToolbar } from '@/components'
-import { DashboardLayout } from '@/components/dashboard'
+import { ContextToolbar, Explorer } from '@/components'
+import { DashboardLoading, DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
     ContextToolbar,
+    Explorer,
+    DashboardLoading,
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['loaded', 'isFullscreen']),
+    ...mapState('Dashboard', [
+      'loaded',
+      'explorer',
+      'isLoading',
+      'isFullscreen',
+      'isExploring'
+    ]),
     style () {
       const { r, g, b, a } = this.loaded.settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
@@ -75,10 +92,10 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded']),
+    ...mapActions('Dashboard', ['load', 'commit']),
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FULLSCREEN'])
   },
-  mounted () {
+  async mounted () {
     this.load(this.$route.params.id)
   },
   beforeDestroy () {

@@ -37,8 +37,10 @@ const mutations = {
         integrations.splice(index, 1)
     })
   },
-  [t.INTEGRATION_SET_PUBLIC] (state, payload) {
-    state.public = payload
+  [t.INTEGRATION_SET_VERSIONS] (state, payload) {
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0)
+      Vue.set(state.list[index], 'versions', payload.versions)
   }
 }
 
@@ -54,12 +56,12 @@ const actions = {
       commit(t.INTEGRATION_SET_LIST, result)
     }
   },
-  async create ({ commit }, { id = null, runtime = 'nodejs' }) {
+  async create ({ commit }, { id = null, name = 'Untitled', runtime = 'nodejs' }) {
     let result = [] // Default value
 
     try {
       result.push(await API.invoke('post', '/integration', {
-        body: { id, runtime }
+        body: { id, name, runtime }
       }))
     } catch (e) {
       throw e
@@ -88,16 +90,27 @@ const actions = {
     }
   },
 
-  async loadPublic ({ commit }, id) {
-    let result = null // Default value
-    commit(t.INTEGRATION_SET_PUBLIC, null)
-
+  async publish ({ commit }, id) {
     try {
-      result = await API.invoke('get', `/integration/${id}`)
+      const { versions } = await API.invoke('post', '/registry', {
+        body: { type: 'INTEGRATION', id }
+      })
+      commit(t.INTEGRATION_SET_VERSIONS, { id, versions })
+      commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions }, { root: true })
     } catch (e) {
       throw e
-    } finally {
-      commit(t.INTEGRATION_SET_PUBLIC, result)
+    }
+  },
+
+  async depublish ({ commit }, id) {
+    try {
+      await API.invoke('del', '/registry', {
+        body: { type: 'INTEGRATION', id }
+      })
+      commit(t.INTEGRATION_SET_VERSIONS, { id, versions: false })
+      commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions: false }, { root: true })
+    } catch (e) {
+      throw e
     }
   }
 }
@@ -108,21 +121,6 @@ const getters = {
    */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
-  },
-
-  /**
-   * Provided an integration ID, parse its config
-   * and return a { variables, error } parsed config.
-   */
-  parsedConfig: (_, getters) => id => {
-    try {
-      const integration = getters.integrationById(id)
-      const files = get(integration, 'files', null)
-      const contents = fileContents(files, ['config.json'])
-      return parseConfig(contents)
-    } catch (e) {
-      return { error: [e.message] }
-    }
   }
 }
 

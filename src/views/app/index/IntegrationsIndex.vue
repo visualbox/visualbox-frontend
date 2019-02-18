@@ -18,32 +18,22 @@ v-container(fill-height)
       v-layout
         v-flex
           v-text-field(
+            v-model="settings.name"
             hide-details single-line
-            outline
+            autofocus outline
           )
       .headline.mb-3.mt-4 Select Runtime
       v-layout
         v-flex
-          v-select(
-            v-model="runtime"
-            :items="runtimes"
-            :disabled="isLoading"
-            item-text="text"
-            item-value="runtime"
-            hide-details single-line
-            outline
+          select-runtime(
+            v-model="settings.runtime"
+            :loading="isLoading"
           )
-            template(#selection="{ item }")
-              v-icon.mr-3(:color="item.color") {{ item.icon }}
-              span {{ item.text }}
-            template(#item="{ item }")
-              v-icon.mr-3(:color="item.color") {{ item.icon }}
-              span {{ item.text }}
       v-layout.mt-4
         v-spacer
         v-btn.ma-0.mr-3(
           @click="isAdding = false"
-          outline
+          large outline
         ) Cancel
         v-btn.ma-0(
           :disabled="isLoading"
@@ -56,55 +46,31 @@ v-container(fill-height)
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { SelectRuntime } from '@/components'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'IntegrationsIndex',
+  components: { SelectRuntime },
   data: () => ({
     isAdding: false,
-    runtimes: [
-      {
-        text: 'Node.js',
-        runtime: 'nodejs',
-        icon: 'mdi-nodejs',
-        color: '#43853d'
-      },
-      {
-        text: 'Python',
-        runtime: 'python',
-        icon: 'mdi-language-python',
-        color: '#4180b1'
-      },
-      {
-        text: 'Java',
-        runtime: 'java',
-        icon: 'mdi-language-java',
-        color: '#e11e21'
-      },
-      {
-        text: 'Go',
-        runtime: 'go',
-        icon: 'mdi-language-go',
-        color: '#29beb1'
-      },
-      {
-        text: 'C',
-        runtime: 'c',
-        icon: 'mdi-language-c',
-        color: '#f7ef21'
-      }
-    ],
-    runtime: 'nodejs'
+    settings: {
+      name: '',
+      runtime: 'nodejs'
+    }
   }),
   computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
     ...mapActions('Integration', ['create']),
     async submit () {
+      if (!this.settings.name || this.settings.name === '')
+        return
+
       this.showSearch = false
       this.setIsLoading(true)
       try {
-        await this.create({ runtime: this.runtime })
+        await this.create(this.settings)
       } catch (e) {
         this.setSnackbar({
           type: 'error',

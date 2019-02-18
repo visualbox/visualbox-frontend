@@ -1,5 +1,4 @@
 export { default as API } from './API'
 export { default as BuildIFrame } from './BuildIFrame'
-export { default as BuildWorker } from './BuildWorker'
 export { default as IFrameHandler } from './IFrameHandler'
-export { default as WorkerHandler } from './WorkerHandler'
+export { default as DashboardHandler } from './DashboardHandler'

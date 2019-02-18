@@ -42,7 +42,7 @@ grid-layout#dashboard-layout(
       )
         v-icon mdi-content-copy
       v-btn(
-        @click.native.stop="DASHBOARD_REMOVE_WIDGET(item.i)"
+        @click.native.stop="removeWidget(item)"
         color="red"
         fab dark small
       )
@@ -65,7 +65,6 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import { cloneDeep, difference } from '@/lib/utils'
 import { IFrameHandler } from '@/service'
-import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'DashboardLayout',
@@ -79,7 +78,6 @@ export default {
   computed: {
     ...mapState('Dashboard', ['loaded', 'isEditing']),
     ...mapGetters('Dashboard', ['focusedWidget']),
-    ...mapGetters('Widget', ['widgetById']),
     widgets () {
       return get(this, 'loaded.widgets', [])
     }
@@ -87,10 +85,12 @@ export default {
   methods: {
     ...mapMutations('Dashboard', [
       'DASHBOARD_CONCAT_LOADED',
-      'DASHBOARD_SET_FOCUSED_WIDGET',
-      'DASHBOARD_REMOVE_WIDGET'
+      'DASHBOARD_SET_FOCUSED_WIDGET'
     ]),
-    ...mapActions('Dashboard', ['copyWidget']),
+    ...mapActions('Dashboard', [
+      'copyWidget',
+      'removeWidget'
+    ]),
     layoutUpdatedEvent (widgets) {
       this.DASHBOARD_CONCAT_LOADED({ widgets })
     },
@@ -138,12 +138,6 @@ export default {
   mounted () {
     IFrameHandler.attachRefs(this.$refs)
     IFrameHandler.generate(this.widgets)
-    EventBus.$on('vbox:dataChanged:layout', ({ i, data }) => {
-      IFrameHandler.onDataChange(this.widgets, i, data)
-    })
-  },
-  beforeDestroy () {
-    EventBus.$off('vbox:dataChanged:layout')
   }
 }
 </script>

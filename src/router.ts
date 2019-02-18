@@ -26,10 +26,6 @@ import Widget from '@/views/app/page/Widget.vue'
 import IntegrationCtx from '@/views/app/page/IntegrationCtx.vue'
 import Integration from '@/views/app/page/Integration.vue'
 
-// Public
-import WidgetPublic from '@/views/app/public/WidgetPublic.vue'
-import IntegrationPublic from '@/views/app/public/IntegrationPublic.vue'
-
 // Help
 import HelpCtx from '@/views/app/help/HelpCtx.vue'
 import HelpIndex from '@/views/app/help/HelpIndex.vue'
@@ -120,14 +116,6 @@ export default new Router({
           }
         },
         {
-          path: 'i/:id/public',
-          name: 'integration-public',
-          components: {
-            context: IntegrationsCtx,
-            default: IntegrationPublic
-          }
-        },
-        {
           path: 'w',
           name: 'widgets-index',
           components: {
@@ -141,14 +129,6 @@ export default new Router({
           components: {
             context: WidgetCtx,
             default: Widget
-          }
-        },
-        {
-          path: 'w/:id/public',
-          name: 'widget-public',
-          components: {
-            context: WidgetsCtx,
-            default: WidgetPublic
           }
         },
         {

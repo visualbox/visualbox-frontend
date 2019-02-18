@@ -9,14 +9,21 @@ import {
   getUniqueName,
   getFullPath
 } from '@/lib/utils'
+import { isObject } from 'util';
 
 const parseFiles = (opts = {}) => {
   const files = get(opts, 'files', null)
   return !files ? {} : cloneDeep(files)
 }
 
-const parseSettings = ({ name = 'Untitled' }) => {
-  return { name }
+const parseSettings = (opts = {}) => {
+  const settings = get(opts, 'settings', null)
+  return !settings ? {} : cloneDeep(settings)
+}
+
+const parseVersions = (opts = {}) => {
+  const versions = get(opts, 'versions', null)
+  return !versions ? false : cloneDeep(versions)
 }
 
 const state = {
@@ -28,6 +35,7 @@ const state = {
   uid: null,
   files: {},
   settings: {},
+  versions: {},
 
   active: null,
   open: new Set(),
@@ -47,6 +55,8 @@ const mutations = {
     state.uid = null
     state.files = {}
     state.settings = {}
+    state.versions = {}
+
     state.active = null
     state.open.clear()
     state.dirty.clear()
@@ -59,7 +69,15 @@ const mutations = {
     state.uid = payload.uid
     state.files = parseFiles(copy)
     state.settings = parseSettings(copy)
+    state.versions = parseVersions(copy)
     state.ready = true
+  },
+  [t.PROJECT_SET_SETTINGS] (state, { key, value }) {
+    Vue.set(state.settings, key, value)
+  },
+  [t.PROJECT_SET_VERSIONS] (state, { id, versions }) {
+    if (id === state.id)
+      state.versions = versions
   },
   [t.PROJECT_SAVE] (state) {
     state.dirty = new Set()
@@ -290,16 +308,12 @@ const actions = {
     }
   },
 
-  save ({ commit, dispatch }, save = true) {
+  save ({ commit }, save = true) {
     if (save)
       commit(t.PROJECT_SAVE)
 
-    const { id, files, dependencies, settings } = state
-
-    // Invalidate Cached project
-    dispatch('Bundler/invalidateCache', id, { root: true })
-
-    return { id, files, dependencies, settings }
+    const { id, files, settings, versions } = state
+    return { id, files, settings, versions }
   }
 }
 
@@ -329,6 +343,22 @@ const getters = {
              && preCut.indexOf('/') < 0
              && type === fileType
     })
+  },
+
+  /**
+   * Return the registry version of the project.
+   * 0  - not been published before
+   * -1 - published but later removed
+   * >0 - latest version
+   */
+  registryVersion: ({ versions }) => {
+    if (!isObject(versions))
+      return -1
+    
+    const keys = Object.keys(versions)
+    return (keys.length <= 0)
+      ? 0
+      : Math.max(...keys)
   }
 }
 

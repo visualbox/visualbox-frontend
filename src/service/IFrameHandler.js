@@ -1,7 +1,5 @@
-// import { getNestedSource } from '@/lib/utils'
 import get from 'lodash-es/get'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { BuildIFrame, WorkerHandler } from '@/service'
+import { BuildIFrame, DashboardHandler } from '@/service'
 
 class IFrameHandler {
   attachStore (store) {
@@ -16,30 +14,27 @@ class IFrameHandler {
   /**
    * Convenience store mappers.
    */
-  widgetById (id) {
-    return this.store.getters['Widget/widgetById'](id)
+  get widgetSourceMap () {
+    return this.store.state.Dashboard.widgetSourceMap
+  }
+
+  get widgets () {
+    return this.store.state.Dashboard.loaded.widgets
   }
 
   /**
-   * Register integrations by first trying
-   * to fetch them from source, and then starting
-   * them with configurations from integration.
-   * If not found, bundle and repeat.
    */
   generate (widgets) {
     widgets.forEach(widget => {
       try {
         // Get source code and config vars from widget
-        const { i, id, settings: { config, source } } = widget
+        const { i, id, version, model } = widget
 
-        // BUNDLE?
-        const { files } = this.widgetById(id)
-        const contents = fileContents(files, ['index.html'])
-        if (!contents)
-          console.log('Could not read index.html')
+        const hash = `${id}:${version}`
+        const code = this.widgetSourceMap[hash]
 
         // Create iframe content with injected config vars
-        this.refs[i][0].src = BuildIFrame(contents, config)
+        this.refs[i][0].src = BuildIFrame(code, model)
 
         /**
          * Try to send initial data with a
@@ -47,10 +42,10 @@ class IFrameHandler {
          * render.
          */
         setTimeout(() => {
-          this.onDataSourceChange(i, source)
+          // this.onDataSourceChange(i, source)
         }, 2000)
       } catch (e) {
-        console.log('Failed to generate a widget')
+        console.log('Failed to generate a widget', e)
       }
     })
   }
@@ -62,10 +57,10 @@ class IFrameHandler {
    * @param {Object} i      Dashboard integration ID.
    * @param {Object} data   Updated data object.
    */
-  onDataChange (widgets, i, data) {
+  onDataChange (i, data) {
     const len = i.length
 
-    widgets.forEach(widget => {
+    this.widgets.forEach(widget => {
       try {
         let { source } = widget.settings
 
@@ -103,7 +98,7 @@ class IFrameHandler {
           this.postMessage('sendData', widget.i, value)
 
       } catch (e) {
-        console.warn('Failed to send updated data to widget bb', e, source)
+        console.warn('Failed to send updated data to widget', e)
       }
     })
   }
@@ -121,7 +116,7 @@ class IFrameHandler {
         return
 
       // const value = _.get(data, source, null) getNestedSource was here?
-      const value = get(WorkerHandler.data, source, null)
+      const value = get(DashboardHandler.data, source, null)
 
       if (value !== null)
         this.postMessage('sendData', i, value)

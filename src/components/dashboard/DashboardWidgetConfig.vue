@@ -2,6 +2,7 @@
 #dashboard-widget-config
   context-toolbar
     .subheading Edit Widget
+
   .pl-3.pr-3.pb-3
     v-dialog(
       v-model="dialog"
@@ -16,40 +17,28 @@
             | Data Source
       v-card
         v-toolbar(fixed)
-          v-btn(
-            icon
-            @click="dialog = false"
-          )
+          v-btn(@click="dialog = false" icon)
             v-icon mdi-close
           v-toolbar-title Data Source
           v-spacer
           v-toolbar-items
-            v-btn(
-              flat
-              @click="updateDataSource"
-            ) Save
+            v-btn(@click="updateDataSource" flat) Save
         v-container.mt-5(fluid)
           v-layout(
-            row
             align-center
             justify-center
-            fill-height
+            fill-height row
           )
             v-flex(xs12 sm12 md10 lg8 xl6)
-              //- Integration data tree
               v-treeview#data-source-tree.mt-3(
-                :active.sync="dataSource"
-                :open.sync="dataSourceOpen"
                 :items="dataTree"
+                :active.sync="active"
+                :open.sync="open"
                 item-key="key"
                 item-text="text"
-                selected-color="red"
                 activatable
               )
-                template(
-                  slot="label"
-                  slot-scope="{ item }"
-                )
+                template(slot="label" slot-scope="{ item }")
                   span(v-html="item.text")
 
     v-expansion-panel.mt-3
@@ -70,14 +59,13 @@
 
 <script>
 import get from 'lodash-es/get'
-import debounce from 'lodash-es/debounce'
 import isString from 'lodash-es/isString'
+import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import { parseConfig, cloneDeep, dataTree } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { IFrameHandler, WorkerHandler } from '@/service'
+import { parseConfig, dataTree } from '@/lib/utils'
+import { DashboardHandler, IFrameHandler } from '@/service'
 import EventBus from '@/lib/eventBus'
 
 export default {
@@ -89,14 +77,14 @@ export default {
   },
   data: () => ({
     model: {},
+    dialog: false,
     dataTree: [],
-    dataSource: [],
-    dataSourceOpen: [],
-    dialog: false
+    active: [],
+    open: []
   }),
   computed: {
+    ...mapState('Dashboard', ['widgetConfigMap']),
     ...mapGetters('Dashboard', ['focusedWidget', 'integrationByI']),
-    ...mapGetters('Widget', ['parsedConfig']),
 
     /**
      * Focused widget BGC. Stored in widget
@@ -113,7 +101,9 @@ export default {
       }, 20)
     },
     config () {
-      return this.parsedConfig(this.focusedWidget.id)
+      const { id, version } = this.focusedWidget
+      const hash = `${id}:${version}`
+      return parseConfig(this.widgetConfigMap[hash])
     },
     widgetI () {
       return get(this.focusedWidget, 'i', null)
@@ -126,21 +116,32 @@ export default {
         if (!val)
           return
 
-        const variables = get(this.config, 'variables', null)
-        const configModel = variables.reduce((acc, cur) => {
+        const variables = get(this.config, 'variables', [])
+        const defaults = variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null
           return acc
         }, {})
 
         // Apply user input
-        for (const name in this.focusedWidget.settings.config) {
-          if (configModel.hasOwnProperty(name))
-            configModel[name] = this.focusedWidget.settings.config[name]
+        for (const name in this.focusedWidget.model) {
+          if (defaults.hasOwnProperty(name))
+            defaults[name] = this.focusedWidget.model[name]
         }
-        this.model = configModel
 
-        // Load data source
-        this.loadDataSource()
+        this.model = defaults
+      }
+    },
+
+    /**
+     * Watch when settings have changed by the user.
+     */
+    model: {
+      deep: true,
+      handler (model) {
+        this.updateFocusedWidget({ model })
+
+        // Send config updates to IFrame
+        IFrameHandler.postMessage('sendConfig', this.widgetI, model)
       }
     },
 
@@ -150,67 +151,47 @@ export default {
      */
     dialog: {
       handler (newVal, oldVal) {
-        if (newVal && !oldVal)
+        if (newVal && !oldVal) {
           this.recalculateDataTree()
+          this.loadOpen()
+        } else if (!newVal && oldVal) {
+          this.dataTree = []
+        }
       }
     },
-
-    /**
-     * Watch when settings have changed by the user.
-     */
-    model: {
-      deep: true,
-      handler (config) {
-        this.updateFocusedWidget({ settings: { config } })
-
-        // Send config updates to IFrame
-        IFrameHandler.postMessage('sendConfig', this.widgetI, config)
-      }
-    }
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_WIDGET']),
     ...mapActions('Dashboard', ['updateFocusedWidget']),
-
     recalculateDataTree () {
-      this.dataTree = dataTree(WorkerHandler.data)
+      this.dataTree = dataTree(DashboardHandler.data)
 
       // Convert top-leved ID's into integration names
       for (const integration of this.dataTree) {
         try {
           const { key } = integration
-          integration.text = this.integrationByI(key).settings.label || key
+          integration.text = this.integrationByI(key).label || key
         } catch (e) {
           continue
         }
       }
-      console.log('recalculated')
-
-      this.loadDataSource()
     },
 
     /**
      * Convenience method for instructing
      * dataTree how to open.
      */
-    loadDataSource () {
-      /**
-       * Don't touch dataSource or dataSourceOpen when
-       * user is actively involved.
-       */
-      if (this.dialog)
-        return
-
+    loadOpen () {
       let { source } = this.focusedWidget.settings
 
       // Source is not a String (defaul is null)
       if (!isString(source))
         source = ''
 
-      this.dataSource = [ source ]
+      this.active = [ source ]
 
       // Open tree all the way to the source leaf
-      this.dataSourceOpen = source.split('.').reduce((a, b) => {
+      this.open = source.split('.').reduce((a, b) => {
         const path = a.length > 0
           ? a[a.length - 1] + '.' + b
           : b
@@ -221,11 +202,11 @@ export default {
 
     /**
      * Update Widget data source path when
-     * dialog is closed.
+     * dialog is saved.
      */
     updateDataSource () {
       this.dialog = false
-      const source = this.dataSource[0]
+      const source = this.active[0]
       this.updateFocusedWidget({ settings: { source } })
 
       // Signal that Widget has updated its source
@@ -234,14 +215,16 @@ export default {
   },
   mounted () {
     /**
-     * Data from WorkerHandler has changed.
-     * Re-calculate data tree and re-apply
-     * dataSource on data tree.
+     * Data from DashboardHandler has changed.
+     * Re-calculate data tree if dialog is open.
      */
-    EventBus.$on('vbox:dataChanged:config', this.recalculateDataTree)
+    EventBus.$on('vbox:dataChanged', () => {
+      if (this.dialog)
+        this.recalculateDataTree()
+    })
   },
   beforeDestroy () {
-    EventBus.$off('vbox:dataChanged:config')
+    EventBus.$off('vbox:dataChanged')
   }
 }
 </script>

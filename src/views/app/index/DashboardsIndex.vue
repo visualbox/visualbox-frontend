@@ -19,6 +19,8 @@ export default Vue.extend({
 
 <style lang="stylus" scoped>
 .container
+  max-width 800px
+
   .flex
     position relative
 </style>

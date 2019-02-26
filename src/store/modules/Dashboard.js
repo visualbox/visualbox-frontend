@@ -217,12 +217,7 @@ const actions = {
     const dashboard = getters.dashboardById(id)
     commit(t.DASHBOARD_SET_LOADED, dashboard)
 
-    // Create a map for Container access
-    const integrationConfigMap = new Set()
-    state.loaded.integrations.forEach(i => {
-      integrationConfigMap.add(`${i.id}:${i.version}`)
-    })
-    DashboardHandler.initDashboard([...integrationConfigMap])
+    DashboardHandler.initDashboard()
   },
 
   /**

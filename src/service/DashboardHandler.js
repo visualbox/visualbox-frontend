@@ -18,6 +18,10 @@ class DashboardHandler {
     this.store.dispatch('Dashboard/setLoadingScreen', show)
   }
 
+  get integrations () {
+    return this.store.state.Dashboard.loaded.integrations
+  }
+
   /**
    * The container has sent a message.
    */
@@ -25,33 +29,10 @@ class DashboardHandler {
     switch (m.message.type) {
 
       /**
-       * Container sent an INIT message,
-       * signaling it's ready to start
-       * integrations.
+       * Container sent an INIT message.
        */
       case 'INIT':
         this.setLoadingScreen(false)
-
-        /**
-         * Start ticker to keep container
-         * alive.
-         */
-        if (this.tick !== null)
-          clearInterval(this.tick)
-        this.tick = setInterval(() => {
-          this.publish({ type: 'TICK' })
-        }, 15000)
-
-        /**
-         * Launch initial tasks. No need to
-         * add them via LTL first since we're
-         * still at init (they are already added
-         * to container access).
-         */
-        const integrations = this.store.state.Dashboard.loaded.integrations.map(({ i, id, version, model }) => {
-          return { i, id, version, model }
-        })
-        this.publish({ type: 'START', integrations })
         break
 
       /**
@@ -109,44 +90,58 @@ class DashboardHandler {
       presence: p => { this.onPresence(p) },
       status: s => { this.onStatus(s) }
     })
+
+    /**
+     * Start ticker to keep container
+     * alive.
+     */
+    if (this.tick !== null)
+      clearInterval(this.tick)
+    this.tick = setInterval(() => {
+      this.publish({ type: 'TICK' })
+    }, 15000)
   }
 
   /**
-   * Init dashboard by ID by sending a command
-   * to the LTL to download and start a new container
-   * with processes and initial configurations.
+   * Init dashboard by sending integrations to start
+   * to LTL without a token. Save returned token.
    */
-  async initDashboard (integrationConfigMap) {
+  async initDashboard () {
     try {
       this.setLoadingScreen(true)
-      const {
-        token
-      } = await API.invoke('post', '/containers/ltl', {
-        body: {
-          type: 'INIT',
-          integrationConfigMap
-        }
+      const { token } = await API.invoke('post', '/containers/ltl', {
+        body: { integrations: this.integrations }
       })
-      this.token = token
 
-      // this.token = '2060044baeb33f73154f43406a463d905b14c317f15924f09df7c7bda498b241bd0b3d89fb3114b6de1b614b8ca9c28bdfeebf6503510a954f1764a4a56b3fdf'
+      this.token = token
       this.initSocket()
     } catch (e) {
       console.log('[DashboardHandler]: error; ', e)
     }
   }
 
-  addIntegration ({ i, id, version, model }) {
-    this.publish({
-      type: 'START',
-      integrations: [{ i, id, version, model }]
-    })
+  /**
+   * Add an integration by calling LTL
+   * with current token and the new integration
+   * as a single item in the list.
+   */
+  async addIntegration (integration) {
+    try {
+      await API.invoke('post', '/containers/ltl', {
+        body: {
+          token: this.token,
+          integrations: [integration]
+        }
+      })
+    } catch (e) {
+      console.log('[DashboardHandler]: error; ', e)
+    }
   }
 
-  restartIntegration ({ i, id, version, model }) {
+  restartIntegration (integration) {
     this.publish({
       type: 'START',
-      integrations: [{ i, id, version, model }]
+      integration
     })
   }
 
@@ -160,7 +155,7 @@ class DashboardHandler {
    * and clearing token / data.
    */
   end () {
-    this.publish({ type: 'END' })
+    this.publish({ type: 'TERMINATE' })
     PubNub.unsubscribeAll()
     this.token = null
     this.data = {}

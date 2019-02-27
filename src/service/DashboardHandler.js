@@ -32,6 +32,7 @@ class DashboardHandler {
        * Container sent an INIT message.
        */
       case 'INIT':
+        console.log('GOT init', m)
         this.setLoadingScreen(false)
         break
 
@@ -109,7 +110,7 @@ class DashboardHandler {
   async initDashboard () {
     try {
       this.setLoadingScreen(true)
-      const { token } = await API.invoke('post', '/containers/ltl', {
+      const { token } = await API.invoke('post', '/k8s/ltl', {
         body: { integrations: this.integrations }
       })
 

@@ -45,6 +45,7 @@ class DashboardHandler {
         const { i, data } = m.message
         this.data[i] = data
         IFrameHandler.onDataChange(i, data)
+        console.log(`[${i}]: ${data}`)
 
         /**
          * Only emit notification to recalculate dataTree
@@ -116,7 +117,6 @@ class DashboardHandler {
 
       this.token = token
       this.initSocket()
-      this.setLoadingScreen(false)
     } catch (e) {
       console.log('[DashboardHandler]: error; ', e)
     }

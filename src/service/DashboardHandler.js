@@ -110,12 +110,13 @@ class DashboardHandler {
   async initDashboard () {
     try {
       this.setLoadingScreen(true)
-      const { token } = await API.invoke('post', '/k8s/ltl', {
+      const { token } = await API.invoke('post', '/containers/ltl', {
         body: { integrations: this.integrations }
       })
 
       this.token = token
       this.initSocket()
+      this.setLoadingScreen(false)
     } catch (e) {
       console.log('[DashboardHandler]: error; ', e)
     }

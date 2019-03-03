@@ -13,7 +13,6 @@ const state = {
     local: true
   },
 
-  isLoading: true,
   isEditing: false,
   isFullscreen: false,
   isExploring: false,
@@ -35,7 +34,6 @@ const mutations = {
       local: true
     },
 
-    state.isLoading = true
     state.isEditing = false
     state.isFullscreen = false
     state.isExploring = false
@@ -48,9 +46,6 @@ const mutations = {
   },
 
   //------------ META
-  [t.DASHBOARD_SET_LOADING] (state, payload) {
-    state.isLoading = payload
-  },
   [t.DASHBOARD_SET_EDITING] (state, payload) {
     state.isEditing = payload
   },
@@ -185,10 +180,6 @@ const actions = {
   },
 
   // -----------------------------------------------------
-  setLoadingScreen ({ commit }, show) {
-    commit(t.DASHBOARD_SET_LOADING, show)
-    commit(t.DASHBOARD_SET_FULLSCREEN, show)
-  },
   openExplorer ({ commit }, type) {
     commit(t.DASHBOARD_SET_EXPLORER, {
       explorer: {

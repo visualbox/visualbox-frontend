@@ -1,21 +1,29 @@
 <template lang="pug">
 #editor-ctx
   context-toolbar
-    v-btn(
-      icon
-      @click="goBack"
-    )
+    v-btn(@click="goBack" icon)
       v-icon mdi-menu-left
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
-      v-btn(
-        @click="saveProject"
-        icon
-      )
+      v-btn(@click="saveProject" icon)
         v-icon mdi-floppy
 
   v-list.hover-actions(dense)
+    //- Info
+    v-list-tile(
+      @click="showPage('info')"
+      :class="{ 'v-list__tile--active' : showInfo }"
+    )
+      v-list-tile-content View Info
+
+    //- Settings
+    v-list-tile(
+      @click="showPage('settings')"
+      :class="{ 'v-list__tile--active' : showSettings }"
+    )
+      v-list-tile-content Settings
+
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
       v-list-tile-action.hover-actions-always
@@ -80,7 +88,7 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
@@ -107,8 +115,14 @@ export default {
   }),
   computed: {
     ...mapState('Route', ['path']),
-    ...mapState('Project', ['settings', 'active', 'dirty']),
     ...mapGetters('Project', ['projectFiles']),
+    ...mapState('Project', [
+      'showInfo',
+      'showSettings',
+      'settings',
+      'active',
+      'dirty'
+    ]),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
@@ -131,6 +145,11 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
+    ...mapMutations('Project', [
+      'PROJECT_SHOW_INFO',
+      'PROJECT_SHOW_SETTINGS',
+      'PROJECT_SET_ACTIVE'
+    ]),
     ...mapActions('Project', [
       'doubleClick',
       'click',
@@ -233,6 +252,14 @@ export default {
      */
     saveProject () {
       EventBus.$emit('vbox:saveProject')
+    },
+    showPage (page) {
+      this.PROJECT_SET_ACTIVE(null)
+
+      if (page === 'info')
+        this.PROJECT_SHOW_INFO()
+      else
+        this.PROJECT_SHOW_SETTINGS()
     },
     /**
      * Need to calculate destination because

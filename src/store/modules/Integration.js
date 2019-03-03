@@ -83,6 +83,17 @@ const actions = {
   async commit ({ commit }, project) {
     try {
       commit(t.INTEGRATION_COMMIT, project)
+
+      /**
+       * Update local integration config map.
+       * Use version '*' since it's local.
+       */
+      try {
+        commit(`Dashboard/${t.DASHBOARD_SET_I_CONFIG_MAP}`, {
+          [`${project.id}:*`]: JSON.parse(project.files['config.json'].contents)
+        }, { root: true })
+      } catch (e) {}
+
       const { id } = project
       await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {

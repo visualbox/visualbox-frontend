@@ -14,10 +14,6 @@ class DashboardHandler {
     this.store = store
   }
 
-  setLoadingScreen (show) {
-    this.store.dispatch('Dashboard/setLoadingScreen', show)
-  }
-
   get integrations () {
     return this.store.state.Dashboard.loaded.integrations
   }
@@ -33,7 +29,6 @@ class DashboardHandler {
        */
       case 'INIT':
         console.log('GOT init', m)
-        this.setLoadingScreen(false)
         break
 
       /**
@@ -109,8 +104,8 @@ class DashboardHandler {
    * to LTL without a token. Save returned token.
    */
   async initDashboard () {
+    return
     try {
-      this.setLoadingScreen(true)
       const { token } = await API.invoke('post', '/containers/ltl', {
         body: { integrations: this.integrations }
       })
@@ -148,7 +143,7 @@ class DashboardHandler {
   }
 
   removeIntegration (i) {
-    this.publish({ type: 'REMOVE', i })
+    this.publish({ type: 'TERMINATE', i })
   }
 
   /**

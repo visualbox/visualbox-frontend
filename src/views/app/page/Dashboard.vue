@@ -3,7 +3,7 @@ v-container#dashboard(
   v-if="loaded"
   fluid
 )
-  context-toolbar(v-if="isFullscreen")
+  context-toolbar.fs-toolbar(v-if="isFullscreen")
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
@@ -13,10 +13,9 @@ v-container#dashboard(
 
   v-layout(
     justify-center
-    row
-    :fill-height="!isLoading"
+    row fill-height
+    :nudge-fs="isFullscreen"
   )
-    dashboard-loading(v-if="isLoading")
     explorer(
       v-if="isExploring"
       :config="explorer"
@@ -31,21 +30,19 @@ v-container#dashboard(
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar, Explorer } from '@/components'
-import { DashboardLoading, DashboardLayout } from '@/components/dashboard'
+import { DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
     ContextToolbar,
     Explorer,
-    DashboardLoading,
     DashboardLayout
   },
   computed: {
     ...mapState('Dashboard', [
       'loaded',
       'explorer',
-      'isLoading',
       'isFullscreen',
       'isExploring'
     ]),
@@ -108,4 +105,11 @@ export default {
 #dashboard
   height 100%
   padding 0
+
+  .fs-toolbar
+    position fixed !important
+    z-index 1
+  
+  .nudge-fs
+    padding-top 48px
 </style>

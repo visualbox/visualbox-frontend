@@ -28,6 +28,8 @@ const parseVersions = (opts = {}) => {
 
 const state = {
   ready: false,
+  showInfo: true,
+  showSettings: false,
   showHelper: false,
   layoutHelper: 'horizontal',
 
@@ -47,9 +49,10 @@ const mutations = {
   [t.PROJECT_RESET] (state) {
     state.ready = false
 
-    // These are nice to disable
-    // state.showHelper = false
-    // state.layoutHelper = 'horizontal'
+    state.showInfo = true
+    state.showSettings = false
+    state.showHelper = false
+    state.layoutHelper = 'horizontal'
 
     state.id = null
     state.uid = null
@@ -82,7 +85,15 @@ const mutations = {
   [t.PROJECT_SAVE] (state) {
     state.dirty = new Set()
   },
-  [t.PROJECT_SET_HELPER] (state, payload) {
+  [t.PROJECT_SHOW_INFO] (state) {
+    state.showInfo = true
+    state.showSettings = false
+  },
+  [t.PROJECT_SHOW_SETTINGS] (state) {
+    state.showInfo = false
+    state.showSettings = true
+  },
+  [t.PROJECT_SHOW_HELPER] (state, payload) {
     state.showHelper = !!payload
   },
   [t.PROJECT_SET_HELPER_LAYOUT] (state, payload) {
@@ -116,9 +127,17 @@ const mutations = {
     if (!state.open.has(payload))
       state.peek = payload
     state.active = payload
+
+    // Disable open info/settings
+    state.showInfo = false
+    state.showSettings = false
   },
   [t.PROJECT_SET_ACTIVE] (state, payload) {
     state.active = payload
+
+    // Disable open info/settings
+    state.showInfo = false
+    state.showSettings = false
   },
   [t.PROJECT_WRITE_FILE] (state, { fullPath, contents }) {
     if (!state.files.hasOwnProperty(fullPath))

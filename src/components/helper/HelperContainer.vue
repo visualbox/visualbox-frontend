@@ -1,51 +1,74 @@
 <template lang="pug">
 #helper-integration
   v-system-bar
-    .tab(
-      :active="tab === 0"
-      @click="tab = 0"
-    ) Configure
-    .tab(
-      :active="tab === 1"
-      @click="tab = 1"
-    ) Console
+    //- Tabs
+    .tab(:active="tab === 0" @click="tab = 0") Configure
+    .tab(:active="tab === 1" @click="tab = 1") Console
+
+    //- Clear console
+    tooltip(text="Clear Console" :open-delay="800" top)
+      v-icon.ml-2(@click="clear" color="red") mdi-cancel
+
     v-spacer
+
+    //- Restart
+    tooltip(text="Restart" :open-delay="800" top)
+      v-icon(@click="restart") mdi-restart
+    
+    //- Freeze
+    tooltip(text="Freeze Console" :open-delay="800" top)
+      v-icon(
+        :color="freeze ? 'blue' : ''"
+        @click="freeze = !freeze"
+      ) mdi-snowflake
+
+    //- Dock bottom
     tooltip(text="Dock to Bottom" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
+
+    //- Dock right
     tooltip(text="Dock to Right" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'vertical' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
       ) mdi-page-layout-sidebar-right
-    v-icon(@click="PROJECT_SET_HELPER(false)") mdi-close
+
+    //- Close helper
+    v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
+
+  //- Config pane
   .pane(:active="tab === 0")
     input-types(
       v-model="model"
-      :config="parsedConfig"
+      :config="config"
     )
+
+  //- Console pane
   .pane(:active="tab === 1")
-    span console
+    .ln(
+      v-for="(item, index) in consoleBuffer"
+      :key="index"
+    )
+      template(v-if="item.status")
+        b.mr-1(:style="{ 'color': item.status.color }") {{ item.status.text }}
+      pre {{ item.ln }}
 </template>
 
 <script>
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
+import PubNub from '@/lib/pubnub'
+import API from '@/service/API'
 import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { BuildWorker } from '@/service'
-import API from '@/service/API'
-import PubNub from 'pubnub'
-
-const pubnub = new PubNub({
-  publishKey: 'pub-c-69e6e696-f97d-4d5f-9e5b-fb902f093347',
-  subscribeKey: 'sub-c-03f905e2-2f2e-11e9-b681-be2e977db94e'
-})
 
 const BUFFER_MAX = 100
+const T_INFO = 'T_INFO'
+const T_WARNING = 'T_WARNING'
+const T_ERROR = 'T_ERROR'
 
 export default {
   name: 'HelperContainer',
@@ -54,77 +77,197 @@ export default {
     Tooltip
   },
   data: () => ({
+    tab: 1,
     model: {},
-    tab: 1
+    consoleBuffer: [],
+    freeze: false,
+    token: null,
+    tick: null
   }),
   computed: {
-    ...mapState('Project', ['layoutHelper', 'dirty', 'files', 'id']),
-    ...mapState('Bundler', ['active', 'status']),
-    parsedConfig () {
-      const contents = fileContents(this.files, ['config.json'])
-      if (!contents)
-        return { error: ['Unable to parse integration configuration'] }
-      return parseConfig(contents)
+    ...mapState('Dashboard', ['integrationConfigMap']),
+    ...mapState('Project', [
+      'layoutHelper',
+      'dirty',
+      'files',
+      'id'
+    ]),
+    config () {
+      const hash = `${this.id}:*`
+      return parseConfig(this.integrationConfigMap[hash])
+    },
+    integration () {
+      return {
+        i: '_0', // Dummy 'i' in helper
+        id: this.id,
+        version: '*', // always latest in helper
+        model: this.model
+      }
     }
   },
   watch: {
-    /**
-     * Re-apply defaults to model bound to input types.
-     */
-    parsedConfig: {
-      immediate: true,
-      deep: true,
-      handler () {
-        if (!this.parsedConfig.hasOwnProperty('variables'))
-          return
-
-        try {
-          // Create local config model
-          this.model = this.parsedConfig.variables.reduce((acc, cur) => {
-            acc[cur.name] = cur.default || null
-            return acc
-          }, {})
-        } catch (e) {
-          console.log(e)
-        }
-      }
-    }
+    freeze (val) {
+      if (val)
+        this.terminate()
+      else
+        this.restart()
+    },
   },
   methods: {
     ...mapMutations('Project', [
       'PROJECT_SET_HELPER_LAYOUT',
-      'PROJECT_SET_HELPER'
+      'PROJECT_SHOW_HELPER'
     ]),
-    ...mapActions('Project', ['save'])
-  },
-  async mounted () {
-    try {
-      const result = await API.invoke('post', '/ltl', {
-        body: {
-          type: 'INTEGRATION',
-          id: this.id
-        }
-      })
-      console.log('Result', result)
-      pubnub.subscribe({
-        channels: [result.token],
-        withPresence: true
-      });
 
-      pubnub.addListener({
-        message (m) {
-          console.log('Got message from container: ', m)
-        },
-        presence (p) {
-          console.log('PRESENCE', p)
-        },
-        status (s) {
-          console.log('STATUS', s)
-        }
+    /**
+     * Print a line to the console.
+     */
+    print (ln, statusType) {
+      if (this.consoleBuffer.length > BUFFER_MAX)
+        this.consoleBuffer.shift()
+
+      let status = null
+      if (statusType === T_INFO)
+        status = { text: '[info]:', color: 'green' }
+      if (statusType === T_WARNING)
+        status = { text: '[warning]:', color: 'orange' }
+      if (statusType === T_ERROR)
+        status = { text: '[error]:', color: 'red' }
+
+      this.consoleBuffer.push({
+        timestamp: +new Date(),
+        ln, status
       })
-    } catch (e) {
-      console.log('Error', e)
+    },
+
+    /**
+     * Clear the console.
+     */
+    clear () {
+      this.consoleBuffer = []
+    },
+
+    /**
+     * Send a message to the container.
+     */
+    publish (message) {
+      if (!this.token)
+        throw new Error('[DashboardHandler]: No token to publish to')
+
+      PubNub.publish({
+        message,
+        channel: [this.token],
+        storeInHistory: false
+      })
+    },
+
+    /**
+     * Restart container.
+     */
+    restart () {
+      this.freeze = false
+      this.publish({
+        type: 'START',
+        integration: this.integration
+      })
+    },
+
+    /**
+     * Terminate container.
+     */
+    terminate () {
+      this.publish({
+        type: 'TERMINATE',
+        i: -1
+      })
+    },
+
+    /**
+     * The container has sent a message.
+     */
+    onMessage (m) {
+      switch (m.message.type) {
+
+        /**
+         * Container sent an INIT message.
+         */
+        case 'INIT':
+          this.print('container started', T_INFO)
+          break
+
+        /**
+         * Container integration is giving output.
+         * 'i' is included in the message but we
+         * don't care about it in the helper
+         * component.
+         */
+        case 'OUTPUT':
+          const { i, data } = m.message
+          this.print(data)
+          break;
+
+        case 'STATUS':
+          this.print(m.message.data, m.message.statusType)
+          break;
+      }
+    },
+
+    /**
+     * Init container socket connection.
+     */
+    initSocket () {
+      PubNub.unsubscribeAll()
+
+      if (!this.token)
+        throw new Error('[DashboardHandler]: No token to subscribe to')
+
+      PubNub.subscribe({
+        channels: [this.token],
+        withPresence: true
+      })
+
+      PubNub.addListener({
+        message: m => { this.onMessage(m) }
+      })
+
+      /**
+       * Start ticker to keep container
+       * alive.
+       */
+      if (this.tick !== null)
+        clearInterval(this.tick)
+      this.tick = setInterval(() => {
+        this.publish({ type: 'TICK' })
+      }, 15000)
+    },
+
+    /**
+     * Init container by calling LTL.
+     */
+    async initContainer () {
+      this.clear()
+
+      try {
+        const { token } = await API.invoke('post', '/containers/ltl', {
+          body: { integrations: [this.integration] }
+        })
+
+        this.token = token
+        this.initSocket()
+      } catch (e) {
+        console.log('[DashboardHandler]: error; ', e)
+      }
     }
+  },
+  mounted () {
+    this.initContainer()
+  },
+  beforeDestroy () {
+    this.publish({ type: 'TERMINATE' })
+    PubNub.unsubscribeAll()
+
+    if (this.tick !== null)
+      clearInterval(this.tick)
   }
 }
 </script>
@@ -158,9 +301,6 @@ export default {
     .v-icon
       margin-right 10px
 
-      &.ml
-        margin-left 10px
-
   .pane
     display none
     padding 16px
@@ -173,5 +313,15 @@ export default {
 
     .ln
       font-family monospace
-      word-break break-all
+
+      b
+        float left
+
+      pre
+        white-space pre-wrap
+        white-space -moz-pre-wrap
+        white-space -pre-wrap
+        white-space -o-pre-wrap
+        word-wrap break-word
+        word-break break-word
 </style>

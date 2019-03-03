@@ -16,38 +16,61 @@ v-container#editor-settings(fill-height)
         v-flex
           select-runtime(
             v-model="runtime"
-            :loading="isLoading"
+            disabled
           )
+      v-layout.mt-2
+        v-flex
+          span.grey--text
+            | The runtime can unfortunately not be changed after creation.
+            | Please create a new project if you want to change the runtime.
       v-layout.mt-4
         v-spacer
-        v-btn.ma-0(
+        v-btn.ma-0.px-3(
           @click="saveProject"
           :loading="isLoading"
           :disabled="isLoading"
           color="primary"
           large outline
-        ) Save
+        )
+          v-icon.mr-3 mdi-content-save
+          | Save
+      .headline.mb-3.mt-4 Download Code
+      v-layout
+        v-flex
+          span.grey--text
+            | Download all source code as a ZIP archive.
+      v-layout.mt-4
+        v-spacer
+        v-btn.ma-0.px-3(
+          @click=""
+          color="primary"
+          large outline
+        )
+          v-icon.mr-3 mdi-cloud-download-outline
+          | Download
       .headline.mb-3.mt-4 Publish to Registry
       v-layout
         v-flex
           span.grey--text
             | By publishing to the registry you allow other users to add your code to their dashboards.
             | The registry is versioned so you can safely update your code without breaking dashboards.
+            | VisualBox uses <a href="https://semver.org/" target="_new">Semantic Versioning</a> for registry items.
       v-layout.mt-4(v-if="registryVersion > -1")
         v-spacer
-        v-btn.ma-0.mr-3(
+        v-btn.ma-0.mr-3.px-3(
           v-if="registryVersion > 0"
           @click="depublishProject"
           color="red"
           large outline
         ) Remove from Registry
-        v-btn.ma-0(
+        v-btn.ma-0.px-3(
           @click="publishProject"
           :loading="isLoading"
           :disabled="isLoading"
           color="primary"
           large outline
         )
+          v-icon.mr-3 mdi-publish
           | Publish
           template(v-if="registryVersion > 0") &nbsp;Version {{ registryVersion + 1 }}
 
@@ -58,6 +81,7 @@ v-container#editor-settings(fill-height)
 </template>
 
 <script>
+import semver from 'semver'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { SelectRuntime } from '@/components'
 import { cloneDeep } from '@/lib/utils'
@@ -74,10 +98,7 @@ export default {
       get () { return this.settings.name },
       set (value) { this.PROJECT_SET_SETTINGS({ key: 'name', value }) }
     },
-    runtime: {
-      get () { return this.settings.runtime },
-      set (value) { this.PROJECT_SET_SETTINGS({ key: 'runtime', value }) }
-    }
+    runtime () { return this.settings.runtime }
   },
   methods: {
     ...mapMutations('Project', ['PROJECT_SET_SETTINGS']),
@@ -103,5 +124,4 @@ export default {
   padding 16px
   position absolute
   top 0; right 0; left 0; bottom 0;
-  overflow hidden
 </style>

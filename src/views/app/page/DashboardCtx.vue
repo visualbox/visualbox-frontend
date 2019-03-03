@@ -16,19 +16,19 @@
       v-flex(xs4)
         tooltip(text="Add Integration" bottom)
           v-btn.ma-0(
-            @click="openExplorer('INTEGRATION')"
-            :color="addIntegrationColor"
+            @click="clickOpenExplorer('INTEGRATION')"
+            :color="buttonColorExplorer('INTEGRATION')"
             flat block large
           )
-            v-icon mdi-tab-plus
+            v-icon mdi-source-pull
       v-flex(xs4)
         tooltip(text="Add Widget" bottom)
           v-btn.ma-0(
-            @click="openExplorer('WIDGET')"
-            :color="addWidgetColor"
+            @click="clickOpenExplorer('WIDGET')"
+            :color="buttonColorExplorer('WIDGET')"
             flat block large
           )
-            v-icon mdi-hexagon-slice-2
+            v-icon mdi-hexagon
       v-flex(xs4)
         tooltip(text="Dashboard Settings" bottom)
           v-btn.ma-0(
@@ -93,16 +93,6 @@ export default {
       return this.isFullscreen
         ? 'mdi-fullscreen-exit'
         : 'mdi-fullscreen'
-    },
-    addIntegrationColor () {
-      return this.isExploring && this.explorer.type === 'INTEGRATION'
-        ? 'white'
-        : 'grey'
-    },
-    addWidgetColor () {
-      return this.isExploring && this.explorer.type === 'WIDGET'
-        ? 'white'
-        : 'grey'
     }
   },
   methods: {
@@ -116,6 +106,17 @@ export default {
       'DASHBOARD_SET_EDITING',
       'DASHBOARD_SET_FULLSCREEN'
     ]),
+    buttonColorExplorer (type) {
+      return this.isExploring && this.explorer.type === type
+        ? 'white'
+        : 'grey'
+    },
+    clickOpenExplorer (type) {
+      if (this.isExploring && this.explorer.type === type)
+        this.closeExplorer()
+      else
+        this.openExplorer(type)
+    },
     goBack () {
       if (this.focusedWidget)
         this.DASHBOARD_SET_FOCUSED_WIDGET(null)

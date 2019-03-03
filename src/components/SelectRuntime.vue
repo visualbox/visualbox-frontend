@@ -2,7 +2,7 @@
 v-select(
   v-model="internalValue"
   :items="runtimes"
-  :disabled="loading"
+  :disabled="loading || disabled"
   item-text="text"
   item-value="runtime"
   hide-details single-line
@@ -23,7 +23,7 @@ import { proxyValue } from '@/mixins'
 export default {
   name: 'SelectRuntime',
   mixins: [proxyValue],
-  props: ['loading'],
+  props: ['loading', 'disabled'],
   data: () => ({
     runtimes: [
       {

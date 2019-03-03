@@ -83,6 +83,20 @@ const actions = {
   async commit ({ commit }, project) {
     try {
       commit(t.WIDGET_COMMIT, project)
+
+      /**
+       * Update local widget config and source map.
+       * Use version '*' since it's local.
+       */
+      try {
+        commit(`Dashboard/${t.DASHBOARD_SET_W_CONFIG_MAP}`, {
+          [`${project.id}:*`]: JSON.parse(project.files['config.json'].contents)
+        }, { root: true })
+        commit(`Dashboard/${t.DASHBOARD_SET_W_SOURCE_MAP}`, {
+          [`${project.id}:*`]: project.files['index.html'].contents
+        }, { root: true })
+      } catch (e) {}
+
       const { id } = project
       await API.invoke('put', `/widget/${id}`, { body: project })
     } catch (e) {

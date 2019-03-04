@@ -51,10 +51,10 @@ v-container#explorer(fluid)
             v-for="(item, index) in currentList"
             :key="index"
             @click="selected = item"
-            xs12 sm6 md4 lg3 xl2
+            v-bind="cols"
           )
             v-card
-              v-responsive(:aspect-ratio="1/1")
+              v-responsive(:aspect-ratio="4/3")
                 .background
                 .text
                   .headline {{ item.settings.name }}
@@ -66,6 +66,7 @@ import get from 'lodash-es/get'
 import marked from 'marked'
 import { mapState, mapActions } from 'vuex'
 import { integrationsIndex, widgetsIndex } from '@/lib/algoliasearch'
+import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 
 export default {
   name: 'Explorer',
@@ -80,7 +81,10 @@ export default {
     selected: null,
 
     index: null,
-    browsePopular: []
+    browsePopular: [],
+
+    resizeSensor: null,
+    cols: { xs12: true }
   }),
   computed: {
     ...mapState({
@@ -203,7 +207,33 @@ export default {
           }
         })
       })
+    },
+
+    /**
+     * Use custom resize watcher since Vuetify
+     * won't detect element resize (only window).
+     */
+    onResize ({ width }) {
+      const { xs, sm, md, lg } = this.$vuetify.breakpoint.thresholds
+      let cols = 12
+
+      if (width >= lg)
+        cols = 2
+      else if (width >= md)
+        cols = 3
+      else if (width >= sm)
+        cols = 4
+      else if (width >= xs)
+        cols = 6
+
+      this.cols = { [`xs${cols}`]: true }
     }
+  },
+  mounted () {
+    this.resizeSensor = new ResizeSensor(this.$el, this.onResize)
+  },
+  beforeDestroy () {
+    this.resizeSensor.detach()
   }
 }
 </script>
@@ -237,7 +267,7 @@ export default {
       .background
         position absolute
         top 0; left 0; right 0; bottom 0;
-        background-image url(https://www.itromso.no/nyhet/article14207016.ece/90iuwu/ALTERNATES/w980-default/1025580.jpg)
+        background-image url('https://www.visittromso.no/sites/tromso/files/styles/responsive-slideshow-xs_2x/public/northern_lights_over_tromso_-_picture_by_vegard_stien_visit_tromso.jpg?itok=6rZtYfeZ&timestamp=1535112923')
         background-size cover
         filter brightness(0.4)
       

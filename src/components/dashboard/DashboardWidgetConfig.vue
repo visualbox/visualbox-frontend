@@ -112,10 +112,7 @@ export default {
   watch: {
     widgetI: {
       immediate: true,
-      handler (val) {
-        if (!val)
-          return
-
+      handler () {
         const variables = get(this.config, 'variables', [])
         const defaults = variables.reduce((acc, cur) => {
           acc[cur.name] = cur.default || null

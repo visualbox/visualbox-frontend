@@ -47,7 +47,7 @@
     )
 
   //- Console pane
-  .pane(:active="tab === 1")
+  .pane(:active="tab === 1" ref="terminal")
     .ln(
       v-for="(item, index) in consoleBuffer"
       :key="index"
@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import debounce from 'lodash-es/debounce'
+import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import PubNub from '@/lib/pubnub'
 import API from '@/service/API'
@@ -106,18 +106,50 @@ export default {
     }
   },
   watch: {
+    /**
+     * Re-apply defaults to model bound to input types.
+     */
+    config: {
+      immediate: true,
+      deep: true,
+      handler () {
+        const variables = get(this.config, 'variables', [])
+        const defaults = variables.reduce((acc, cur) => {
+          acc[cur.name] = cur.default || null
+          return acc
+        }, {})
+
+        // Apply user input
+        for (const name in this.model) {
+          if (defaults.hasOwnProperty(name))
+            defaults[name] = this.model[name]
+        }
+
+        this.model = defaults
+      }
+    },
+
     freeze (val) {
       if (val)
         this.terminate()
       else
         this.restart()
-    },
+    }
   },
   methods: {
     ...mapMutations('Project', [
       'PROJECT_SET_HELPER_LAYOUT',
       'PROJECT_SHOW_HELPER'
     ]),
+
+    scrollTerminal () {
+      const el = this.$refs.terminal
+      if (el.scrollTop === (el.scrollHeight - el.offsetHeight)) {
+        this.$nextTick(() => {
+          el.scrollTop = el.scrollHeight
+        })
+      }
+    },
 
     /**
      * Print a line to the console.
@@ -138,6 +170,8 @@ export default {
         timestamp: +new Date(),
         ln, status
       })
+
+      this.scrollTerminal()
     },
 
     /**
@@ -315,6 +349,7 @@ export default {
       font-family monospace
 
       b
+        font-weight normal
         float left
 
       pre

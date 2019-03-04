@@ -61,6 +61,7 @@ export default Vue.extend({
       { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' }
     ],
     itemsBottom: [
+      { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle', class: 'bottom_upper' },
       { title: 'Settings', to: '/app/s', icon: 'mdi-settings', class: 'bottom_upper' },
       { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
     ]

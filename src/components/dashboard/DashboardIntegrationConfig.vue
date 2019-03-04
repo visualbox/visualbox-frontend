@@ -67,6 +67,20 @@ export default {
     const { label, model } = this.focusedIntegration
     this.label = label
     this.model = cloneDeep(model)
+
+    const variables = get(this.config, 'variables', [])
+    const defaults = variables.reduce((acc, cur) => {
+      acc[cur.name] = cur.default || null
+      return acc
+    }, {})
+
+    // Apply user input
+    for (const name in this.model) {
+      if (defaults.hasOwnProperty(name))
+        defaults[name] = this.model[name]
+    }
+
+    this.model = defaults
   }
 }
 </script>

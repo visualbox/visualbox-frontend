@@ -86,11 +86,11 @@ const actions = {
 
       /**
        * Update local widget config and source map.
-       * Use version '*' since it's local.
+       * Use version '^' since it's local.
        */
       try {
         commit(`Dashboard/${t.DASHBOARD_SET_W_CONFIG_MAP}`, {
-          [`${project.id}:*`]: JSON.parse(project.files['config.json'].contents)
+          [`${project.id}:^`]: JSON.parse(project.files['config.json'].contents)
         }, { root: true })
         commit(`Dashboard/${t.DASHBOARD_SET_W_SOURCE_MAP}`, {
           [`${project.id}:*`]: project.files['index.html'].contents

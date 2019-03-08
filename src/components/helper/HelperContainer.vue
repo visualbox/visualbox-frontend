@@ -66,9 +66,11 @@ import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
 const BUFFER_MAX = 100
+
 const T_INFO = 'T_INFO'
 const T_WARNING = 'T_WARNING'
 const T_ERROR = 'T_ERROR'
+const T_OUTPUT = 'T_OUTPUT'
 
 export default {
   name: 'HelperContainer',
@@ -93,14 +95,14 @@ export default {
       'id'
     ]),
     config () {
-      const hash = `${this.id}:*`
+      const hash = `${this.id}:^`
       return parseConfig(this.integrationConfigMap[hash])
     },
     integration () {
       return {
         i: '_0', // Dummy 'i' in helper
         id: this.id,
-        version: '*', // always latest in helper
+        version: '^', // always local in helper
         model: this.model
       }
     }
@@ -144,6 +146,9 @@ export default {
 
     scrollTerminal () {
       const el = this.$refs.terminal
+      if (!el)
+        return
+
       if (el.scrollTop === (el.scrollHeight - el.offsetHeight)) {
         this.$nextTick(() => {
           el.scrollTop = el.scrollHeight
@@ -161,10 +166,12 @@ export default {
       let status = null
       if (statusType === T_INFO)
         status = { text: '[info]:', color: 'green' }
-      if (statusType === T_WARNING)
+      else if (statusType === T_WARNING)
         status = { text: '[warning]:', color: 'orange' }
-      if (statusType === T_ERROR)
+      else if (statusType === T_ERROR)
         status = { text: '[error]:', color: 'red' }
+      else if (statusType === T_OUTPUT)
+        status = { text: '[output]:', color: 'deepskyblue' }
 
       this.consoleBuffer.push({
         timestamp: +new Date(),
@@ -199,6 +206,7 @@ export default {
      * Restart container.
      */
     restart () {
+      this.print('restarting container', T_INFO)
       this.freeze = false
       this.publish({
         type: 'START',
@@ -237,7 +245,7 @@ export default {
          */
         case 'OUTPUT':
           const { i, data } = m.message
-          this.print(data)
+          this.print(data, T_OUTPUT)
           break;
 
         case 'STATUS':
@@ -280,6 +288,7 @@ export default {
      */
     async initContainer () {
       this.clear()
+      this.print('starting container', T_INFO)
 
       try {
         const { token } = await API.invoke('post', '/containers/ltl', {

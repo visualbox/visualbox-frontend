@@ -148,6 +148,7 @@ export default {
     ...mapMutations('Project', [
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
+      'PROJECT_SHOW_HELPER',
       'PROJECT_SET_ACTIVE'
     ]),
     ...mapActions('Project', [
@@ -254,6 +255,7 @@ export default {
       EventBus.$emit('vbox:saveProject')
     },
     showPage (page) {
+      this.PROJECT_SHOW_HELPER(false)
       this.PROJECT_SET_ACTIVE(null)
 
       if (page === 'info')

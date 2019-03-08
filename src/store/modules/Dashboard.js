@@ -427,7 +427,7 @@ const getters = {
    */
   integrationByI: ({ loaded }) => i => {
     return loaded.integrations.find(addedIntegration => addedIntegration.i === i) || null
-  },
+  }
 }
 
 export default {

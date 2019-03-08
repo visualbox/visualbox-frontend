@@ -86,11 +86,11 @@ const actions = {
 
       /**
        * Update local integration config map.
-       * Use version '*' since it's local.
+       * Use version '^' since it's local.
        */
       try {
         commit(`Dashboard/${t.DASHBOARD_SET_I_CONFIG_MAP}`, {
-          [`${project.id}:*`]: JSON.parse(project.files['config.json'].contents)
+          [`${project.id}:^`]: JSON.parse(project.files['config.json'].contents)
         }, { root: true })
       } catch (e) {}
 

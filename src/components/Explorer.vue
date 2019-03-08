@@ -14,23 +14,48 @@ v-container#explorer(fluid)
         solo hide-details
       )
 
-    //- Registry / local tabs
     v-flex.mt-3(xs12)
-      v-btn.ma-0.mr-4.pl-2(
-        @click="local = false"
-        :flat="local"
-        :disabled="!local"
-      )
-        v-icon.mr-2 mdi-earth
-        | Registry
-      v-btn.ma-0.pl-2(
-        v-if="showLocal"
-        @click="local = true"
-        :flat="!local"
-        :disabled="local"
-      )
-        v-icon.mr-2 mdi-home
-        | Local
+
+      //- Registry / local tabs
+      template(v-if="!selected")
+        v-btn.ma-0.mr-4.pl-2(
+          @click="local = false"
+          :flat="local"
+          :disabled="!local"
+        )
+          v-icon.mr-2 mdi-earth
+          | Registry
+        v-btn.ma-0.pl-2(
+          v-if="showLocal"
+          @click="local = true"
+          :flat="!local"
+          :disabled="local"
+        )
+          v-icon.mr-2 mdi-home
+          | Local
+      
+      //- Selected back/add button
+      template(v-else)
+        v-btn.ma-0.mr-4.pl-2(
+          @click="selected = null"
+          flat
+        )
+          v-icon.mr-2 mdi-menu-left
+          | Back
+        v-select.d-inline-flex.mr-4.select(
+          v-if="!local"
+          v-model="selectedVersion"
+          :items="selected.versions"
+          hide-details solo
+        )
+        v-btn.ma-0.pl-2(
+          @click="add(selected)"
+          :loading="loading"
+          :disabled="loading"
+          color="primary"
+        )
+          v-icon.mr-2 mdi-plus
+          | Add
 
     //- Search result contents
     v-container.pa-0.pt-4(
@@ -42,7 +67,7 @@ v-container#explorer(fluid)
           .headline.font-weight-light Search
 
     //- Browser
-    template(v-if="!search")
+    template(v-else-if="!search && !selected")
       v-container.pa-0.pt-4(fluid grid-list-xl)
         v-layout(row wrap)
           v-flex(xs12)
@@ -59,6 +84,11 @@ v-container#explorer(fluid)
                 .text
                   .headline {{ item.settings.name }}
                   .subheading {{ item.intro }}
+
+    //- Selected
+    template(v-else-if="!search && selected")
+      v-container(fluid).pa-0.pt-4
+        .markdown(v-html="selected.readme")
 </template>
 
 <script>
@@ -72,17 +102,30 @@ export default {
   name: 'Explorer',
   props: ['config'],
   data: () => ({
+    // Explorer title
     title: null,
+    // Search input placeholder
     placeholder: null,
+    // If 'Local' tab should be visible
     showLocal: true,
 
+    // If explorer is currently viewing local
     local: false,
+    // Search input string
     search: null,
+    // Currently selected item
     selected: null,
+    // Selected item version
+    selectedVersion: '*',
+    // Loading state (adding item)
+    loading: false,
 
+    // Algoliasearch index in use
     index: null,
+    // Algoliasearch result array
     browsePopular: [],
 
+    // Responsive stuff
     resizeSensor: null,
     cols: { xs12: true }
   }),
@@ -97,17 +140,28 @@ export default {
         : this.listWidget
 
       return list.map(item => {
-        const readme = get(item, ['files', 'README.md', 'contents'], '')
-
-        let intro = marked(readme, {
+        let readme = get(item, ['files', 'README.md', 'contents'], '')
+        readme = marked(readme, {
           sanitize: true,
           gfm: true,
           silent: true
         })
 
         // Strip HTML
-        const doc = new DOMParser().parseFromString(intro, 'text/html')
-        intro = doc.body.textContent || ''
+        const doc = new DOMParser().parseFromString(readme, 'text/html')
+        const intro = doc.body.textContent || ''
+
+        const versions = Object.keys(item.versions).reduce((a, b) => {
+          a.unshift({
+            text: b,
+            value: b//item.versions[b]
+          })
+          return a
+        }, [])
+        versions.unshift({
+          text: 'Latest',
+          value: '*'
+        })
 
         return {
           id: item.id,
@@ -117,13 +171,7 @@ export default {
           readme,
           intro,
           settings: item.settings,
-          versions: Object.keys(item.versions).reduce((a, b) => {
-            a.push({
-              n: b,
-              versionId: item.versions[b]
-            })
-            return a
-          }, [])
+          versions
         }
       })
     },
@@ -151,6 +199,12 @@ export default {
 
         this.browse()
       }
+    },
+    selected () {
+      this.selectedVersion = '*'
+    },
+    search () {
+      this.selected = null
     }
   },
   methods: {
@@ -159,16 +213,23 @@ export default {
       'addIntegration',
       'addWidget'
     ]),
-    async add (item) {
+    async add ({ id }) {
       try {
+        this.loading = true
+        const version = this.local
+          ? '^'
+          : this.selectedVersion || '*'
+
         if (this.config.type === 'INTEGRATION')
-          this.addIntegration(item)
+          await this.addIntegration({ id, version })
         else {
-          await this.addWidget(item)
+          await this.addWidget({ id, version })
           this.closeExplorer()
         }
       } catch (e) {
         console.log('Failed to add', e)
+      } finally {
+        this.loading = false
       }
     },
     browse () {
@@ -179,31 +240,37 @@ export default {
         if (err)
           return
         this.browsePopular = result.hits.map(hit => {
-          let intro = marked(hit.readme, {
+          const readme = marked(hit.readme, {
             sanitize: true,
             gfm: true,
             silent: true
           })
 
           // Strip HTML
-          const doc = new DOMParser().parseFromString(intro, 'text/html')
-          intro = doc.body.textContent || ''
+          const doc = new DOMParser().parseFromString(readme, 'text/html')
+          const intro = doc.body.textContent || ''
+
+          const versions = Object.keys(hit.versions).reduce((a, b) => {
+            a.unshift({
+              text: b,
+              value: b// hit.versions[b]
+            })
+            return a
+          }, [])
+          versions.unshift({
+            text: 'Latest',
+            value: '*'
+          })
 
           return {
             id: hit.objectID,
             createdAt: hit.createdAt,
             updatedAt: hit.updatedAt,
             uid: hit.uid,
-            readme: hit.readme,
+            readme,
             intro,
             settings: hit.settings,
-            versions: Object.keys(hit.versions).reduce((a, b) => {
-              a.push({
-                n: b,
-                versionId: hit.versions[b]
-              })
-              return a
-            }, [])
+            versions
           }
         })
       })
@@ -282,4 +349,11 @@ export default {
 
         .subheading
           font-weight 300
+
+  .select
+    width 140px
+    top 2px
+
+    >>> .v-input__control
+      min-height 36px
 </style>

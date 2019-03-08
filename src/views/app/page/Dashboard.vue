@@ -20,10 +20,7 @@ v-container#dashboard(
       v-if="isExploring"
       :config="explorer"
     )
-    dashboard-layout(
-      v-if="!isExploring"
-      :style="style"
-    )
+    dashboard-layout(:style="style")
 </template>
 
 <script>
@@ -102,6 +99,8 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../../../assets/styles/colors';
+
 #dashboard
   height 100%
   padding 0
@@ -112,4 +111,9 @@ export default {
   
   .nudge-fs
     padding-top 48px
+
+  >>> #explorer
+    position absolute !important
+    z-index 1
+    background $vb-application
 </style>

@@ -8,6 +8,11 @@ class DashboardHandler {
     this.token = null
     this.tick = null
     this.data = {}
+    this.pubNubListener = {
+      message: m => { this.onMessage(m) },
+      presence: p => { this.onPresence(p) },
+      status: s => { this.onStatus(s) }
+    }
   }
 
   attachStore (store) {
@@ -82,11 +87,7 @@ class DashboardHandler {
       withPresence: true
     })
 
-    PubNub.addListener({
-      message: m => { this.onMessage(m) },
-      presence: p => { this.onPresence(p) },
-      status: s => { this.onStatus(s) }
-    })
+    PubNub.addListener(this.pubNubListener)
 
     /**
      * Start ticker to keep container
@@ -104,7 +105,6 @@ class DashboardHandler {
    * to LTL without a token. Save returned token.
    */
   async initDashboard () {
-    return
     try {
       const { token } = await API.invoke('post', '/containers/ltl', {
         body: { integrations: this.integrations }
@@ -152,8 +152,10 @@ class DashboardHandler {
    * and clearing token / data.
    */
   end () {
+    console.log('END')
     this.publish({ type: 'TERMINATE' })
     PubNub.unsubscribeAll()
+    PubNub.removeListener(this.pubNubListener)
     this.token = null
     this.data = {}
 

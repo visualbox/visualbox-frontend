@@ -22,6 +22,7 @@
     "monaco-editor": "^0.15.1",
     "pubnub": "^4.21.7",
     "register-service-worker": "^1.5.2",
+    "socket.io-client": "^2.2.0",
     "split-grid": "^1.0.9",
     "uuid": "^3.3.2",
     "vivus": "^0.4.4",

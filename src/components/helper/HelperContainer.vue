@@ -60,7 +60,7 @@
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import PubNub from '@/lib/pubnub'
+import IO from '@/lib/socket'
 import API from '@/service/API'
 import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
@@ -195,11 +195,7 @@ export default {
       if (!this.token)
         throw new Error('[DashboardHandler]: No token to publish to')
 
-      PubNub.publish({
-        message,
-        channel: [this.token],
-        storeInHistory: false
-      })
+      IO.emit('message', message)
     },
 
     /**
@@ -228,7 +224,9 @@ export default {
      * The container has sent a message.
      */
     onMessage (m) {
-      switch (m.message.type) {
+      const { type } = m
+
+      switch (type) {
 
         /**
          * Container sent an INIT message.
@@ -244,12 +242,11 @@ export default {
          * component.
          */
         case 'OUTPUT':
-          const { i, data } = m.message
-          this.print(data, T_OUTPUT)
+          this.print(m.data, T_OUTPUT)
           break;
 
         case 'STATUS':
-          this.print(m.message.data, m.message.statusType)
+          this.print(m.data, m.statusType)
           break;
       }
     },
@@ -258,19 +255,13 @@ export default {
      * Init container socket connection.
      */
     initSocket () {
-      PubNub.unsubscribeAll()
+      IO.reset()
 
       if (!this.token)
         throw new Error('[DashboardHandler]: No token to subscribe to')
 
-      PubNub.subscribe({
-        channels: [this.token],
-        withPresence: true
-      })
-
-      PubNub.addListener({
-        message: m => { this.onMessage(m) }
-      })
+      IO.join(this.token)
+      IO.on('message', m => this.onMessage(m))
 
       /**
        * Start ticker to keep container
@@ -307,7 +298,7 @@ export default {
   },
   beforeDestroy () {
     this.publish({ type: 'TERMINATE' })
-    PubNub.unsubscribeAll()
+    IO.end()
 
     if (this.tick !== null)
       clearInterval(this.tick)

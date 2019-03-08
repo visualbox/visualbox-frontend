@@ -1,5 +1,6 @@
 import API from '@/service/API'
-import PubNub from '@/lib/pubnub'
+// import PubNub from '@/lib/pubnub'
+import IO from '@/lib/socket'
 import { IFrameHandler } from '@/service'
 import EventBus from '@/lib/eventBus'
 
@@ -8,11 +9,6 @@ class DashboardHandler {
     this.token = null
     this.tick = null
     this.data = {}
-    this.pubNubListener = {
-      message: m => { this.onMessage(m) },
-      presence: p => { this.onPresence(p) },
-      status: s => { this.onStatus(s) }
-    }
   }
 
   attachStore (store) {
@@ -27,13 +23,16 @@ class DashboardHandler {
    * The container has sent a message.
    */
   onMessage (m) {
-    switch (m.message.type) {
+    const { type } = m
+
+    switch (type) {
 
       /**
        * Container sent an INIT message.
        */
       case 'INIT':
         console.log('GOT init', m)
+        // TODO, visually show that container is ready
         break
 
       /**
@@ -42,10 +41,9 @@ class DashboardHandler {
        * know where to send the data.
        */
       case 'OUTPUT':
-        const { i, data } = m.message
+        const { i, data } = m
         this.data[i] = data
         IFrameHandler.onDataChange(i, data)
-        console.log(`[${i}]: ${data}`)
 
         /**
          * Only emit notification to recalculate dataTree
@@ -57,37 +55,21 @@ class DashboardHandler {
     }
   }
 
-  onPresence (p) {
-    console.log('[PubNub]: onPresence; ', p)
-  }
-
-  onStatus (s) {
-    console.log('[PubNub]: onStatus; ', s)
-  }
-
   publish (message) {
     if (!this.token)
       throw new Error('[DashboardHandler]: No token to publish to')
 
-    PubNub.publish({
-      message,
-      channel: [this.token],
-      storeInHistory: false
-    })
+    IO.emit('message', message)
   }
 
   initSocket () {
-    PubNub.unsubscribeAll()
+    IO.reset()
 
     if (!this.token)
       throw new Error('[DashboardHandler]: No token to subscribe to')
 
-    PubNub.subscribe({
-      channels: [this.token],
-      withPresence: true
-    })
-
-    PubNub.addListener(this.pubNubListener)
+    IO.join(this.token)
+    IO.on('message', m => this.onMessage(m))
 
     /**
      * Start ticker to keep container
@@ -152,10 +134,8 @@ class DashboardHandler {
    * and clearing token / data.
    */
   end () {
-    console.log('END')
     this.publish({ type: 'TERMINATE' })
-    PubNub.unsubscribeAll()
-    PubNub.removeListener(this.pubNubListener)
+    IO.end()
     this.token = null
     this.data = {}
 

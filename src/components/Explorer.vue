@@ -151,13 +151,7 @@ export default {
         const doc = new DOMParser().parseFromString(readme, 'text/html')
         const intro = doc.body.textContent || ''
 
-        const versions = Object.keys(item.versions).reduce((a, b) => {
-          a.unshift({
-            text: b,
-            value: b//item.versions[b]
-          })
-          return a
-        }, [])
+        const versions = Object.keys(item.versions).map(k => ({ text: k, value: k }))
         versions.unshift({
           text: 'Latest',
           value: '*'
@@ -250,13 +244,7 @@ export default {
           const doc = new DOMParser().parseFromString(readme, 'text/html')
           const intro = doc.body.textContent || ''
 
-          const versions = Object.keys(hit.versions).reduce((a, b) => {
-            a.unshift({
-              text: b,
-              value: b// hit.versions[b]
-            })
-            return a
-          }, [])
+          const versions = Object.keys(hit.versions).map(k => ({ text: k, value: k }))
           versions.unshift({
             text: 'Latest',
             value: '*'

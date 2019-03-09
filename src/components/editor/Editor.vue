@@ -70,8 +70,7 @@ import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import EditorSettings from '@/components/editor/EditorSettings'
-import { parseFileType, fileTypeMeta } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
+import { parseFileType, fileTypeMeta, fileContents } from '@/lib/utils'
 
 export default {
   name: 'Editor',

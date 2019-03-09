@@ -85,6 +85,7 @@ export default {
   computed: {
     ...mapState('Dashboard', ['widgetConfigMap']),
     ...mapGetters('Dashboard', ['focusedWidget', 'integrationByI']),
+    ...mapGetters('Widget', ['configMapById']),
 
     /**
      * Focused widget BGC. Stored in widget
@@ -102,8 +103,28 @@ export default {
     },
     config () {
       const { id, version } = this.focusedWidget
-      const hash = `${id}:${version}`
-      return parseConfig(this.widgetConfigMap[hash])
+      let configMap
+
+      // Local, fetch from store
+      if (version === '^') {
+        configMap = this.configMapById(id)
+
+        // Something went wrong retieving local config map
+        if (!configMap || typeof configMap === 'string') {
+          const error = !configMap ? 'Unable to get config.json' : configMap
+          return {
+            error: [error],
+            variables: []
+          }
+        }
+
+      // Registry, fetch from config map
+      } else {
+        const hash = `${id}:${version}`
+        configMap = this.widgetConfigMap[hash]
+      }
+
+      return parseConfig(configMap)
     },
     widgetI () {
       return get(this.focusedWidget, 'i', null)

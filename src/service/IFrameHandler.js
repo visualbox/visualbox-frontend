@@ -14,12 +14,26 @@ class IFrameHandler {
   /**
    * Convenience store mappers.
    */
-  get widgetSourceMap () {
-    return this.store.state.Dashboard.widgetSourceMap
-  }
-
   get widgets () {
     return this.store.state.Dashboard.loaded.widgets
+  }
+
+  /**
+   * Get correct source map based on
+   * version. Version: '^' means the
+   * widget is local and needs to be
+   * fetched from store.
+   */
+  widgetSourceMap (id, version) {
+    // Local, fetch from store
+    if (version === '^') {
+      return this.store.getters['Widget/sourceMapById'](id)
+
+    // Registry, fetch from source map
+    } else {
+      const hash = `${id}:${version}`
+      return this.store.state.Dashboard.widgetSourceMap[hash]
+    }
   }
 
   /**
@@ -30,8 +44,7 @@ class IFrameHandler {
         // Get source code and config vars from widget
         const { i, id, version, model } = widget
 
-        const hash = `${id}:${version}`
-        const code = this.widgetSourceMap[hash]
+        const code = this.widgetSourceMap(id, version)
 
         // Create iframe content with injected config vars
         this.refs[i][0].src = BuildIFrame(code, model)

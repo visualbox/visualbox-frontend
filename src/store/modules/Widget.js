@@ -2,8 +2,7 @@ import Vue from 'vue'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import API from '@/service/API'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { cloneDeep, parseConfig } from '@/lib/utils'
+import { cloneDeep, fileContents } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -84,19 +83,6 @@ const actions = {
     try {
       commit(t.WIDGET_COMMIT, project)
 
-      /**
-       * Update local widget config and source map.
-       * Use version '^' since it's local.
-       */
-      try {
-        commit(`Dashboard/${t.DASHBOARD_SET_W_CONFIG_MAP}`, {
-          [`${project.id}:^`]: JSON.parse(project.files['config.json'].contents)
-        }, { root: true })
-        commit(`Dashboard/${t.DASHBOARD_SET_W_SOURCE_MAP}`, {
-          [`${project.id}:*`]: project.files['index.html'].contents
-        }, { root: true })
-      } catch (e) {}
-
       const { id } = project
       await API.invoke('put', `/widget/${id}`, { body: project })
     } catch (e) {
@@ -135,6 +121,35 @@ const getters = {
    */
   widgetById: ({ list }) => id => {
     return list.find(i => i.id === id)
+  },
+
+  /**
+   * Get widget config map by ID.
+   */
+  configMapById: (_, { widgetById }) => id => {
+    const widget = widgetById(id)
+
+    if (!widget)
+      return null
+
+    const config = fileContents(widget.files, ['config.json'])
+    try {
+      return JSON.parse(config)
+    } catch (e) {
+      return e.message
+    }
+  },
+
+  /**
+   * Get widget source map by ID.
+   */
+  sourceMapById: (_, { widgetById }) => id => {
+    const widget = widgetById(id)
+
+    if (!widget)
+      return null
+
+    return fileContents(widget.files, ['index.html'])
   }
 }
 

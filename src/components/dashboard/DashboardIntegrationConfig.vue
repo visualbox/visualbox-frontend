@@ -41,10 +41,31 @@ export default {
   computed: {
     ...mapState('Dashboard', ['integrationConfigMap']),
     ...mapGetters('Dashboard', ['focusedIntegration']),
+    ...mapGetters('Integration', ['configMapById']),
     config () {
       const { id, version } = this.focusedIntegration
-      const hash = `${id}:${version}`
-      return parseConfig(this.integrationConfigMap[hash])
+      let configMap
+
+      // Local, fetch from store
+      if (version === '^') {
+        configMap = this.configMapById(id)
+
+        // Something went wrong retieving local config map
+        if (!configMap || typeof configMap === 'string') {
+          const error = !configMap ? 'Unable to get config.json' : configMap
+          return {
+            error: [error],
+            variables: []
+          }
+        }
+
+      // Registry, fetch from config map
+      } else {
+        const hash = `${id}:${version}`
+        configMap = this.integrationConfigMap[hash]
+      }
+
+      return parseConfig(configMap)
     }
   },
   methods: {

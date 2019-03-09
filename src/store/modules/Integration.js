@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
-import get from 'lodash-es/get'
 import API from '@/service/API'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { cloneDeep, parseConfig } from '@/lib/utils'
+import { cloneDeep, fileContents } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -84,16 +82,6 @@ const actions = {
     try {
       commit(t.INTEGRATION_COMMIT, project)
 
-      /**
-       * Update local integration config map.
-       * Use version '^' since it's local.
-       */
-      try {
-        commit(`Dashboard/${t.DASHBOARD_SET_I_CONFIG_MAP}`, {
-          [`${project.id}:^`]: JSON.parse(project.files['config.json'].contents)
-        }, { root: true })
-      } catch (e) {}
-
       const { id } = project
       await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {
@@ -132,6 +120,23 @@ const getters = {
    */
   integrationById: ({ list }) => id => {
     return list.find(i => i.id === id)
+  },
+
+  /**
+   * Get integration config map by ID.
+   */
+  configMapById: (_, { integrationById }) => id => {
+    const integration = integrationById(id)
+
+    if (!integration)
+      return null
+
+    const config = fileContents(integration.files, ['config.json'])
+    try {
+      return JSON.parse(config)
+    } catch (e) {
+      return e.message
+    }
   }
 }
 

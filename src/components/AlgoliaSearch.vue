@@ -26,7 +26,6 @@
 import Auth from '@aws-amplify/auth'
 import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
-import { packageJson } from '@/lib/utils/projectUtils'
 import { integrationsIndex, widgetsIndex } from '@/lib/algoliasearch'
 
 export default {

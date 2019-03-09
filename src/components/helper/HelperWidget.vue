@@ -42,8 +42,7 @@
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { InputTypes, Tooltip } from '@/components'
-import { parseConfig } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
+import { parseConfig, fileContents } from '@/lib/utils'
 import { BuildIFrame } from '@/service'
 
 export default {

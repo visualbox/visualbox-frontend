@@ -59,7 +59,7 @@
 
 <script>
 import get from 'lodash-es/get'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import IO from '@/lib/socket'
 import API from '@/service/API'
 import { InputTypes, Tooltip } from '@/components'
@@ -87,7 +87,7 @@ export default {
     tick: null
   }),
   computed: {
-    ...mapState('Dashboard', ['integrationConfigMap']),
+    ...mapGetters('Integration', ['configMapById']),
     ...mapState('Project', [
       'layoutHelper',
       'dirty',
@@ -95,8 +95,18 @@ export default {
       'id'
     ]),
     config () {
-      const hash = `${this.id}:^`
-      return parseConfig(this.integrationConfigMap[hash])
+      const configMap = this.configMapById(this.id)
+
+      // Something went wrong retieving local config map
+      if (!configMap || typeof configMap === 'string') {
+        const error = !configMap ? 'Unable to get config.json' : configMap
+        return {
+          error: [error],
+          variables: []
+        }
+      }
+
+      return parseConfig(configMap)
     },
     integration () {
       return {

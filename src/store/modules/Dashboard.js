@@ -7,6 +7,7 @@ import { DashboardHandler } from '@/service'
 const state = {
   list: [],
   loaded: null,
+  initedIntegrations: [],
 
   explorer: {
     type: 'INTEGRATION',
@@ -28,6 +29,7 @@ const mutations = {
   [t.DASHBOARD_RESET] (state) {
     state.list = []
     state.loaded = null
+    state.initedIntegrations = []
 
     state.explorer = {
       type: 'INTEGRATION',
@@ -91,6 +93,16 @@ const mutations = {
   },
 
   //------------ WIDGET /INTEGRATION
+  [t.DASHBOARD_ADD_INITED_INTEGRATION] (state, i) {
+    const index = state.initedIntegrations.length
+    Vue.set(state.initedIntegrations, index, i)
+  },
+  [t.DASHBOARD_REMOVE_INITED_INTEGRATION] (state, i) {
+    const index = state.initedIntegrations.findIndex(e => e === i)
+
+    if (index >= 0)
+      state.initedIntegrations.splice(index, 1)
+  },
   [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
     const index = state.loaded.integrations.length
     Vue.set(state.loaded.integrations, index, integration)
@@ -243,7 +255,7 @@ const actions = {
    * but this can be improved to fetch from local
    * list instead (giving instant feedback).
    */
-  async addIntegration ({ commit, state }, { id, version }) {
+  async addIntegration ({ commit, dispatch, state }, { id, version }) {
     try {
       const endpoint = `/dashboard/${state.loaded.id}/integration`
       const {
@@ -255,8 +267,12 @@ const actions = {
           id, version
         }
       })
-      commit(t.DASHBOARD_ADD_INTEGRATION, item)
       commit(t.DASHBOARD_SET_I_CONFIG_MAP, integrationConfigMap)
+
+      // Apply defaults to widget model
+      item.model = await dispatch('applyDefaults', { type: 'INTEGRATION', item })
+
+      commit(t.DASHBOARD_ADD_INTEGRATION, item)
 
       DashboardHandler.addIntegration(item)
     } catch (e) {
@@ -272,6 +288,7 @@ const actions = {
   async removeIntegration ({ commit, state }, { i, id, version }) {
     try {
       commit(t.DASHBOARD_REMOVE_INTEGRATION, i)
+      commit(t.DASHBOARD_REMOVE_INITED_INTEGRATION, i)
 
       // Cleanup integration config map
       const index = state.loaded.integrations.findIndex(i => {
@@ -314,10 +331,10 @@ const actions = {
    * dashboard widget_id:version map (to avoid
    * duplicate sources).
    */
-  async addWidget ({ commit, state }, { id, version }) {
+  async addWidget ({ commit, dispatch, state }, { id, version }) {
     try {
       const endpoint = `/dashboard/${state.loaded.id}/widget`
-      const {
+      let {
         item,
         widgetConfigMap,
         widgetSourceMap
@@ -327,10 +344,13 @@ const actions = {
           id, version
         }
       })
-      commit(t.DASHBOARD_ADD_WIDGET, item)
       commit(t.DASHBOARD_SET_W_CONFIG_MAP, widgetConfigMap)
       commit(t.DASHBOARD_SET_W_SOURCE_MAP, widgetSourceMap)
-      // Widget handler add
+
+      // Apply defaults to widget model
+      item.model = await dispatch('applyDefaults', { type: 'WIDGET', item })
+
+      commit(t.DASHBOARD_ADD_WIDGET, item)
     } catch (e) {
       console.log('Error', e)
     }
@@ -368,7 +388,6 @@ const actions = {
    * Same as addWidget() but use existing
    * widget configuration instead.
    */
-  /*
   copyWidget ({ commit, state, }, i) {
     // Generate widget ID
     let n = 0
@@ -382,25 +401,45 @@ const actions = {
     const originalWidget = state.loaded.widgets.find(w => w.i === i)
     if (typeof originalWidget === 'undefined')
       return
-    
-    const w = get(originalWidget, 'w', null)
-    const h = get(originalWidget, 'h', null)
-    const id = get(originalWidget, 'id', null)
-    const settings = get(originalWidget, 'settings', null)
-    if (!w || !h || !id || !settings)
-      return
-    
-    const widget = {
-      x: 0,
-      y: 0,
-      w,
-      h,
-      i: ni,
-      id,
-      settings: cloneDeep(settings)
-    }
+
+    let widget = cloneDeep(originalWidget)
+    widget.i = ni
     commit(t.DASHBOARD_ADD_WIDGET, widget)
-  },*/
+  },
+
+  applyDefaults ({ state, rootGetters }, { type, item }) {
+    const { id, version } = item
+    let config, configMap, configMapById
+
+    if (type === 'WIDGET') {
+      configMap = state.widgetConfigMap
+      configMapById = rootGetters['Widget/configMapById']
+    } else {
+      configMap = state.integrationConfigMap
+      configMapById = rootGetters['Integration/configMapById']
+    }
+
+    // Local, fetch from store
+    if (version === '^') {
+      config = configMapById(id)
+
+      // Something went wrong retieving local config map
+      if (!config || typeof config === 'string')
+        config = []
+
+    // Registry, fetch from config map
+    } else {
+      const hash = `${id}:${version}`
+      config = configMap[hash]
+    }
+
+    const defaults = config.reduce((acc, cur) => {
+      acc[cur.name] = cur.default || null
+      return acc
+    }, {})
+
+    return defaults
+  }
 }
 
 const getters = {

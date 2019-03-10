@@ -106,7 +106,7 @@ const putParam = async (type: string, id: string, body: IObject) => {
 
 export default async (method: string, path: string, opts?: IObject) => {
   try {
-    console.log(`OFFLINE: ${method} ${path} ${opts}`)
+    // console.log(`OFFLINE: ${method} ${path} ${opts}`)
 
     // Remove '/' at beginning
     path = path.charAt(0) === '/' ? path.substr(1) : path
@@ -117,77 +117,22 @@ export default async (method: string, path: string, opts?: IObject) => {
     switch (method) {
       case 'get':
         /**
-         * Param is present.
+         * GET /dashboard
+         * Get a list of dashboards.
          */
-        if (param) {
-          /**
-           * GET /integration/{id}
-           * Get a public integration
-           */
-          if (resource === 'integration')
-            return _API.get(env, `/integration/${param}`, null)
-
-          /**
-           * GET /widget/{id}
-           * Get a public widget
-           */
-          else if (resource === 'widget')
-            return _API.get(env, `/widget/${param}`, null)
-
-          /**
-           * GET /cdn/{package}
-           * Turbo CDN
-           */
-          else if (resource === 'cdn')
-            return await _API.get(env, `/cdn/${param}`, null)
+        if (resource === 'dashboard') {
+          const list = await API.getItem('/dashboard')
+          return {
+            integrationConfigMap: {},
+            widgetConfigMap: {},
+            widgetSourceMap: {},
+            list
+          }
         }
 
         const item = await API.getItem(`/${path}`)
         return item || []
       case 'post':
-
-        /**
-         * Body is present.
-         */
-        if (opts) {
-          /**
-           * POST /integration { id: x }
-           * Copy existing integration
-           */
-          if (resource === 'integration' && opts.body.id) {
-            const integration = await _API.get(env, `/integration/${opts.body.id}`, null)
-
-            // Re-assign write protected properties
-            integration.uid = 0
-            integration.id = uuid.v1()
-            integration.createdAt = Date.now()
-            integration.updatedAt = Date.now()
-
-            return post('/integration', integration)
-
-          /**
-           * POST /widget { id: x }
-           * Copy existing widget
-           */
-          } else if (resource === 'widget' && opts.body.id) {
-            const widget = await _API.get(env, `/widget/${opts.body.id}`, null)
-
-            // Re-assign write protected properties
-            widget.uid = 0
-            widget.id = uuid.v1()
-            widget.createdAt = Date.now()
-            widget.updatedAt = Date.now()
-
-            return post('/widget', widget)
-
-          /**
-           * POST /resolver { name, version }
-           * Turbo resolver
-           */
-          } else if (resource === 'resolver')
-            return await _API.post(env, '/resolver', opts)
-        }
-
         /**
          * POST /dashboard
          * Create a new dashboard.
@@ -210,9 +155,17 @@ export default async (method: string, path: string, opts?: IObject) => {
          * Create a new integration
          */
         } else if (resource === 'integration') {
+          const body = opts && opts.body ? opts.body : {}
+
           return post('/integration', Object.assign(PRESETS.BLANK_INTEGRATION, {
             uid: 0,
             id: uuid.v1(),
+            settings: {
+              name: body.settings.name || 'Untitled',
+              runtime: body.settings.runtime || 'nodejs',
+              thumb: null
+            },
+            versions: {},
             createdAt: Date.now(),
             updatedAt: Date.now()
           }))
@@ -222,9 +175,17 @@ export default async (method: string, path: string, opts?: IObject) => {
          * Create a new widget
          */
         } else if (resource === 'widget') {
+          const body = opts && opts.body ? opts.body : {}
+
           return post('/widget', Object.assign(PRESETS.BLANK_WIDGET, {
             uid: 0,
             id: uuid.v1(),
+            settings: {
+              name: body.settings.name || 'Untitled',
+              runtime: body.settings.runtime || 'javascript',
+              thumb: null
+            },
+            versions: {},
             createdAt: Date.now(),
             updatedAt: Date.now()
           }))

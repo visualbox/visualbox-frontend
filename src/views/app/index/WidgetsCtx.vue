@@ -4,11 +4,10 @@
     .subheading Manage Widgets
     v-spacer
     v-btn(
+      @click="toggleExplorer"
       icon
-      @click="showSearch = !showSearch"
     )
-      v-icon(v-if="!showSearch") mdi-magnify
-      v-icon(v-if="showSearch") mdi-close
+      v-icon mdi-magnify
     v-btn(
       icon
       @click="addWidget"
@@ -17,17 +16,8 @@
     )
       v-icon mdi-plus-box
 
-  //- Search
-  algolia-search(
-    v-if="showSearch"
-    type="widget"
-  )
-
   //- List
-  v-list.hover-actions(
-    v-if="!showSearch"
-    dense
-  )
+  v-list.hover-actions(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
@@ -42,32 +32,26 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
+import { ContextToolbar, Tooltip } from '@/components'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'WidgetsCtx',
   components: {
     ContextToolbar,
-    Tooltip,
-    AlgoliaSearch
+    Tooltip
   },
-  data: () => ({
-    showSearch: false
-  }),
   computed: {
     ...mapState('App', ['isLoading']),
     ...mapState('Widget', ['list'])
   },
-  watch: {
-    list () {
-      this.showSearch = false
-    }
-  },
   methods: {
-    ...mapActions('Widget', ['create', 'del']),
+    ...mapActions('Widget', ['del']),
     addWidget () {
       EventBus.$emit('vbox:addWidget')
+    },
+    toggleExplorer () {
+      EventBus.$emit('vbox:toggleExplorer')
     },
     deleteWidget (id) {
       if (confirm('Are you sure you want to delete the widget?'))

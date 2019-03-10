@@ -4,7 +4,7 @@ v-container#explorer(fluid)
 
     //- Title and search
     v-flex(xs7)
-      .display-1.font-weight-light Add {{ title }}
+      .display-1.font-weight-light {{ title }}
     v-flex(xs5)
       v-text-field(
         v-model="search"
@@ -43,12 +43,15 @@ v-container#explorer(fluid)
           v-icon.mr-2 mdi-menu-left
           | Back
         v-select.d-inline-flex.mr-4.select(
-          v-if="!local"
+          v-if="!local && showLocal"
           v-model="selectedVersion"
           :items="selected.versions"
           hide-details solo
         )
+        //- Only show 'Add' is local is shown,
+        //- meaning that the explorer is in a dashboard
         v-btn.ma-0.pl-2(
+          v-if="showLocal"
           @click="add(selected)"
           :loading="loading"
           :disabled="loading"
@@ -56,6 +59,16 @@ v-container#explorer(fluid)
         )
           v-icon.mr-2 mdi-plus
           | Add
+        //- Else show a 'Fork' button
+        v-btn.ma-0.pl-2(
+          v-if="!showLocal"
+          @click="fork(selected)"
+          :loading="loading"
+          :disabled="loading"
+          color="primary"
+        )
+          v-icon.mr-2 mdi-silverware-fork
+          | Fork Code
 
     //- Search result contents
     v-container.pa-0.pt-4(
@@ -80,7 +93,7 @@ v-container#explorer(fluid)
           )
             v-card
               v-responsive(:aspect-ratio="4/3")
-                .background
+                .background(:style="{ 'background-image': `url(${item.settings.thumb})` }")
                 .text
                   .headline {{ item.settings.name }}
                   .subheading {{ item.intro }}
@@ -190,6 +203,7 @@ export default {
 
         this.showLocal = !!local
         this.local = false
+        this.selected = null
 
         this.browse()
       }
@@ -222,6 +236,20 @@ export default {
         }
       } catch (e) {
         console.log('Failed to add', e)
+      } finally {
+        this.loading = false
+      }
+    },
+    async fork ({ id }) {
+      try {
+        this.loading = true
+
+        if (this.config.type === 'INTEGRATION')
+          await this.$store.dispatch('Integration/create', { id })
+        else
+          await this.$store.dispatch('Widget/create', { id })
+      } catch (e) {
+        console.log('Failed to fork', e)
       } finally {
         this.loading = false
       }
@@ -322,8 +350,8 @@ export default {
       .background
         position absolute
         top 0; left 0; right 0; bottom 0;
-        background-image url('https://www.visittromso.no/sites/tromso/files/styles/responsive-slideshow-xs_2x/public/northern_lights_over_tromso_-_picture_by_vegard_stien_visit_tromso.jpg?itok=6rZtYfeZ&timestamp=1535112923')
         background-size cover
+        background-position center
         filter brightness(0.4)
       
       .text

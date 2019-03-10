@@ -32,13 +32,13 @@
       v-flex(xs4)
         tooltip(text="Dashboard Settings" bottom)
           v-btn.ma-0(
-            @click=""
-            color="grey"
+            @click="clickToggleSettings"
+            :color="isSettings ? 'white' : 'grey'"
             flat block large
           )
             v-icon mdi-settings
 
-    dashboard-integration-list
+    dashboard-integration-list(v-if="!isSettings")
 
   //------------------------------------
 
@@ -49,6 +49,10 @@
   //- Widet config menu
   v-scroll-x-transition(hide-on-leave)
     dashboard-widget-config(v-if="focusedWidget")
+
+  //- Settings menu
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-settings(v-if="isSettings && !focusedIntegration && !focusedWidget")
 </template>
 
 <script>
@@ -72,6 +76,9 @@ export default {
     DashboardWidgetConfig,
     DashboardSettings,
   },
+  data: () => ({
+    isSettings: false
+  }),
   computed: {
     ...mapGetters('Dashboard', [
       'focusedIntegration',
@@ -116,6 +123,11 @@ export default {
         this.closeExplorer()
       else
         this.openExplorer(type)
+    },
+    clickToggleSettings () {
+      this.DASHBOARD_SET_FOCUSED_WIDGET(null)
+      this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+      this.isSettings = !this.isSettings
     },
     goBack () {
       if (this.focusedWidget)

@@ -54,12 +54,12 @@ const actions = {
       commit(t.INTEGRATION_SET_LIST, result)
     }
   },
-  async create ({ commit }, { id = null, name = 'Untitled', runtime = 'nodejs' }) {
+  async create ({ commit }, { id = null, settings = null }) {
     let result = [] // Default value
 
     try {
       result.push(await API.invoke('post', '/integration', {
-        body: { id, name, runtime }
+        body: { id, settings }
       }))
     } catch (e) {
       throw e

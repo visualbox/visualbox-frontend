@@ -11,18 +11,30 @@ v-container#editor-settings(fill-height)
             hide-details single-line
             outline
           )
-      .headline.mb-3.mt-4 Runtime
+      .headline.mb-3.mt-4 Cover Image URL
       v-layout
         v-flex
-          select-runtime(
-            v-model="runtime"
-            disabled
+          v-text-field(
+            v-model="thumb"
+            :disabled="isLoading"
+            hide-details single-line
+            outline
           )
-      v-layout.mt-2
-        v-flex
-          span.grey--text
-            | The runtime can unfortunately not be changed after creation.
-            | Please create a new project if you want to change the runtime.
+
+      //- Widget only have 'javascript' runtime
+      template(v-if="runtime !== 'javascript'")
+        .headline.mb-3.mt-4 Runtime
+        v-layout
+          v-flex
+            select-runtime(
+              v-model="runtime"
+              disabled
+            )
+        v-layout.mt-2
+          v-flex
+            span.grey--text
+              | The runtime can unfortunately not be changed after creation.
+              | Please create a new project if you want to change the runtime.
       v-layout.mt-4
         v-spacer
         v-btn.ma-0.px-3(
@@ -97,6 +109,10 @@ export default {
     name: {
       get () { return this.settings.name },
       set (value) { this.PROJECT_SET_SETTINGS({ key: 'name', value }) }
+    },
+    thumb: {
+      get () { return this.settings.thumb },
+      set (value) { this.PROJECT_SET_SETTINGS({ key: 'thumb', value }) }
     },
     runtime () { return this.settings.runtime }
   },

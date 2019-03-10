@@ -24,7 +24,9 @@ The configuration model must be an array of **configuration types**. A configura
 ]
 ```
 
-> Depending on the configuration type additional fields may be required.
+::: warning
+Additional fields may be required depending on the configuration type.
+:::
 
 In the example above we defined a single text configuration type which can be accessed as `myVariable` in the integration or widget code.
 
@@ -41,7 +43,7 @@ Renders a simple text field.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "text",
   "name": "myVariable",
@@ -65,7 +67,7 @@ Renders a simple password text field.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "password",
   "name": "myVariable",
@@ -89,7 +91,7 @@ Renders a color palette.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "color",
   "name": "myColor",
@@ -113,7 +115,7 @@ Renders an on / off switch.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "switch",
   "name": "myBoolean",
@@ -139,7 +141,7 @@ Renders a slider with an adjustable handle.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "slider",
   "name": "myVariable",
@@ -165,7 +167,7 @@ Renders a date picker.
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "date",
   "name": "myDate",
@@ -197,7 +199,7 @@ A select option:
 
 Example:
 
-``` json
+``` json{2}
 {
   "type": "select",
   "name": "myVariable",

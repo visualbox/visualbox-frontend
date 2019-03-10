@@ -15,10 +15,12 @@
 import Split from 'split-grid'
 import { mapState, mapActions } from 'vuex'
 import { NavigationDrawer } from '@/components'
+import { unauthGuard } from '@/mixins'
 
 export default {
   name: 'App',
   components: { NavigationDrawer },
+  mixins: [ unauthGuard ],
   computed: {
     ...mapState('App', ['appIsReady']),
     ...mapState('Dashboard', ['isFullscreen']),

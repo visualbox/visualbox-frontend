@@ -4,30 +4,20 @@
     .subheading Manage Integrations
     v-spacer
     v-btn(
+      @click="toggleExplorer"
       icon
-      @click="showSearch = !showSearch"
     )
-      v-icon(v-if="!showSearch") mdi-magnify
-      v-icon(v-if="showSearch") mdi-close
+      v-icon mdi-magnify
     v-btn(
-      icon
       @click="addIntegration"
       :loading="isLoading"
       :disabled="isLoading"
+      icon
     )
       v-icon mdi-plus-box
 
-  //- Search
-  algolia-search(
-    v-if="showSearch"
-    type="integration"
-  )
-
   //- List
-  v-list.hover-actions(
-    v-if="!showSearch"
-    dense
-  )
+  v-list.hover-actions(dense)
     v-list-tile(
       v-for="(item, index) in list"
       :key="index"
@@ -42,32 +32,26 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { ContextToolbar, Tooltip, AlgoliaSearch } from '@/components'
+import { ContextToolbar, Tooltip } from '@/components'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'IntegrationsCtx',
   components: {
     ContextToolbar,
-    Tooltip,
-    AlgoliaSearch
+    Tooltip
   },
-  data: () => ({
-    showSearch: false
-  }),
   computed: {
     ...mapState('App', ['isLoading']),
     ...mapState('Integration', ['list'])
-  },
-  watch: {
-    list () {
-      this.showSearch = false
-    }
   },
   methods: {
     ...mapActions('Integration', ['del']),
     addIntegration () {
       EventBus.$emit('vbox:addIntegration')
+    },
+    toggleExplorer () {
+      EventBus.$emit('vbox:toggleExplorer')
     },
     deleteIntegration (id) {
       if (confirm('Are you sure you want to delete the integration?'))

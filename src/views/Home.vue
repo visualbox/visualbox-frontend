@@ -1,53 +1,33 @@
 <template lang="pug">
-v-container(fluid)
-
-  v-responsive.white--text(:aspect-ratio="2.5/1")
+v-container
+  .aurora-borealis
+  v-responsive(:aspect-ratio="2.5/1")
     v-container(fill-height grid-list-xl)
-      v-layout(align-center justify-center wrap)
-        #visualbox-animation.mx-4
-        v-flex(shrink)
-          .display-3.font-weight-light Data integration and
-          .display-3.font-weight-light.mb-4 visualization toolbox
-          div
-            v-btn.primary--text(
-              to="/app/d"
-              color="white"
-            ) Get Started
+      v-layout(align-center justify-center row wrap)
+        v-flex(xs12 sm12 md8 lg8 xl6)
+          .display-3.font-weight-thin Data integration and
+          .display-3.font-weight-thin.mb-4 visualization toolbox
+          .headline.font-weight-thin
+            | Integrate any data source and create beautiful
+            | realtime dashboards.
+        .hidden-md-and-up.my-4 &nbsp;
+        v-flex(xs12 sm12 md4 lg3 xl2)
+          v-card
+            img(:src="require('../assets/img/vbox-white.svg')")
+            .subheading.font-weight-light.my-4
+              | Technology preview
             v-btn(
+              to="/auth/signup"
               color="white"
-              outline
-            )
-              v-icon(dark left) mdi-star-circle-outline
-              | Features
-            v-btn(
-              to="/auth"
-              color="white"
-              outline
-            )
-              v-icon(dark left) mdi-launch
-              | Sign In
-
-  v-container#infotron(fluid fill-height)
-    v-layout(align-center justify-center)
-      v-flex(xs12 text-xs-center)
-        .display-3.font-weight-thin A MASTER'S PROJECT
-        .display-1.font-weight-light.mt-4 by Pontus Edvard Aurdal at the University of Tromsø – the Arctic University of Norway
+              round outline
+            ) Try Now
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import Vivus from 'vivus'
 
 export default Vue.extend({
-  name: 'Home',
-  mounted () {
-    return new Vivus('visualbox-animation', {
-      type: 'sync',
-      duration: 100,
-      animTimingFunction: Vivus.EASE_IN,
-      file: require('../assets/img/visualbox.svg')
-    })
-  }
+  name: 'Home'
 })
 </script>
 
@@ -55,15 +35,25 @@ export default Vue.extend({
 .container
   padding 0
 
+  .aurora-borealis
+    height 100%
+    position absolute
+    top 0; left 0; right 0;
+    background-image url(../assets/img/aurora-borealis.jpg)
+    background-size cover
+
   .v-responsive
     padding 64px 16px
-    background linear-gradient(160deg, #b1f3b3, #68bd6a 75%, #73c777 75%, #235a25 100%)
+    color #FFF
 
-    #visualbox-animation
-      width 250px
+    .v-card
+      padding 40px 10px
+      width 100%
+      text-align center
+      color #FFF
+      background-color rgba(255, 255, 255, .25)
+      border-radius 10px
 
-  #infotron
-    height 600px
-    color #edeef1 !important
-    background #333
+      img
+        width 100px
 </style>

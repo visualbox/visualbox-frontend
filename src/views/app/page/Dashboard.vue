@@ -1,6 +1,7 @@
 <template lang="pug">
 v-container#dashboard(
   v-if="loaded"
+  :class="{ 'is-exploring': isExploring }"
   fluid
 )
   context-toolbar.fs-toolbar(v-if="isFullscreen")
@@ -104,6 +105,10 @@ export default {
 #dashboard
   height 100%
   padding 0
+
+  &.is-exploring
+    height 100% !important
+    overflow hidden !important
 
   .fs-toolbar
     position fixed !important

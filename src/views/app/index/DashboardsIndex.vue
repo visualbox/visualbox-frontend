@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container(fill-height)
+v-container(fill-height fluid)
   v-layout(align-center justify-center)
     v-flex(xs12 sm12 md10 lg8 xl6)
       .display-3.mb-4 VisualBox
@@ -19,8 +19,6 @@ export default Vue.extend({
 
 <style lang="stylus" scoped>
 .container
-  max-width 800px
-
   .flex
     position relative
 </style>

@@ -1,31 +1,37 @@
 <template lang="pug">
 #helper-widget
   v-system-bar
-    .tab(
-      :active="tab === 0"
-      @click="tab = 0"
-    ) Configure
-    .tab(
-      :active="tab === 1"
-      @click="tab = 1"
-    ) Preview
+    //- Tabs
+    .tab(:active="tab === 0" @click="tab = 0") Configure
+    .tab(:active="tab === 1" @click="tab = 1") Preview
+
     v-spacer
+
+    //- Dock bottom
     tooltip(text="Dock to Bottom" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
+
+    //- Dock right
     tooltip(text="Dock to Right" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'vertical' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
       ) mdi-page-layout-sidebar-right
-    v-icon(@click="PROJECT_SET_HELPER(false)") mdi-close
+    
+    //- Close helper
+    v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
+
+  //- Config pane
   .pane(:active="tab === 0")
     input-types(
       v-model="model"
-      :config="parsedConfig"
+      :config="config"
     )
+
+  //- Preview pane
   .pane.pa-0(:active="tab === 1")
     iframe(
       ref="preview"
@@ -39,10 +45,11 @@
 </template>
 
 <script>
+import get from 'lodash-es/get'
 import debounce from 'lodash-es/debounce'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { InputTypes, Tooltip } from '@/components'
-import { parseConfig, fileContents } from '@/lib/utils'
+import { parseConfig } from '@/lib/utils'
 import { BuildIFrame } from '@/service'
 
 export default {
@@ -52,46 +59,60 @@ export default {
     Tooltip
   },
   data: () => ({
-    model: {},
     tab: 1,
+    model: {}
   }),
   computed: {
-    ...mapState('Project', ['layoutHelper', 'dirty', 'files']),
-    ...mapState('Bundler', ['active', 'status']),
-    parsedConfig () {
-      const contents = fileContents(this.files, ['config.json'])
-      if (!contents)
-        return { error: ['Unable to parse widget configuration'] }
-      return parseConfig(contents)
+    ...mapGetters('Widget', [
+      'configMapById',
+      'sourceMapById'
+    ]),
+    ...mapState('Project', [
+      'layoutHelper',
+      'dirty',
+      'files',
+      'id'
+    ]),
+    config () {
+      const configMap = this.configMapById(this.id)
+
+      // Something went wrong retieving local config map
+      if (!configMap || typeof configMap === 'string') {
+        const error = !configMap ? 'Unable to get config.json' : configMap
+        return {
+          error: [error],
+          variables: []
+        }
+      }
+
+      return parseConfig(configMap)
+    },
+    source () {
+      return this.sourceMapById(this.id)
     }
   },
   watch: {
     /**
      * Re-apply defaults to model bound to input types.
      */
-    parsedConfig: {
+    config: {
       immediate: true,
       deep: true,
       handler () {
-        if (!this.parsedConfig.hasOwnProperty('variables'))
-          return
+        const variables = get(this.config, 'variables', [])
+        const defaults = variables.reduce((acc, cur) => {
+          acc[cur.name] = cur.default || null
+          return acc
+        }, {})
 
-        try {
-          // Create local config model
-          this.model = this.parsedConfig.variables.reduce((acc, cur) => {
-            acc[cur.name] = cur.default || null
-            return acc
-          }, {})
-        } catch (e) {
-          console.log(e)
+        // Apply user input
+        for (const name in this.model) {
+          if (defaults.hasOwnProperty(name))
+            defaults[name] = this.model[name]
         }
+
+        this.model = defaults
       }
-    },
-    dirty: {
-      immediate: true,
-      handler: debounce(function () {
-        this.fetchBundle()
-      }, 3000)
     },
 
     /**
@@ -109,29 +130,21 @@ export default {
           console.log(e)
         }
       }
+    },
+
+    source: {
+      immediate: true,
+      handler: debounce(function (source) {
+        this.$nextTick(() => {
+          this.$refs.preview.src = BuildIFrame(source, this.model)
+        })
+      }, 500)
     }
   },
-  methods: {
-    ...mapMutations('Project', [
-      'PROJECT_SET_HELPER_LAYOUT',
-      'PROJECT_SET_HELPER'
-    ]),
-    ...mapActions('Project', ['save']),
-    ...mapActions('Bundler', ['queueBundle']),
-
-    async fetchBundle () {
-      try {
-        // Should use bundler
-        const contents = fileContents(this.files, ['index.html'])
-        if (!contents)
-          return
-
-        this.$refs.preview.src = BuildIFrame(contents, this.model)
-      } catch (e) {
-        console.log('Mount bundle error', e)
-      }
-    }
-  }
+  methods: mapMutations('Project', [
+    'PROJECT_SET_HELPER_LAYOUT',
+    'PROJECT_SHOW_HELPER'
+  ])
 }
 </script>
 
@@ -164,18 +177,15 @@ export default {
     .v-icon
       margin-right 10px
 
-      &.ml
-        margin-left 10px
-
   .pane
-    visibility hidden
+    display none
     padding 16px
     position absolute
     top 31px; right 0; left 0; bottom 0;
-    overflow hidden
+    overflow auto
 
     &[active]
-      visibility visible
+      display block
 
     iframe
       width 100%

@@ -6,6 +6,7 @@
       :key="index"
       @click="DASHBOARD_SET_FOCUSED_INTEGRATION(item.i)"
     )
+      .status(:inited="isInited(item.i)")
       v-list-tile-content
         v-list-tile-sub-title {{ item.label }}
       v-list-tile-action
@@ -22,10 +23,25 @@ import { DashboardHandler } from '@/service'
 export default {
   name: 'DashboardIntegrationList',
   components: { Tooltip },
-  computed: mapState('Dashboard', ['loaded']),
+  computed: mapState('Dashboard', ['loaded', 'initedIntegrations']),
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
-    ...mapActions('Dashboard', ['removeIntegration'])
+    ...mapActions('Dashboard', ['removeIntegration']),
+    isInited (i) {
+      return this.initedIntegrations.includes(i)
+    }
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+#dashboard-integration-list
+  .status
+    width 2px
+    position absolute
+    top 0; bottom 0; left 0;
+    background #b10000
+
+    &[inited]
+      background #4caf50
+</style>

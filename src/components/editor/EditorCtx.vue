@@ -10,19 +10,6 @@
         v-icon mdi-floppy
 
   v-list.hover-actions(dense)
-    //- Info
-    v-list-tile(
-      @click="showPage('info')"
-      :class="{ 'v-list__tile--active' : showInfo }"
-    )
-      v-list-tile-content View Info
-
-    //- Settings
-    v-list-tile(
-      @click="showPage('settings')"
-      :class="{ 'v-list__tile--active' : showSettings }"
-    )
-      v-list-tile-content Settings
 
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
@@ -85,6 +72,20 @@
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
+
+    //- Info
+    v-list-tile(
+      @click="showPage('info')"
+      :class="{ 'v-list__tile--active' : showInfo }"
+    )
+      v-list-tile-content View Info
+
+    //- Settings
+    v-list-tile(
+      @click="showPage('settings')"
+      :class="{ 'v-list__tile--active' : showSettings }"
+    )
+      v-list-tile-content Settings
 </template>
 
 <script>

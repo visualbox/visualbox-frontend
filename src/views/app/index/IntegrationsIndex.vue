@@ -1,8 +1,8 @@
 <template lang="pug">
-v-container(fill-height)
+v-container(fill-height fluid)
   v-layout(align-center justify-center)
     v-flex(
-      v-if="!isAdding"
+      v-if="!isAdding && !isExploring"
       xs12 sm12 md10 lg8 xl6
     )
       .display-3.mb-4 Integrations
@@ -42,18 +42,32 @@ v-container(fill-height)
           color="primary"
           large outline
         ) Create
+
+  //- Explore integrations
+  explorer.pa-0(
+    v-if="isExploring"
+    :config="explorerConfig"
+  )
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { SelectRuntime } from '@/components'
+import { SelectRuntime, Explorer } from '@/components'
 import EventBus from '@/lib/eventBus'
 
 export default {
   name: 'IntegrationsIndex',
-  components: { SelectRuntime },
+  components: {
+    SelectRuntime,
+    Explorer
+  },
   data: () => ({
     isAdding: false,
+    isExploring: false,
+    explorerConfig: {
+      type: 'INTEGRATION',
+      local: false
+    },
     settings: {
       name: '',
       runtime: 'nodejs'
@@ -67,10 +81,9 @@ export default {
       if (!this.settings.name || this.settings.name === '')
         return
 
-      this.showSearch = false
       this.setIsLoading(true)
       try {
-        await this.create(this.settings)
+        await this.create({ settings: this.settings })
       } catch (e) {
         this.setSnackbar({
           type: 'error',
@@ -83,18 +96,24 @@ export default {
     }
   },
   mounted () {
-    EventBus.$on('vbox:addIntegration', () => { this.isAdding = true })
+    EventBus.$on('vbox:addIntegration', () => {
+      this.isAdding = true
+      this.isExploring = false
+    })
+    EventBus.$on('vbox:toggleExplorer', () => {
+      this.isExploring = !this.isExploring
+      this.isAdding = false
+    })
   },
   beforeDestroy () {
     EventBus.$off('vbox:addIntegration')
+    EventBus.$off('vbox:toggleExplorer')
   }
 }
 </script>
 
 <style lang="stylus" scoped>
 .container
-  max-width 800px
-
   .flex
     position relative
 </style>

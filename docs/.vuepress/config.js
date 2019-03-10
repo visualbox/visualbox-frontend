@@ -8,7 +8,7 @@ module.exports = {
   },
   serviceWorker: true,
   themeConfig: {
-    repo: 'pwntus/visualbox-frontend',
+    repo: 'visualbox',
     docsDir: 'docs',
     locales: {
       '/': {

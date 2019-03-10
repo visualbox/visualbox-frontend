@@ -16,6 +16,8 @@
         )
           v-list-tile(
             :to="item.to"
+            :href="item.href"
+            :target="item.href ? '_new' : ''"
             :exact="item.to === '/app'"
           )
             v-list-tile-action
@@ -23,6 +25,7 @@
                 :color="item.color"
                 medium
               ) {{ item.icon }}
+          
       v-spacer
       v-list(two-line)
         tooltip(
@@ -58,10 +61,10 @@ export default Vue.extend({
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-hexagon-multiple' },
-      { title: 'Help Center', to: '/app/h', icon: 'mdi-help-circle' }
+      { title: 'Help Center', href: 'https://docs.visualbox.io', icon: 'mdi-help-circle' }
     ],
     itemsBottom: [
-      { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle', class: 'bottom_upper' },
+      // { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle', class: 'bottom_upper' },
       { title: 'Settings', to: '/app/s', icon: 'mdi-settings', class: 'bottom_upper' },
       { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
     ]

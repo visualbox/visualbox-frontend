@@ -19,6 +19,10 @@ class DashboardHandler {
     return this.store.state.Dashboard.loaded.integrations
   }
 
+  addInitedIntegration (i) {
+    this.store.commit('Dashboard/DASHBOARD_ADD_INITED_INTEGRATION', i)
+  }
+
   /**
    * The container has sent a message.
    */
@@ -31,8 +35,7 @@ class DashboardHandler {
        * Container sent an INIT message.
        */
       case 'INIT':
-        console.log('GOT init', m)
-        // TODO, visually show that container is ready
+        this.addInitedIntegration(m.i)
         break
 
       /**
@@ -125,6 +128,7 @@ class DashboardHandler {
   }
 
   removeIntegration (i) {
+    delete this.data[i]
     this.publish({ type: 'TERMINATE', i })
   }
 

@@ -1,26 +1,38 @@
-# visualbox-frontend
+# VisualBox Frontend
+
+![VisualBox Demo GIF](demo.gif "VisualBox Demo")
 
 ## Project setup
 ```
-npm install
+yarn
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+yarn serve
 ```
 
 ### Compiles and minifies for production
 ```
-npm run build
+yarn build
 ```
 
-### Lints and fixes files
+### Lints
 ```
-npm run lint
+yarn lint
 ```
 
 ### Run your unit tests
 ```
-npm run test:unit
+yarn test:unit
+```
+
+### Compiles and hot-reloads documentation for development
+```
+yarn docs:dev
+```
+
+### Compiles and minifies documentation for production
+```
+yarn docs:build
 ```

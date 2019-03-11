@@ -1,6 +1,6 @@
 <template lang="pug">
 #editor
-  context-toolbar
+  context-toolbar(v-if="editorIsOpen")
     v-tabs.editor-tabs(
       v-model="activeTab"
       color="transparent"
@@ -14,9 +14,7 @@
         :key="index"
         :ripple="false"
       )
-        //- README viewer
-        v-icon(v-if="item.name === '/~README'") mdi-eye-outline
-        template(v-else)
+        template
           v-icon.mr-2(:color="item.color") {{ item.icon }}
           template(v-if="item.peek")
             i {{ item.name }}
@@ -33,24 +31,27 @@
       v-spacer
       v-toolbar-items
         v-btn(
-          v-if="activeTab > 0"
           @click="formatCode"
           flat
         )
           v-icon mdi-auto-fix
         v-btn(
           :color="showHelper ? 'primary' : ''"
-          @click="PROJECT_SET_HELPER(!showHelper)"
+          @click="PROJECT_SHOW_HELPER(!showHelper)"
           flat
         )
           v-icon mdi-console
-  .grid-layout(:class="showHelper ? layoutHelper : 'no-split'")
+  .grid-layout(
+    :class="showHelper ? layoutHelper : 'no-split'"
+    :nudge-tabs="editorIsOpen"
+  )
     .grid-item
       .markdown(
-        v-if="activeTab <= 0"
+        v-if="showInfo"
         v-html="compiledMarkdown"
       )
-      .monaco(v-if="activeTab > 0")
+      editor-settings(v-else-if="showSettings")
+      .monaco(v-else)
         monaco-editor(
           :theme="'vs-' + theme"
           :language="monacoLanguage"
@@ -68,15 +69,14 @@ import Split from 'split-grid'
 import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
-import { parseFileType, fileTypeMeta } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
-
-const README_VIEVER_NAME = '/~README'
+import EditorSettings from '@/components/editor/EditorSettings'
+import { parseFileType, fileTypeMeta, fileContents } from '@/lib/utils'
 
 export default {
   name: 'Editor',
   components: {
-    ContextToolbar
+    ContextToolbar,
+    EditorSettings
   },
   data: () => ({
     split: Split({}),
@@ -90,11 +90,16 @@ export default {
       'dirty',
       'peek',
       'active',
+      'showInfo',
+      'showSettings',
       'showHelper',
       'layoutHelper'
     ]),
     ...mapGetters('Project', ['fileByFullPath']),
     ...mapGetters('App', ['theme']),
+    editorIsOpen () {
+      return !this.showInfo && !this.showSettings
+    },
     activeTab: {
       /**
        * Translate fullPath -> tab index
@@ -106,7 +111,7 @@ export default {
        * Translate tab index -> fullPath
        */
       set (index) {
-        if (!this.openTabs.hasOwnProperty(index))
+        if (!this.openTabs.hasOwnProperty(index) || !this.active)
           return
 
         const { fullPath } = this.openTabs[index]
@@ -115,14 +120,6 @@ export default {
     },
     openTabs () {
       const open = [...this.open].map(fullPath => this.fullPathMeta(fullPath))
-
-      // Add 'README' tab to beginning with an impossible name
-      open.unshift({
-        name: README_VIEVER_NAME,
-        fullPath: README_VIEVER_NAME,
-        icon: null,
-        color: null
-      })
 
       if (this.peek) {
         const meta = this.fullPathMeta(this.peek)
@@ -171,7 +168,7 @@ export default {
       'PROJECT_SET_ACTIVE',
       'PROJECT_WRITE_FILE',
       'PROJECT_CLOSE_OPEN',
-      'PROJECT_SET_HELPER'
+      'PROJECT_SHOW_HELPER'
     ]),
     formatCode () {
       this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
@@ -232,9 +229,6 @@ export default {
       }
     }
   },
-  mounted () {
-    this.PROJECT_SET_ACTIVE(README_VIEVER_NAME)
-  },
   beforeDestroy () {
     this.PROJECT_RESET()
   }
@@ -285,7 +279,7 @@ export default {
   .grid-layout
     display grid
     position absolute
-    top 48px; right 0; left 0; bottom 0;
+    top 0; right 0; left 0; bottom 0;
 
     .grid-item
       position relative
@@ -294,6 +288,9 @@ export default {
 
       &.gutter
         z-index 20
+
+    &[nudge-tabs]
+      top 48px
 
     &.vertical
       grid-template none / 3fr 0 1fr

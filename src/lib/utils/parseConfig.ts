@@ -20,15 +20,14 @@ const VALID_TYPES: string[] = [
 
 /**
  * Parse JSON configuration string
- * @param  {String}        config Configuration JSON string
+ * @param  {Array}         config Configuration array
  * @return {IParsedConfig}        Return an object with parsed config and error message(s)
  */
-export default (config: string): IParsedConfig => {
+export default (config: IObject): IParsedConfig => {
   try {
-    const parsed: IObject = JSON.parse(config)
 
     // Config is array
-    if (!isArray(parsed))
+    if (!isArray(config))
       return {
         error: ['Config definition is not an array.'],
         variables: []
@@ -39,11 +38,11 @@ export default (config: string): IParsedConfig => {
       variables: []
     }
 
-    for (const i in parsed) {
-      if (!parsed.hasOwnProperty(i))
+    for (const i in config) {
+      if (!config.hasOwnProperty(i))
         continue
 
-      const field = parsed[i]
+      const field = config[i]
 
       // Contains required field 'type'
       if (!has(field, 'type')) {

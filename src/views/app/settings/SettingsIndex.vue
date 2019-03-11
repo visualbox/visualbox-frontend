@@ -1,11 +1,10 @@
 <template lang="pug">
-v-container(fluid fill-height)
-  v-layout(column)
-
-    v-container().pa-0.pb-5
+v-container(fill-height)
+  v-layout(align-center justify-center)
+    v-container
       .headline.mb-3 User Information
       v-layout
-        v-flex(xs12)
+        v-flex
           v-text-field(
             v-model="name"
             :disabled="loading.info"
@@ -14,18 +13,18 @@ v-container(fluid fill-height)
             outline
           )
       v-layout
-        v-btn.ma-0(
+        v-spacer
+        v-btn.ma-0.px-3(
           :disabled="!validInfo"
           :loading="loading.info"
           @click="submitInfo"
           color="primary"
-          outline
+          large outline
         ) Update
 
-    v-container.pa-0.pb-5
-      .headline.mb-3 Change Email
+      .headline.mb-3.mt-4 Change Email
       v-layout
-        v-flex(xs12)
+        v-flex
           v-text-field(
             v-model="email"
             :disabled="loading.changeEmail"
@@ -34,45 +33,47 @@ v-container(fluid fill-height)
             outline
           )
       v-layout
-        v-btn.ma-0(
+        v-spacer
+        v-btn.ma-0.px-3(
           :disabled="!validEmail"
           :loading="loading.changeEmail"
           @click="submitEmail"
           color="primary"
-          outline
+          large outline
         ) Change
 
-    v-container.pa-0.pb-5
-      .headline.mb-3 Change Password
-      v-layout(wrap)
-        v-flex.pr-2(xs12 sm6)
-          v-text-field(
-            v-model="password"
-            :disabled="loading.changePassword"
-            :rules="[rules.required('Enter your old password'), rules.pwdLength]"
-            label="Old password"
-            type="password"
-            outline
-          )
-        v-flex.pl-2(xs12 sm6)
-          v-text-field(
-            v-model="newPassword"
-            :disabled="loading.changePassword"
-            :rules="[rules.required('Enter a new password'), rules.pwdLength]"
-            label="Confirm password"
-            type="password"
-            outline
-          )
-        v-flex.pb-4(xs12)
-          v-messages(:value="['Use a password with 6 or more characters']")
-      v-layout
-        v-btn.ma-0(
-          :disabled="!validPassword"
-          :loading="loading.changePassword"
-          @click="submitPassword"
-          color="primary"
-          outline
-        ) Change
+      v-container.mt-4.pa-0(grid-list-lg)
+        .headline.mb-3 Change Password
+        v-layout(wrap)
+          v-flex(xs12 sm6)
+            v-text-field(
+              v-model="password"
+              :disabled="loading.changePassword"
+              :rules="[rules.required('Enter your old password'), rules.pwdLength]"
+              label="Old password"
+              type="password"
+              outline
+            )
+          v-flex(xs12 sm6)
+            v-text-field(
+              v-model="newPassword"
+              :disabled="loading.changePassword"
+              :rules="[rules.required('Enter a new password'), rules.pwdLength]"
+              label="Confirm password"
+              type="password"
+              outline
+            )
+          v-flex.pb-4
+            v-messages(:value="['Use a password with 6 or more characters']")
+        v-layout
+          v-spacer
+          v-btn.ma-0.px-3(
+            :disabled="!validPassword"
+            :loading="loading.changePassword"
+            @click="submitPassword"
+            color="primary"
+            large outline
+          ) Change
 </template>
 
 <script>
@@ -185,4 +186,5 @@ export default {
 <style lang="stylus" scoped>
 .container
   max-width 800px
+  padding 16px
 </style>

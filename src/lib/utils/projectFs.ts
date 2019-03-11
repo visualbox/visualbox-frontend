@@ -1,3 +1,4 @@
+import get from 'lodash-es/get'
 
 export const isValidPath = (path: string) => {
   return path
@@ -46,4 +47,8 @@ export const getFullPath = (folder: string, name: string) => {
   const pre = folder.split('/').filter(i => i !== '')
   const post = name.split('/').filter(i => i !== '')
   return [...pre, ...post].join('/')
+}
+
+export const fileContents = (files: object, path: string[]) => {
+  return get(files, [...path, 'contents'], null)
 }

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0 0 100 100">
+  <g fill="transparent" stroke="#FFF" stroke-width="3" stroke-linecap="round">
+    <!-- Top Sheet -->
+    <path
+      d="M6,18 C30,0 70,0 94,18
+         C85,20 65,25 50,38
+         C35,25 15,20 6,18"
+      stroke="none"
+      fill="#666"
+    />
+    <!-- Left Sheet -->
+    <path
+      d="M6,18 C0,25 0,60 6,75
+         C20,90 35,95 50,93
+         L50 38
+         C35,25 15,20 6,18"
+      stroke="none"
+      fill="#444"
+    />
+    <!-- Right Sheet -->
+    <path
+      d="M94,18 C100,25 100,60 94,75
+         C80,90 65,95 50,93
+         L50 38
+         C65,25 85,20 94,18"
+      stroke="none"
+      fill="#888"
+    />
+
+    <!-- Top -->
+    <path
+      d="M6,18 C30,0 70,0 94,18"
+    />
+    <!-- Left -->
+    <path
+      d="M6,18 C0,35 0,60 6,75"
+    />
+    <!-- Left In -->
+    <path
+      d="M6,18 C15,20 35,25 50,38"
+    />
+    <!-- Right -->
+    <path
+      d="M94,18 C100,35 100,60 94,75"
+    />
+    <!-- Right In -->
+    <path
+      d="M94,18 C85,20 65,25 50,38"
+    />
+    <!-- Bottom -->
+    <path
+      d="M6,75 C30,100 70,100 94,75"
+    />
+    <!-- Line Down -->
+    <line
+      x1="50" y1="38" x2="50" y2="93"
+    />
+  </g>
+</svg>

@@ -2,7 +2,11 @@
 base-card
   v-card-text.pa-5
     .text-xs-center.mb-5(v-if="!done")
-      h2.headline.primary--text.mb-3 VisualBox
+      img(
+        :src="require('../../assets/img/vbox.svg')"
+        width="60"
+      )
+      h2.headline.primary--text.font-weight-light.mb-3 VISUALBOX
       .subheading.mb-5 Create an account to get started
     .text-xs-center(v-if="done")
       h1.headline.mb-3 Verify

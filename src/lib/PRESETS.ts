@@ -35,9 +35,7 @@ export default {
         name: 'config.json',
         type: 'file'
       }
-    },
-    dependencies: {},
-    settings: {}
+    }
   },
 
   BLANK_WIDGET: {
@@ -76,8 +74,6 @@ export default {
         name: 'config.json',
         type: 'file'
       }
-    },
-    dependencies: {},
-    settings: {}
+    }
   }
 }

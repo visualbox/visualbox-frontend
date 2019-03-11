@@ -2,8 +2,7 @@ import Vue from 'vue'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import API from '@/service/API'
-import { fileContents } from '@/lib/utils/projectUtils'
-import { cloneDeep, parseConfig } from '@/lib/utils'
+import { cloneDeep, fileContents } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -37,8 +36,10 @@ const mutations = {
         widgets.splice(index, 1)
     })
   },
-  [t.WIDGET_SET_PUBLIC] (state, payload) {
-    state.public = payload
+  [t.WIDGET_SET_VERSIONS] (state, payload) {
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0)
+      Vue.set(state.list[index], 'versions', payload.versions)
   }
 }
 
@@ -54,12 +55,12 @@ const actions = {
       commit(t.WIDGET_SET_LIST, result)
     }
   },
-  async create ({ commit }, id = null) {
+  async create ({ commit }, { id = null, settings = null }) {
     let result = [] // Default value
 
     try {
       result.push(await API.invoke('post', '/widget', {
-        body: { id }
+        body: { id, settings }
       }))
     } catch (e) {
       throw e
@@ -81,6 +82,7 @@ const actions = {
   async commit ({ commit }, project) {
     try {
       commit(t.WIDGET_COMMIT, project)
+
       const { id } = project
       await API.invoke('put', `/widget/${id}`, { body: project })
     } catch (e) {
@@ -88,16 +90,27 @@ const actions = {
     }
   },
 
-  async loadPublic ({ commit }, id) {
-    let result = null // Default value
-    commit(t.WIDGET_SET_PUBLIC, null)
-
+  async publish ({ commit }, id) {
     try {
-      result = await API.invoke('get', `/widget/${id}`)
+      const { versions } = await API.invoke('post', '/registry', {
+        body: { type: 'WIDGET', id }
+      })
+      commit(t.WIDGET_SET_VERSIONS, { id, versions })
+      commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions }, { root: true })
     } catch (e) {
       throw e
-    } finally {
-      commit(t.WIDGET_SET_PUBLIC, result)
+    }
+  },
+
+  async depublish ({ commit }, id) {
+    try {
+      await API.invoke('del', '/registry', {
+        body: { type: 'WIDGET', id }
+      })
+      commit(t.WIDGET_SET_VERSIONS, { id, versions: false })
+      commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions: false }, { root: true })
+    } catch (e) {
+      throw e
     }
   }
 }
@@ -111,18 +124,32 @@ const getters = {
   },
 
   /**
-   * Provided an widget ID, parse its config
-   * and return a { variables, error } parsed config.
+   * Get widget config map by ID.
    */
-  parsedConfig: (_, getters) => id => {
+  configMapById: (_, { widgetById }) => id => {
+    const widget = widgetById(id)
+
+    if (!widget)
+      return null
+
+    const config = fileContents(widget.files, ['config.json'])
     try {
-      const widget = getters.widgetById(id)
-      const files = get(widget, 'files', null)
-      const contents = fileContents(files, ['config.json'])
-      return parseConfig(contents)
+      return JSON.parse(config)
     } catch (e) {
-      return { error: [e.message] }
+      return e.message
     }
+  },
+
+  /**
+   * Get widget source map by ID.
+   */
+  sourceMapById: (_, { widgetById }) => id => {
+    const widget = widgetById(id)
+
+    if (!widget)
+      return null
+
+    return fileContents(widget.files, ['index.html'])
   }
 }
 

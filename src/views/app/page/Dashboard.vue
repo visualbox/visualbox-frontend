@@ -1,9 +1,10 @@
 <template lang="pug">
 v-container#dashboard(
   v-if="loaded"
+  :class="{ 'is-exploring': isExploring }"
   fluid
 )
-  context-toolbar(v-if="isFullscreen")
+  context-toolbar.fs-toolbar(v-if="isFullscreen")
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
@@ -14,24 +15,35 @@ v-container#dashboard(
   v-layout(
     justify-center
     row fill-height
+    :nudge-fs="isFullscreen"
   )
+    explorer(
+      v-if="isExploring"
+      :config="explorer"
+    )
     dashboard-layout(:style="style")
 </template>
 
 <script>
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { ContextToolbar } from '@/components'
+import { ContextToolbar, Explorer } from '@/components'
 import { DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
     ContextToolbar,
+    Explorer,
     DashboardLayout
   },
   computed: {
-    ...mapState('Dashboard', ['loaded', 'isFullscreen']),
+    ...mapState('Dashboard', [
+      'loaded',
+      'explorer',
+      'isFullscreen',
+      'isExploring'
+    ]),
     style () {
       const { r, g, b, a } = this.loaded.settings.rgba
       const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
@@ -75,10 +87,10 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
-    ...mapActions('Dashboard', ['load', 'commit', 'closeLoaded']),
+    ...mapActions('Dashboard', ['load', 'commit']),
     ...mapMutations('Dashboard', ['DASHBOARD_SET_FULLSCREEN'])
   },
-  mounted () {
+  async mounted () {
     this.load(this.$route.params.id)
   },
   beforeDestroy () {
@@ -88,7 +100,25 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../../../assets/styles/colors';
+
 #dashboard
   height 100%
   padding 0
+
+  &.is-exploring
+    height 100% !important
+    overflow hidden !important
+
+  .fs-toolbar
+    position fixed !important
+    z-index 1
+  
+  .nudge-fs
+    padding-top 48px
+
+  >>> #explorer
+    position absolute !important
+    z-index 1
+    background $vb-application
 </style>

@@ -1,21 +1,16 @@
 <template lang="pug">
 #editor-ctx
   context-toolbar
-    v-btn(
-      icon
-      @click="goBack"
-    )
+    v-btn(@click="goBack" icon)
       v-icon mdi-menu-left
-    .subheading {{ projectName }}
+    .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
-      v-btn(
-        @click="saveProject"
-        icon
-      )
+      v-btn(@click="saveProject" icon)
         v-icon mdi-floppy
 
   v-list.hover-actions(dense)
+
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
       v-list-tile-action.hover-actions-always
@@ -78,45 +73,23 @@
           tooltip(text="Delete" :open-delay="800" bottom)
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
 
-    //- Dependencies
-    v-list-tile.no-hover(@click="openPanel.dependencies = !openPanel.dependencies")
-      v-list-tile-action.hover-actions-always
-        v-icon {{ openPanel.dependencies ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-      v-list-tile-content Dependencies
-    template(v-if="openPanel.dependencies")
-      v-list-tile(
-        v-for="(item, index) in projectDependencies"
-        :key="'d' + index"
-        @click=""
-      )
-        v-list-tile-action
-          v-icon(small color="blue") mdi-package-variant-closed
-        v-list-tile-content
-          a(
-            :href="'https://www.npmjs.com/package/' + item.name"
-            target="_new"
-          ) {{ item.name }}
-        v-list-tile-action
-          v-btn(
-            v-if="index === hoverIndex"
-            @click.stop=""
-            flat icon
-          )
-            v-icon(small) mdi-trash-can-outline
-          .grey--text.pr-2(v-else) {{ item.version }}
-      v-container.pt-2
-        v-text-field.dependency-input(
-          v-model="newDependency"
-          @keyup.enter.native=""
-          :loading="loading"
-          :disabled="loading"
-          placeholder="Enter package name"
-          hide-details outline single-line
-        )
+    //- Info
+    v-list-tile(
+      @click="showPage('info')"
+      :class="{ 'v-list__tile--active' : showInfo }"
+    )
+      v-list-tile-content View Info
+
+    //- Settings
+    v-list-tile(
+      @click="showPage('settings')"
+      :class="{ 'v-list__tile--active' : showSettings }"
+    )
+      v-list-tile-content Settings
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
@@ -131,26 +104,25 @@ export default {
   },
   data: () => ({
     fileTypeMeta,
-    loading: false,
     openPanel: {
       files: true,
-      dependencies: false,
       settings: false
     },
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileFullPath: null,
-    editFileName: null,
-    newDependency: null
+    editFileName: null
   }),
   computed: {
     ...mapState('Route', ['path']),
-    ...mapState('Project', ['active', 'dirty']),
-    ...mapGetters('Project', [
-      'projectName',
-      'projectFiles',
-      'projectDependencies'
+    ...mapGetters('Project', ['projectFiles']),
+    ...mapState('Project', [
+      'showInfo',
+      'showSettings',
+      'settings',
+      'active',
+      'dirty'
     ]),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
@@ -161,7 +133,7 @@ export default {
     /**
      * localActive is the write-to variable after a
      * mutation of active is changed in this component.
-     * THis is so that we can intervene and check if
+     * This is so that we can intervene and check if
      * it was a double click or a single click.
      */
     localActive ([ newVal ], [ oldVal ]) {
@@ -174,6 +146,12 @@ export default {
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
+    ...mapMutations('Project', [
+      'PROJECT_SHOW_INFO',
+      'PROJECT_SHOW_SETTINGS',
+      'PROJECT_SHOW_HELPER',
+      'PROJECT_SET_ACTIVE'
+    ]),
     ...mapActions('Project', [
       'doubleClick',
       'click',
@@ -181,7 +159,6 @@ export default {
       'addNewFolder',
       'deleteNestedFile',
       'renameNestedFile',
-      'resolveDependency',
       'save'
     ]),
     /**
@@ -278,38 +255,15 @@ export default {
     saveProject () {
       EventBus.$emit('vbox:saveProject')
     },
+    showPage (page) {
+      this.PROJECT_SHOW_HELPER(false)
+      this.PROJECT_SET_ACTIVE(null)
 
-    // ---------------------------------------------------
-    async addDependency () {
-      this.loading = true
-      const dependency = this.newDependency
-      this.newDependency = ''
-      try {
-        await this.resolveDependency({
-          action: 'ADD',
-          list: [ dependency ]
-        })
-      } catch (e) {
-        throw e
-      } finally {
-        this.loading = false
-      }
+      if (page === 'info')
+        this.PROJECT_SHOW_INFO()
+      else
+        this.PROJECT_SHOW_SETTINGS()
     },
-    async removeDependency (dependency) {
-      this.loading = true
-      try {
-        await this.resolveDependency({
-          action: 'REMOVE',
-          list: [ dependency ]
-        })
-      } catch (e) {
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
-    // ---------------------------------------------------
-
     /**
      * Need to calculate destination because
      * confusion can arise if coming from
@@ -409,15 +363,4 @@ export default {
 
         .v-icon
           padding-right 10px
-
-  .dependency-input
-    min-height 30px
-    font-size 12px
-
-    >>> .v-input__slot
-      min-height 30px
-
-      input
-        max-height 30px
-        margin-top 0
 </style>

@@ -1,54 +1,46 @@
 <template lang="pug">
 #dashboard-ctx(v-if="loaded")
   context-toolbar
-    v-btn(
-      icon
-      @click="goBack"
-    )
+    v-btn(@click="goBack" icon)
       v-icon mdi-menu-left
-    .subheading {{ label }}
-    v-spacer
-    v-btn(
-      @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      icon
-    )
-      v-icon {{ fullscreenIcon }}
-    v-btn(
-      @click="DASHBOARD_SET_EDITING(!isEditing)"
-      icon
-    )
-      v-icon {{ editingIcon }}
+    .subheading {{ loaded.label }}
+    template(v-if="!isExploring")
+      v-spacer
+      v-btn(@click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)" icon)
+        v-icon {{ fullscreenIcon }}
+      v-btn(@click="DASHBOARD_SET_EDITING(!isEditing)" icon)
+        v-icon {{ editingIcon }}
 
-  v-tabs(
-    :class="{ 'hidden': focusedIntegration || focusedWidget || isAddingIntegration }"
-    color="rgba(0,0,0,0)"
-    slider-color="primary"
-    grow
-  )
-    v-tab
-      v-icon mdi-source-fork
-    v-tab
-      v-icon mdi-hexagon-multiple
-    v-tab
-      v-icon mdi-settings
+  template(v-if="!focusedIntegration && !focusedWidget")
+    v-layout
+      v-flex(xs4)
+        tooltip(text="Add Integration" bottom)
+          v-btn.ma-0(
+            @click="clickOpenExplorer('INTEGRATION')"
+            :color="buttonColorExplorer('INTEGRATION')"
+            flat block large
+          )
+            v-icon mdi-source-pull
+      v-flex(xs4)
+        tooltip(text="Add Widget" bottom)
+          v-btn.ma-0(
+            @click="clickOpenExplorer('WIDGET')"
+            :color="buttonColorExplorer('WIDGET')"
+            flat block large
+          )
+            v-icon mdi-hexagon
+      v-flex(xs4)
+        tooltip(text="Dashboard Settings" bottom)
+          v-btn.ma-0(
+            @click="clickToggleSettings"
+            :color="isSettings ? 'white' : 'grey'"
+            flat block large
+          )
+            v-icon mdi-settings
 
-    //- Integrations tab content
-    v-tab-item
-      dashboard-integrations
-
-    //- Widgets tab content
-    v-tab-item
-      dashboard-widgets
-
-    //- Settings tab content
-    v-tab-item
-      dashboard-settings
+    dashboard-integration-list(v-if="!isSettings")
 
   //------------------------------------
-
-  //- Adding integration menu
-  v-scroll-x-transition(hide-on-leave)
-    dashboard-add-integration(v-if="isAddingIntegration")
 
   //- Integration config menu
   v-scroll-x-transition(hide-on-leave)
@@ -57,72 +49,93 @@
   //- Widet config menu
   v-scroll-x-transition(hide-on-leave)
     dashboard-widget-config(v-if="focusedWidget")
+
+  //- Settings menu
+  v-scroll-x-transition(hide-on-leave)
+    dashboard-settings(v-if="isSettings && !focusedIntegration && !focusedWidget")
 </template>
 
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { ContextToolbar } from '@/components'
+import { ContextToolbar, Tooltip } from '@/components'
 import {
-  DashboardIntegrations,
-  DashboardWidgets,
-  DashboardSettings,
-  DashboardAddIntegration,
+  DashboardIntegrationList,
   DashboardIntegrationConfig,
-  DashboardWidgetConfig
+  DashboardWidgetConfig,
+  DashboardSettings
 } from '@/components/dashboard'
 
 export default {
   name: 'DashboardCtx',
   components: {
     ContextToolbar,
-    DashboardIntegrations,
-    DashboardWidgets,
-    DashboardSettings,
-    DashboardAddIntegration,
+    Tooltip,
+    DashboardIntegrationList,
     DashboardIntegrationConfig,
-    DashboardWidgetConfig
+    DashboardWidgetConfig,
+    DashboardSettings,
   },
+  data: () => ({
+    isSettings: false
+  }),
   computed: {
-    ...mapState('Widget', ['list']),
+    ...mapGetters('Dashboard', [
+      'focusedIntegration',
+      'focusedWidget'
+    ]),
     ...mapState('Dashboard', [
       'loaded',
-      'isAddingIntegration',
+      'explorer',
       'isEditing',
-      'isFullscreen'
+      'isFullscreen',
+      'isExploring'
     ]),
-    ...mapGetters('Dashboard', ['focusedIntegration', 'focusedWidget']),
-    label: {
-      get () {
-        return get(this, 'loaded.label', '')
-      },
-      set (label) {
-        this.updateLoaded({ label })
-      }
-    },
     editingIcon () {
-      return this.isEditing ? 'mdi-lock' : 'mdi-cursor-move'
+      return this.isEditing
+        ? 'mdi-lock'
+        : 'mdi-cursor-move'
     },
     fullscreenIcon () {
-      return this.isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'
+      return this.isFullscreen
+        ? 'mdi-fullscreen-exit'
+        : 'mdi-fullscreen'
     }
   },
   methods: {
+    ...mapActions('Dashboard', [
+      'openExplorer',
+      'closeExplorer'
+    ]),
     ...mapMutations('Dashboard', [
       'DASHBOARD_SET_FOCUSED_WIDGET',
       'DASHBOARD_SET_FOCUSED_INTEGRATION',
-      'DASHBOARD_SET_ADDING_INTEGRATION',
       'DASHBOARD_SET_EDITING',
       'DASHBOARD_SET_FULLSCREEN'
     ]),
-    ...mapActions('Dashboard', ['updateLoaded']),
+    buttonColorExplorer (type) {
+      return this.isExploring && this.explorer.type === type
+        ? 'white'
+        : 'grey'
+    },
+    clickOpenExplorer (type) {
+      if (this.isExploring && this.explorer.type === type)
+        this.closeExplorer()
+      else
+        this.openExplorer(type)
+    },
+    clickToggleSettings () {
+      this.DASHBOARD_SET_FOCUSED_WIDGET(null)
+      this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+      this.isSettings = !this.isSettings
+    },
     goBack () {
       if (this.focusedWidget)
         this.DASHBOARD_SET_FOCUSED_WIDGET(null)
       else if (this.focusedIntegration)
         this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
-      else if (this.isAddingIntegration)
-        this.DASHBOARD_SET_ADDING_INTEGRATION(false)
+      else if (this.isExploring)
+        this.closeExplorer()
       else {
         this.DASHBOARD_SET_EDITING(false)
         this.$router.go(-1)

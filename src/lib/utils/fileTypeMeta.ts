@@ -30,6 +30,12 @@ export default (fileType: string) => {
         color: '#ca3736',
         monacoLanguage: 'json'
       }
+    case 'py':
+      return {
+        icon: 'mdi-language-python',
+        color: '#4180b1',
+        monacoLanguage: 'python'
+      }
     default:
       return {
         icon: 'mdi-file-question',

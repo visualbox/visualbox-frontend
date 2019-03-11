@@ -1,13 +1,21 @@
 <template lang="pug">
-.base-toolbar(v-if="showToolbar")
+v-container.base-toolbar(v-if="showToolbar")
   v-toolbar(
     color="transparent"
-    absolute flat
-    clipped-left
+    flat clipped-left
   )
-    v-toolbar-title.font-weight-regular(@click="$router.push('/')") VISUALBOX.IO
+    img(
+      @click="$router.push('/')"
+      :src="require('../../assets/img/vbox-white.svg')"
+    )
+    v-toolbar-title(@click="$router.push('/')") VISUALBOX
     v-spacer
     v-toolbar-items
+      v-btn(
+        href="https://docs.visualbox.io"
+        target="_new"
+        flat exact
+      ) Docs
       v-btn(
         to="/auth"
         flat exact
@@ -33,8 +41,17 @@ export default {
 
 <style lang="stylus" scoped>
 .base-toolbar
+  padding 0
+  max-height 64px
+
+  img
+    width 40px
+    cursor pointer
+
   .v-toolbar__title
     cursor pointer
+    font-weight 300
+
   >>> .v-toolbar__content
     padding 0 0 0 16px !important
 </style>

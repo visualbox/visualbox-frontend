@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
-import { packageJson } from '@/lib/utils/projectUtils'
 import {
   cloneDeep,
   filesTree,
@@ -10,63 +9,35 @@ import {
   getUniqueName,
   getFullPath
 } from '@/lib/utils'
-
-/*
-**
- * Parse the version and name from a string.
- * @param  {String} str Package name
- * @return {Array}      [name, version] array
- *
-const getVersionName = str => {
-  const [ a, b, c ] = str.split('@')
-
-  // Name starts with '@' (e.g. @angular/core)
-  if (str.charAt(0) === '@')
-    return [ `@${b}`, c ]
-  else
-    return [ a, b ]
-}
-
-**
- * Return a cloned object of an integration package.
- * @param {Object}  state Vuex state object
- * @return {Object}       Integration apckage object
- *
-const getPkg = state => {
-  try {
-    let pkg = cloneDeep(get(state, ['loaded', 'files', 'package.json'], ''))
-    if (!pkg.hasOwnProperty('dependencies'))
-      pkg.dependencies = {}
-    return pkg
-  } catch (e) {
-    return null
-  }
-}
-*/
+import { isObject } from 'util';
 
 const parseFiles = (opts = {}) => {
   const files = get(opts, 'files', null)
   return !files ? {} : cloneDeep(files)
 }
 
-const parseDependencies = (ops = {}) => {
-  return {}
+const parseSettings = (opts = {}) => {
+  const settings = get(opts, 'settings', null)
+  return !settings ? {} : cloneDeep(settings)
 }
 
-const parseSettings = (ops = {}) => {
-  return {}
+const parseVersions = (opts = {}) => {
+  const versions = get(opts, 'versions', null)
+  return !versions ? false : cloneDeep(versions)
 }
 
 const state = {
   ready: false,
+  showInfo: true,
+  showSettings: false,
   showHelper: false,
   layoutHelper: 'horizontal',
 
   id: null,
   uid: null,
   files: {},
-  dependencies: {},
   settings: {},
+  versions: {},
 
   active: null,
   open: new Set(),
@@ -78,15 +49,17 @@ const mutations = {
   [t.PROJECT_RESET] (state) {
     state.ready = false
 
-    // These are nice to disable
-    // state.showHelper = false
-    // state.layoutHelper = 'horizontal'
+    state.showInfo = true
+    state.showSettings = false
+    state.showHelper = false
+    state.layoutHelper = 'horizontal'
 
     state.id = null
     state.uid = null
     state.files = {}
-    state.dependencies = {}
     state.settings = {}
+    state.versions = {}
+
     state.active = null
     state.open.clear()
     state.dirty.clear()
@@ -98,14 +71,29 @@ const mutations = {
     state.id = payload.id
     state.uid = payload.uid
     state.files = parseFiles(copy)
-    state.dependencies = parseDependencies(copy)
     state.settings = parseSettings(copy)
+    state.versions = parseVersions(copy)
     state.ready = true
+  },
+  [t.PROJECT_SET_SETTINGS] (state, { key, value }) {
+    Vue.set(state.settings, key, value)
+  },
+  [t.PROJECT_SET_VERSIONS] (state, { id, versions }) {
+    if (id === state.id)
+      state.versions = versions
   },
   [t.PROJECT_SAVE] (state) {
     state.dirty = new Set()
   },
-  [t.PROJECT_SET_HELPER] (state, payload) {
+  [t.PROJECT_SHOW_INFO] (state) {
+    state.showInfo = true
+    state.showSettings = false
+  },
+  [t.PROJECT_SHOW_SETTINGS] (state) {
+    state.showInfo = false
+    state.showSettings = true
+  },
+  [t.PROJECT_SHOW_HELPER] (state, payload) {
     state.showHelper = !!payload
   },
   [t.PROJECT_SET_HELPER_LAYOUT] (state, payload) {
@@ -139,9 +127,17 @@ const mutations = {
     if (!state.open.has(payload))
       state.peek = payload
     state.active = payload
+
+    // Disable open info/settings
+    state.showInfo = false
+    state.showSettings = false
   },
   [t.PROJECT_SET_ACTIVE] (state, payload) {
     state.active = payload
+
+    // Disable open info/settings
+    state.showInfo = false
+    state.showSettings = false
   },
   [t.PROJECT_WRITE_FILE] (state, { fullPath, contents }) {
     if (!state.files.hasOwnProperty(fullPath))
@@ -331,142 +327,18 @@ const actions = {
     }
   },
 
-  save ({ commit, dispatch }, save = true) {
+  save ({ commit }, save = true) {
     if (save)
       commit(t.PROJECT_SAVE)
 
-    const { id, files, dependencies, settings } = state
-
-    // Invalidate Cached project
-    dispatch('Bundler/invalidateCache', id, { root: true })
-
-    return { id, files, dependencies, settings }
-  },
-
-  /*
-  async resolveDependency ({ dispatch, state }, { action, list }) {
-    if (!list || list.length === 0)
-      return
-    action = action === 'ADD' ? 'ADD' : 'REMOVE'
-
-    const addDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        let { name, version } = deps[i]
-        version = typeof version === 'undefined' ? '*' : version
-        pkg.dependencies[name] = version
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    const addResDependencies = resDependencies => {
-      dispatch('updateLoaded', { resDependencies })
-    }
-
-    const removeDependencies = deps => {
-      let pkg = getPkg(state)
-      for (let i in deps) {
-        const name = deps[i]
-        if (pkg.dependencies.hasOwnProperty(name))
-          delete pkg.dependencies[name]
-      }
-      dispatch('updateLoaded', { package: pkg })
-    }
-
-    try {
-      // Parse string name and version
-      const newDeps = list.map(d => {
-        let [ name, version ] = getVersionName(d)
-        return { name, version }
-      })
-
-      if (action === 'ADD')
-        addDependencies(newDeps)
-      else
-        removeDependencies(newDeps.map(d => d.name))
-
-      // Resolve dependency list
-      let pkg = getPkg(state)
-      const res = await API.invoke('post', '/resolver', {
-        body: pkg.dependencies
-      })
-
-      // Parse error and revert accordingly
-      if (res.error) {
-        const { error } = res
-
-        switch (error) {
-          case 'PACKAGE_NOT_FOUND':
-            removeDependencies([ res.data.name ])
-            break
-          case 'UNSATISFIED_RANGE':
-            removeDependencies([ res.data.name ])
-            break
-          case 'MISSING_PEERS':
-            const peers = Object.keys(res.data).map(name => {
-              const requester = Object.keys(res.data[name])[0]
-              const version = res.data[name][requester]
-
-              // Add resolved requester dep
-              const [ rname, rversion ] = getVersionName(requester)
-              addDependencies([{
-                name: rname,
-                version: rversion
-              }])
-
-              return `${name}@${version}`
-            })
-
-            // Recursively add peer
-            await dispatch('resolveDependency', {
-              action: 'ADD',
-              list: peers
-            })
-            break
-          // Undo
-          default:
-            if (action === 'ADD')
-              removeDependencies(newDeps.map(d => d.name))
-            else
-              addDependencies(newDeps)
-        }
-      // OK
-      } else {
-        const { appDependencies, resDependencies } = res
-        const deps = Object.keys(appDependencies).map(name => {
-          const version = appDependencies[name].version
-          return { name, version }
-        })
-        const resDeps = Object.keys(resDependencies)
-        console.log(resDeps)
-        addDependencies(deps)
-        addResDependencies(resDeps)
-      }
-    } catch (e) {
-      console.log(e)
-    }
+    const { id, files, settings, versions } = state
+    return { id, files, settings, versions }
   }
-  */
 }
 
 const getters = {
-  projectName: state => {
-    return packageJson(state, 'name', 'Untitled')
-  },
-
   projectFiles: ({ files }) => {
     return filesTree(files)
-  },
-
-  projectDependencies: ({ dependencies }) => {
-    const deps = get(dependencies, 'appDependencies', {})
-    return Object.keys(deps).reduce((a, b) => {
-      a.push({
-        name: b,
-        version: list[b]
-      })
-      return a
-    }, [])
   },
 
   fileByFullPath: ({ files }) => fullPath => {
@@ -490,6 +362,22 @@ const getters = {
              && preCut.indexOf('/') < 0
              && type === fileType
     })
+  },
+
+  /**
+   * Return the registry version of the project.
+   * 0  - not been published before
+   * -1 - published but later removed
+   * >0 - latest version
+   */
+  registryVersion: ({ versions }) => {
+    if (!isObject(versions))
+      return -1
+    
+    const keys = Object.keys(versions)
+    return (keys.length <= 0)
+      ? 0
+      : Math.max(...keys)
   }
 }
 

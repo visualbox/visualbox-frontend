@@ -15,12 +15,12 @@ export default {
     Editor,
     HelperWidget
   },
-  computed: mapState('Project', ['ready']),
+  computed: mapState('Project', ['ready', 'id']),
   methods: {
     ...mapGetters('Widget', ['widgetById']),
-    ...mapActions('Widget', ['commit']),
+    ...mapActions('Widget', ['commit', 'publish', 'depublish']),
     ...mapActions('Project', ['load', 'save']),
-    ...mapActions('App', ['setSnackbar']),
+    ...mapActions('App', ['setSnackbar', 'setIsLoading']),
     async saveProject () {
       try {
         await this.commit(await this.save())
@@ -32,6 +32,7 @@ export default {
   mounted () {
     EventBus.$on('vbox:saveProject', async () => {
       try {
+        this.setIsLoading(true)
         await this.saveProject()
         this.setSnackbar({
           type: 'info',
@@ -43,6 +44,48 @@ export default {
           type: 'error',
           msg: e.message
         })
+      } finally {
+        this.setIsLoading(false)
+      }
+    })
+
+    // Should save project before publish?
+    EventBus.$on('vbox:publishProject', async () => {
+      try {
+        this.setIsLoading(true)
+        await this.publish(this.id)
+        this.setSnackbar({
+          type: 'info',
+          msg: `Published widget`,
+          timeout: 1000
+        })
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading(false)
+      }
+    })
+
+    // Should save project before publish?
+    EventBus.$on('vbox:depublishProject', async () => {
+      try {
+        this.setIsLoading(true)
+        await this.depublish(this.id)
+        this.setSnackbar({
+          type: 'info',
+          msg: `Removed from registry`,
+          timeout: 1000
+        })
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      } finally {
+        this.setIsLoading(false)
       }
     })
 
@@ -51,6 +94,8 @@ export default {
   },
   beforeDestroy () {
     EventBus.$off('vbox:saveProject')
+    EventBus.$off('vbox:publishProject')
+    EventBus.$off('vbox:depublishProject')
     this.saveProject()
   }
 }

@@ -15,16 +15,18 @@
       v-model="model"
       :config="config"
     )
+    v-btn(
+      @click="submit"
+      color="primary"
+      outline block large
+    ) Save
 </template>
 
 <script>
 import get from 'lodash-es/get'
-import debounce from 'lodash-es/debounce'
-import { mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { ContextToolbar, InputTypes } from '@/components'
-import { WorkerHandler } from '@/service'
-import { parseConfig } from '@/lib/utils'
-import { fileContents } from '@/lib/utils/projectUtils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 
 export default {
   name: 'DashboardIntegrationConfig',
@@ -37,42 +39,45 @@ export default {
     model: {}
   }),
   computed: {
+    ...mapState('Dashboard', ['integrationConfigMap']),
     ...mapGetters('Dashboard', ['focusedIntegration']),
-    ...mapGetters('Integration', ['parsedConfig']),
+    ...mapGetters('Integration', ['configMapById']),
     config () {
-      return this.parsedConfig(this.focusedIntegration.id)
-    },
-    settings () {
-      return {
-        label: this.label,
-        config: this.model
-      }
-    }
-  },
-  watch: {
-    /**
-     * Watch when settings have changed by the user.
-     */
-    settings: {
-      deep: true,
-      handler (settings) {
-        this.updateFocusedIntegration({ settings })
+      const { id, version } = this.focusedIntegration
+      let configMap
 
-        /**
-         * Send argument because debounce may fire
-         * when this.focusedIntegration value is gone.
-         */
-        this.restartFocusedWorker(this.focusedIntegration)
+      // Local, fetch from store
+      if (version === '^') {
+        configMap = this.configMapById(id)
+
+        // Something went wrong retieving local config map
+        if (!configMap || typeof configMap === 'string') {
+          const error = !configMap ? 'Unable to get config.json' : configMap
+          return {
+            error: [error],
+            variables: []
+          }
+        }
+
+      // Registry, fetch from config map
+      } else {
+        const hash = `${id}:${version}`
+        configMap = this.integrationConfigMap[hash]
       }
+
+      return parseConfig(configMap)
     }
   },
   methods: {
-    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
     ...mapActions('Dashboard', ['updateFocusedIntegration']),
-    restartFocusedWorker: debounce(integration => {
-      WorkerHandler.end(integration.i)
-      WorkerHandler.register([ integration ])
-    }, 2000)
+    ...mapMutations('Dashboard', ['DASHBOARD_SET_FOCUSED_INTEGRATION']),
+    submit () {
+      this.updateFocusedIntegration({
+        label: this.label,
+        model: this.model
+      })
+      this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
+    }
   },
 
   /**
@@ -80,23 +85,23 @@ export default {
    * user input on model at mount.
    */
   mounted () {
-    try {
-      const variables = get(this.config, 'variables', null)
-      const configModel = variables.reduce((acc, cur) => {
-        acc[cur.name] = cur.default || null
-        return acc
-      }, {})
+    const { label, model } = this.focusedIntegration
+    this.label = label
+    this.model = cloneDeep(model)
 
-      // Apply user input
-      for (const name in this.focusedIntegration.settings.config) {
-        if (configModel.hasOwnProperty(name))
-          configModel[name] = this.focusedIntegration.settings.config[name]
-      }
-      this.model = configModel
-      this.label = this.focusedIntegration.settings.label
-    } catch (e) {
-      console.log()
+    const variables = get(this.config, 'variables', [])
+    const defaults = variables.reduce((acc, cur) => {
+      acc[cur.name] = cur.default || null
+      return acc
+    }, {})
+
+    // Apply user input
+    for (const name in this.model) {
+      if (defaults.hasOwnProperty(name))
+        defaults[name] = this.model[name]
     }
+
+    this.model = defaults
   }
 }
 </script>

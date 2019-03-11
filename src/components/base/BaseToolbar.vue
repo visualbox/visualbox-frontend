@@ -12,7 +12,8 @@ v-container.base-toolbar(v-if="showToolbar")
     v-spacer
     v-toolbar-items
       v-btn(
-        to="/docs"
+        href="https://docs.visualbox.io"
+        target="_new"
         flat exact
       ) Docs
       v-btn(

@@ -13,7 +13,7 @@ v-container(fill-height fluid)
       v-icon.index-icon mdi-hexagon-multiple
 
     //- Adding widget preconfig
-    v-container(v-if="isAdding")
+    v-container.max-800(v-if="isAdding")
       .headline.mb-3 Name
       v-layout
         v-flex
@@ -130,6 +130,9 @@ export default {
 
 <style lang="stylus" scoped>
 .container
+  .max-800
+    max-width 800px !important
+
   .flex
     position relative
 </style>

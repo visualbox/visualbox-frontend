@@ -103,6 +103,9 @@ const mutations = {
     if (index >= 0)
       state.initedIntegrations.splice(index, 1)
   },
+  [t.DASHBOARD_RESET_INITED_INTEGRATION] (state) {
+    state.initedIntegrations = []
+  },
   [t.DASHBOARD_ADD_INTEGRATION] (state, integration) {
     const index = state.loaded.integrations.length
     Vue.set(state.loaded.integrations, index, integration)
@@ -216,7 +219,7 @@ const actions = {
    * calling Integration/Widget cleaning so that
    * non-existing local Integrations/Widgets gets removed.
    */
-  load ({ commit, getters, state }, id) {
+  load ({ commit, getters }, id) {
     const dashboard = getters.dashboardById(id)
     commit(t.DASHBOARD_SET_LOADED, dashboard)
 
@@ -237,6 +240,7 @@ const actions = {
         commit(t.DASHBOARD_SET_LOADED, null)
         commit(t.DASHBOARD_SET_FOCUSED_WIDGET, null)
         commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, null)
+        commit(t.DASHBOARD_RESET_INITED_INTEGRATION)
         dispatch('closeExplorer')
         DashboardHandler.end();
       }

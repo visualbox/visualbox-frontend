@@ -360,11 +360,13 @@ export default {
         z-index 1
 
         .headline
+          margin-bottom 10px
           font-weight 300
-          white-space nowrap
 
         .subheading
+          max-height 100px
           font-weight 300
+          overflow hidden
 
   .select
     width 140px

@@ -81,6 +81,7 @@ export default {
   data: () => ({
     tab: 1,
     model: {},
+    modelDirty: false,
     consoleBuffer: [],
     freeze: false,
     token: null,
@@ -138,6 +139,25 @@ export default {
         }
 
         this.model = defaults
+      }
+    },
+
+    model: {
+      deep: true,
+      handler () {
+        this.modelDirty = true
+      }
+    },
+
+    /**
+     * Watch to see if model was dirty and changed
+     * "back" to console. If so, restart container.
+     */
+    tab (val) {
+      if (val === 1 && this.modelDirty) {
+        this.modelDirty = false
+        this.print('model was changed', T_INFO)
+        this.restart()
       }
     },
 
@@ -252,6 +272,7 @@ export default {
          * component.
          */
         case 'OUTPUT':
+          console.log('OUTPUT')
           this.print(m.data, T_OUTPUT)
           break;
 

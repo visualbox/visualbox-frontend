@@ -18,22 +18,41 @@ export default {
   computed: mapState('Project', ['ready', 'id']),
   methods: {
     ...mapGetters('Integration', ['integrationById']),
-    ...mapActions('Integration', ['commit', 'publish', 'depublish']),
-    ...mapActions('Project', ['load', 'save']),
-    ...mapActions('App', ['setSnackbar', 'setIsLoading']),
-    async saveProject () {
+    ...mapActions('Integration', [
+      'signedUrl',
+      'commit',
+      'commitFiles',
+      'publish',
+      'depublish'
+    ]),
+    ...mapActions('Project', [
+      'load',
+      'save',
+      'saveFiles'
+    ]),
+    ...mapActions('App', [
+      'setSnackbar',
+      'setIsLoading'
+    ]),
+    async saveProject (files) {
       try {
-        await this.commit(await this.save())
+        // Save files only
+        if (files)
+          await this.commitFiles(await this.saveFiles())
+
+        // Save integration metadata
+        else
+          await this.commit(await this.save())
       } catch (e) {
         throw e
       }
     }
   },
-  mounted () {
-    EventBus.$on('vbox:saveProject', async () => {
+  async mounted () {
+    EventBus.$on('vbox:saveProject', async (files = false) => {
       try {
         this.setIsLoading(true)
-        await this.saveProject()
+        await this.saveProject(files)
         this.setSnackbar({
           type: 'info',
           msg: `Saved integration`,
@@ -89,8 +108,17 @@ export default {
       }
     })
 
-    const integration = this.integrationById()(this.$route.params.id)
-    this.load(integration)
+    try {
+      const integration = this.integrationById()(this.$route.params.id)
+      console.log('int', integration)
+      const signedUrl = await this.signedUrl(integration)
+      this.load({
+        project: integration,
+        signedUrl
+      })
+    } catch (e) {
+      console.log(e)
+    }
   },
   async beforeDestroy () {
     EventBus.$off('vbox:saveProject')

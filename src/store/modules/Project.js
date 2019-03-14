@@ -1,19 +1,23 @@
 import Vue from 'vue'
+import JSZip from 'jszip'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
+import isObject from 'lodash-es/isObject'
 import {
   cloneDeep,
-  filesTree,
   isValidPath,
   pathMeta,
-  getUniqueName,
   getFullPath
 } from '@/lib/utils'
-import { isObject } from 'util';
 
-const parseFiles = (opts = {}) => {
-  const files = get(opts, 'files', null)
-  return !files ? {} : cloneDeep(files)
+const getUniqueName = (prefix, folder) => {
+  let i = 1
+  let uniqueName = prefix
+  while (Object.keys(folder.files).find(name => name === uniqueName)) {
+    uniqueName = `${prefix} (${i})`
+    i++
+  }
+  return uniqueName
 }
 
 const parseSettings = (opts = {}) => {
@@ -35,7 +39,8 @@ const state = {
 
   id: null,
   uid: null,
-  files: {},
+  zip: new JSZip(),
+  fileTree: [],
   settings: {},
   versions: {},
 
@@ -56,7 +61,8 @@ const mutations = {
 
     state.id = null
     state.uid = null
-    state.files = {}
+    state.zip = new JSZip()
+    state.fileTree = []
     state.settings = {}
     state.versions = {}
 
@@ -70,10 +76,15 @@ const mutations = {
 
     state.id = payload.id
     state.uid = payload.uid
-    state.files = parseFiles(copy)
     state.settings = parseSettings(copy)
     state.versions = parseVersions(copy)
     state.ready = true
+  },
+  [t.PROJECT_SET_ZIP] (state, zip) {
+    state.zip = zip
+  },
+  [t.PROJECT_SET_FILE_TREE] (state, fileTree) {
+    state.fileTree = fileTree
   },
   [t.PROJECT_SET_SETTINGS] (state, { key, value }) {
     Vue.set(state.settings, key, value)
@@ -144,7 +155,6 @@ const mutations = {
       return
 
     const file = state.files[fullPath]
-    file.lastModified = +new Date()
     file.contents = contents
     Vue.set(state.files, fullPath, file)
 
@@ -185,23 +195,51 @@ const mutations = {
 }
 
 const actions = {
-  load ({ commit, getters }, project) {
+  async load ({ commit, dispatch }, { project, signedUrl }) {
     commit(t.PROJECT_RESET)
     commit(t.PROJECT_SET_LOADED, project)
 
-    // Try to open defaults
-    const defaults = ['README.md', 'index.js', 'index.html', 'package.json', 'config.json']
-    const rootFiles = getters.filesInFolder().map(({ name }) => name)
-    defaults.filter(v => -1 !== rootFiles.indexOf(v)).forEach(file => {
-      commit(t.PROJECT_ADD_OPEN, file)
-    })
+    if (!signedUrl)
+      return
 
+    /**
+     * Fetch ZIP from signedUrl.
+     */
+    try {
+      const result = await fetch(signedUrl)
+      const blob = await result.blob()
+      const zip = await JSZip.loadAsync(blob)
+      commit(t.PROJECT_SET_ZIP, zip)
+      dispatch('calculateFileTree')
+    } catch (e) {
+      console.log(e)
+    }
   },
   doubleClick ({ commit }, fullPath) {
     commit(t.PROJECT_ADD_OPEN, fullPath)
   },
   click ({ commit }, fullPath) {
     commit(t.PROJECT_SET_PEEK, fullPath)
+  },
+
+  calculateFileTree ({ commit, state }) {
+    const convertLevel = folder => {
+      let outFolder = []
+
+      folder.forEach((_, file) => {
+        const { name, dir } = file
+        const item = { name, dir }
+
+        if (dir)
+          item.children = convertLevel(state.zip.folder(name))
+
+        outFolder.push(item)
+      })
+
+      return outFolder
+    }
+
+    commit(t.PROJECT_SET_FILE_TREE, convertLevel(state.zip))
   },
 
   addNestedFile ({ commit }, { fullPath, item }) {
@@ -253,24 +291,18 @@ const actions = {
     }
   },
 
-  addNewFile ({ dispatch, getters }, folder) {
-    // Generate new filename
-    const files = getters.filesInFolder(folder, 'file')
-    const name = getUniqueName('New File', files)
-    const fullPath = getFullPath(folder, name)
-
-    // May need to set dirty here
-
-    const item = {
-      fullPath,
-      name,
-      type: 'file',
-      contents: '',
-      lastModified: +new Date()
+  addNewFile ({ dispatch, state }, folder) {
+    try {
+      // Convert to folder
+      folder = state.zip.folder(folder)
+      console.log('folder b4', folder)
+      const name = getUniqueName('New File', folder)
+      folder.file(name, '')
+      dispatch('calculateFileTree')
+      return name
+    } catch (e) {
+      console.log(e)
     }
-
-    dispatch('addNestedFile', { fullPath, item })
-    return item
   },
 
   addNewFolder ({ dispatch, getters }, folder) {
@@ -327,24 +359,37 @@ const actions = {
     }
   },
 
-  save ({ commit }, save = true) {
+  save ({ commit }) {
+    const { id, settings, versions } = state
+    return { id, settings, versions }
+  },
+
+  async saveFiles ({ commit }, save = true) {
     if (save)
       commit(t.PROJECT_SAVE)
 
-    const { id, files, settings, versions } = state
-    return { id, files, settings, versions }
+    // Generate ZIP file
+    try {
+      const { id, files } = state
+
+      const zip = new JSZip()
+      Object.values(files).forEach(({ type, fullPath, contents }) => {
+        if (type === 'file')
+          zip.file(fullPath, contents)
+        else
+          zip.folder(fullPath)
+      })
+
+      const blob = await zip.generateAsync({ type: 'blob'})
+
+      return { id, blob }
+    } catch (e) {
+      throw e
+    }
   }
 }
 
 const getters = {
-  projectFiles: ({ files }) => {
-    return filesTree(files)
-  },
-
-  fileByFullPath: ({ files }) => fullPath => {
-    return get(files, fullPath, null)
-  },
-
   filesInFolder: ({ files }) => (folder = null, fileType = 'file') => {
     const fileValues = Object.values(files)
 

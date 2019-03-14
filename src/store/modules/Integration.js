@@ -1,11 +1,11 @@
 import Vue from 'vue'
+import Storage from '@aws-amplify/storage'
 import * as t from '@/store/types'
 import API from '@/service/API'
 import { cloneDeep, fileContents } from '@/lib/utils'
 
 const state = {
-  list: [],
-  public: null
+  list: []
 }
 
 const mutations = {
@@ -86,6 +86,23 @@ const actions = {
       await API.invoke('put', `/integration/${id}`, { body: project })
     } catch (e) {
       throw e
+    }
+  },
+
+  async commitFiles ({ commit }, { id, blob }) {
+    try {
+      const result = await Storage.put(`${id}.zip`, blob)
+      console.log('put result', result)
+    } catch (e) {
+      throw e
+    }
+  },
+
+  async signedUrl (_, { id }) {
+    try {
+      return await Storage.get(`${id}.zip`)
+    } catch (e) {
+      return null
     }
   },
 

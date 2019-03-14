@@ -25,32 +25,32 @@
 
     v-treeview(
       v-if="openPanel.files"
-      :items="projectFiles"
+      :items="fileTree"
       :active.sync="activeTab"
       :open.sync="openTree"
       :edit-file="editFileFullPath"
-      item-key="fullPath"
+      item-key="name"
       activatable
       open-on-click
     )
       template(#prepend="{ item, open }")
         v-icon(
-          v-if="item.type === 'folder'"
+          v-if="item.dir"
           small
         ) {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
         template(v-else)
           v-icon.dirty(
-            v-if="dirty.has(item.fullPath)"
+            v-if="dirty.has(item.name)"
             color="#52b054"
             small
           ) mdi-circle-medium
           v-icon(
-            :color="fileTypeMeta(item.file).color"
+            :color="fileTypeMeta(item.name).color"
             small
-          ) {{ fileTypeMeta(item.file).icon }}
+          ) {{ fileTypeMeta(item.name).icon }}
       template(#label="{ item }")
         input.edit-file-input(
-          v-if="item.fullPath === editFileFullPath"
+          v-if="item.name === editFileFullPath"
           v-model="editFileName"
           :ref="{ 'editFile' : item.fullPath === editFileFullPath }"
           @keyup.enter.stop="editFileBlur"
@@ -62,8 +62,8 @@
         )
         span(v-else) {{ item.name }}
       template(#append="{ item }")
-        .options(v-if="item.fullPath !== editFileFullPath")
-          template(v-if="item.type === 'folder'")
+        .options(v-if="item.name !== editFileFullPath")
+          template(v-if="item.dir")
             tooltip(text="Add File" :open-delay="800" bottom)
               v-icon(@click.stop="addFile(item)" small) mdi-file-plus
             tooltip(text="Add Folder" :open-delay="800" bottom)
@@ -89,7 +89,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
@@ -116,8 +116,8 @@ export default {
   }),
   computed: {
     ...mapState('Route', ['path']),
-    ...mapGetters('Project', ['projectFiles']),
     ...mapState('Project', [
+      'fileTree',
       'showInfo',
       'showSettings',
       'settings',
@@ -177,18 +177,18 @@ export default {
         return newVal
       return null
     },
-    async addFile ({ fullPath, type }) {
+    async addFile ({ name = '', dir }) {
       this.openPanel.files = true
 
       try {
-        fullPath = fullPath || ''
-        const newFile = await this.addNewFile(fullPath)
+        const newFile = await this.addNewFile(name)
+        console.log('newFile', newFile)
 
         // Ensure folder is open when adding file to it
-        if (type === 'folder')
-          this.openTree.push(fullPath)
+        if (dir)
+          this.openTree.push(name)
 
-        this.editFile(newFile)
+        // this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }

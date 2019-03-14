@@ -97,7 +97,7 @@ Vue.component('monaco-editor', Vue.extend({
       this.editor = monacoInstance.editor.create(this.$el, options)
       this.editor.getModel().updateOptions({ tabSize: 2 })
       this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-        EventBus.$emit('vbox:saveProject')
+        EventBus.$emit('vbox:saveProject', true)
       })
 
       /*

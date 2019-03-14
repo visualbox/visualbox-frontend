@@ -1,6 +1,5 @@
 import { Store } from 'vuex'
-import ONLINE_DRIVER from './ONLINE_DRIVER'
-import OFFLINE_DRIVER from './OFFLINE_DRIVER'
+import API_AWS from './API_AWS'
 
 class API {
   private store: Store<any> | null = null
@@ -11,9 +10,10 @@ class API {
 
   public async invoke (method: string, path: string, opts?: IObject) {
     try {
-      return this.isLoggedIn()
-        ? await ONLINE_DRIVER(method, path, opts)
-        : await OFFLINE_DRIVER(method, path, opts)
+      if (this.isLoggedIn())
+        return await API_AWS(method, path, opts)
+      else
+        throw new Error('Not authenticated')
     } catch (e) {
       throw e
     }

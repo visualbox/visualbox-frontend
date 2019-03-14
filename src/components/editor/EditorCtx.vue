@@ -28,7 +28,7 @@
       :items="fileTree"
       :active.sync="activeTab"
       :open.sync="openTree"
-      :edit-file="editFileFullPath"
+      :edit-file="editFileName"
       item-key="name"
       activatable
       open-on-click
@@ -50,9 +50,9 @@
           ) {{ fileTypeMeta(item.name).icon }}
       template(#label="{ item }")
         input.edit-file-input(
-          v-if="item.name === editFileFullPath"
-          v-model="editFileName"
-          :ref="{ 'editFile' : item.fullPath === editFileFullPath }"
+          v-if="item.name === editFileName"
+          v-model="editFileDisplayName"
+          :ref="{ 'editFile' : item.name === editFileName }"
           @keyup.enter.stop="editFileBlur"
           @blur="editFileBlur"
           autocomplete="off"
@@ -60,9 +60,9 @@
           autocapitalize="off"
           spellcheck="false"
         )
-        span(v-else) {{ item.name }}
+        span(v-else) {{ item.displayName }}
       template(#append="{ item }")
-        .options(v-if="item.name !== editFileFullPath")
+        .options(v-if="item.name !== editFileName")
           template(v-if="item.dir")
             tooltip(text="Add File" :open-delay="800" bottom)
               v-icon(@click.stop="addFile(item)" small) mdi-file-plus
@@ -111,8 +111,9 @@ export default {
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
-    editFileFullPath: null,
-    editFileName: null
+    editFileName: null,
+    editFileDisplayName: null,
+    editFileDir: false
   }),
   computed: {
     ...mapState('Route', ['path']),
@@ -155,10 +156,9 @@ export default {
     ...mapActions('Project', [
       'doubleClick',
       'click',
-      'addNewFile',
-      'addNewFolder',
-      'deleteNestedFile',
-      'renameNestedFile',
+      'add',
+      'del',
+      'rename',
       'save'
     ]),
     /**
@@ -177,52 +177,53 @@ export default {
         return newVal
       return null
     },
-    async addFile ({ name = '', dir }) {
+    async addFile ({ name = '' }) {
       this.openPanel.files = true
 
       try {
-        const newFile = await this.addNewFile(name)
-        console.log('newFile', newFile)
+        const newFile = await this.add({ parent: name })
 
         // Ensure folder is open when adding file to it
-        if (dir)
-          this.openTree.push(name)
-
-        // this.editFile(newFile)
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    async addFolder ({ fullPath, type }) {
-      this.openPanel.files = true
-
-      try {
-        fullPath = fullPath || ''
-        const newFile = await this.addNewFolder(fullPath)
-
-        // Ensure folder is open when adding folder to it
-        if (type === 'folder')
-          this.openTree.push(fullPath)
+        this.openTree.push(name)
 
         this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
     },
-    deleteFile ({ fullPath }) {
+    async addFolder ({ name = '' }) {
+      this.openPanel.files = true
+
+      try {
+        const newFile = await this.add({
+          parent: name,
+          dir: true,
+          prefix: 'New Folder'
+        })
+
+        // Ensure folder is open when adding folder to it
+        this.openTree.push(name)
+
+        this.editFile(newFile)
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    deleteFile ({ name }) {
       if (confirm('Are you sure you want to delete the file?'))
-        this.deleteNestedFile(fullPath)
+        this.del(name)
     },
     /**
-     * Edit a file by storing the fullPath of the file
-     * and the name as v-model of the file.
+     * Edit a file by storing the name of the file
+     * and the displayName as v-model of the file.
      * A dynamic $ref is created for the input and is
      * used to focus the input, and selecting (if possible)
      * only the file name and not the file ending.
      */
-    editFile ({ fullPath, name }) {
-      this.editFileFullPath = fullPath
+    editFile ({ name, displayName, dir }) {
       this.editFileName = name
+      this.editFileDisplayName = displayName
+      this.editFileDir = dir
 
       this.$nextTick(() => {
         const input = this.$refs[Object.keys(this.$refs)[0]]
@@ -239,15 +240,23 @@ export default {
      * When input is blurred, update file name.
      */
     editFileBlur () {
-      if (this.editFileFullPath === null || this.editFileName === null)
+      if (!this.editFileName || !this.editFileDisplayName)
         return
 
-      this.renameNestedFile({
-        fullPath: this.editFileFullPath,
-        newName: this.editFileName
+      // Contruct absolute newName
+      const arr = this.editFileName.split('/')
+      arr.pop()
+      arr.push(this.editFileDisplayName)
+      const newName = arr.join('/')
+
+      this.rename({
+        name: this.editFileName,
+        newName,
+        dir: this.editFileDir
       })
-      this.editFileFullPath = null
       this.editFileName = null
+      this.editFileDisplayName = null
+      this.editFileDir = false
     },
     /**
      * Save and commit the project.

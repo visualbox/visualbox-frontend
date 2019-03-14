@@ -89,7 +89,7 @@ const actions = {
     }
   },
 
-  async commitFiles ({ commit }, { id, blob }) {
+  async commitFiles (_, { id, blob }) {
     try {
       const result = await Storage.put(`${id}.zip`, blob)
       console.log('put result', result)

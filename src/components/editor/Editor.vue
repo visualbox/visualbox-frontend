@@ -17,16 +17,16 @@
         template
           v-icon.mr-2(:color="item.color") {{ item.icon }}
           template(v-if="item.peek")
-            i {{ item.name }}
+            i {{ item.displayName }}
           template(v-else)
-            | {{ item.name }}
+            | {{ item.displayName }}
           v-icon.ml-2(
-            :class="tabIconHidden(index, item.fullPath)"
-            @click="PROJECT_CLOSE_OPEN(item.fullPath)"
+            :class="tabIconHidden(index, item.name)"
+            @click="PROJECT_CLOSE_OPEN(item.name)"
             @mouseover="hoverIndexIcon = index"
             @mouseout="hoverIndexIcon = null"
             small
-          ) {{ tabIcon(index, item.fullPath) }}
+          ) {{ tabIcon(index, item.name) }}
 
       v-spacer
       v-toolbar-items
@@ -81,11 +81,14 @@ export default {
   data: () => ({
     split: Split({}),
     hoverIndex: null,
-    hoverIndexIcon: null
+    hoverIndexIcon: null,
+    initEditorModel: true,
+    editorModel: '',
+    compiledMarkdown: ''
   }),
   computed: {
     ...mapState('Project', [
-      'files',
+      'zip',
       'open',
       'dirty',
       'peek',
@@ -102,27 +105,27 @@ export default {
     },
     activeTab: {
       /**
-       * Translate fullPath -> tab index
+       * Translate name -> tab index
        */
       get () {
-        return this.openTabs.findIndex(({ fullPath }) => fullPath && fullPath === this.active)
+        return this.openTabs.findIndex(({ name }) => name && name === this.active)
       },
       /**
-       * Translate tab index -> fullPath
+       * Translate tab index -> name
        */
       set (index) {
         if (!this.openTabs.hasOwnProperty(index) || !this.active)
           return
 
-        const { fullPath } = this.openTabs[index]
-        this.PROJECT_SET_ACTIVE(fullPath)
+        const { name } = this.openTabs[index]
+        this.PROJECT_SET_ACTIVE(name)
       }
     },
     openTabs () {
-      const open = [...this.open].map(fullPath => this.fullPathMeta(fullPath))
+      const open = [...this.open].map(name => this.fileMeta(name))
 
       if (this.peek) {
-        const meta = this.fullPathMeta(this.peek)
+        const meta = this.fileMeta(this.peek)
         if (meta) {
           meta.peek = true
           open.push(meta)
@@ -131,27 +134,9 @@ export default {
 
       return open
     },
-    editorModel: {
-      get () {
-        const file = this.fileByFullPath(this.active)
-        if (!file)
-          return ''
-
-        return file.contents || ''
-      },
-      set (contents) {
-        this.PROJECT_WRITE_FILE({ fullPath: this.active, contents })
-      }
-    },
-    compiledMarkdown () {
-      try {
-        const contents = fileContents(this.files, ['README.md'])
-        return contents ? marked(contents, { sanitize: true, gfm: true }) : 'No README.md'
-      } catch (e) {
-        return 'No README.md'
-      }
-    },
     monacoLanguage () {
+      return 'text'
+      /*
       const file = this.fileByFullPath(this.active)
       if (!file)
         return 'text'
@@ -160,6 +145,7 @@ export default {
       const fileType = parseFileType(fullPath)
       const { monacoLanguage } = fileTypeMeta(fileType)
       return monacoLanguage || 'text'
+      */
     }
   },
   methods: {
@@ -173,26 +159,23 @@ export default {
     formatCode () {
       this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
     },
-    fullPathMeta (fullPath) {
-      const file = this.fileByFullPath(fullPath)
-      if (!file)
-        return null
+    fileMeta (name) {
+      const displayName = name.split('/').pop()
 
-      const { name } = file
-      const fileType = parseFileType(name)
+      const fileType = parseFileType(displayName)
       const { icon, color } = fileTypeMeta(fileType)
 
-      return { name, fullPath, icon, color }
+      return { name, displayName, icon, color }
     },
-    tabIconHidden (index, fullPath) {
-      return (!this.dirty.has(fullPath)
+    tabIconHidden (index, name) {
+      return (!this.dirty.has(name)
              && this.hoverIndex !== index
-             && fullPath !== this.active)
+             && name !== this.active)
              ? 'hidden'
              : null
     },
-    tabIcon (index, fullPath) {
-      return (this.dirty.has(fullPath)
+    tabIcon (index, name) {
+      return (this.dirty.has(name)
              && this.hoverIndexIcon !== index)
              ? 'mdi-circle-medium'
              : 'mdi-close'
@@ -226,6 +209,39 @@ export default {
       } else {
         this.split.removeRowGutter(1)
         this.split.addColumnGutter(this.$refs.gutter, 1)
+      }
+    },
+    async active (name) {
+      this.initEditorModel = true
+      try {
+        this.editorModel = await this.zip.file(name).async('text')
+      } catch (e) {
+        this.editorModel = ''
+      }
+    },
+    editorModel (contents) {
+      // Don't write if switching file
+      if (this.initEditorModel) {
+        this.initEditorModel = false
+        return
+      }
+
+      this.PROJECT_WRITE_FILE({ name: this.active, contents })
+    },
+    showInfo: {
+      immediate: true,
+      handler (val) {
+        if (!val)
+          return
+
+        let compiledMarkdown = 'No README.md'
+        try {
+          const contents = this.zip.file('README.md').async('string')
+          if (contents)
+            compiledMarkdown = marked(contents, { sanitize: true, gfm: true })
+        } catch (e) {}
+
+        this.compiledMarkdown = compiledMarkdown
       }
     }
   },

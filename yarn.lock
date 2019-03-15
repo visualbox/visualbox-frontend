@@ -1712,6 +1712,13 @@
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.14.tgz#37daaf78069e7948520474c87b80092ea912520a"
   integrity sha512-Q5hTcfdudEL2yOmluA1zaSyPbzWPmJ3XfSWeP3RyoYvS9hnje1ZyagrZOuQ6+1nQC1Gw+7gap3pLNL3xL6UBug==
 
+"@types/jszip@^3.1.5":
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/@types/jszip/-/jszip-3.1.5.tgz#664b424b15aadf0489e871d319f4b18ddc6e24ea"
+  integrity sha512-DXjYsQr0B9rbjI8n7ZoIFXFMNHDBb9XLYRgwVYxhtsnr/HfFglpxb/InshOBAzkmW4WjgtvnA212voeVV2vwiA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/lodash-es@^4.17.1":
   version "4.17.3"
   resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.3.tgz#87eb0b3673b076b8ee655f1890260a136af09a2d"

@@ -70,7 +70,8 @@ import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import EditorSettings from '@/components/editor/EditorSettings'
-import { parseFileType, fileTypeMeta, fileContents } from '@/lib/utils'
+import { parseFileType, fileTypeMeta } from '@/lib/utils'
+import { Zip } from '@/service'
 
 export default {
   name: 'Editor',
@@ -152,9 +153,9 @@ export default {
     ...mapMutations('Project', [
       'PROJECT_RESET',
       'PROJECT_SET_ACTIVE',
-      'PROJECT_WRITE_FILE',
       'PROJECT_CLOSE_OPEN',
-      'PROJECT_SHOW_HELPER'
+      'PROJECT_SHOW_HELPER',
+      'PROJECT_TOUCH_FILE'
     ]),
     formatCode () {
       this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
@@ -214,7 +215,7 @@ export default {
     async active (name) {
       this.initEditorModel = true
       try {
-        this.editorModel = await this.zip.file(name).async('text')
+        this.editorModel = await Zip.readFile(name)
       } catch (e) {
         this.editorModel = ''
       }
@@ -226,20 +227,26 @@ export default {
         return
       }
 
-      this.PROJECT_WRITE_FILE({ name: this.active, contents })
+      Zip.writeFile({
+        name: this.active,
+        contents
+      })
+      this.PROJECT_TOUCH_FILE(this.active)
     },
     showInfo: {
       immediate: true,
-      handler (val) {
+      async handler (val) {
         if (!val)
           return
 
         let compiledMarkdown = 'No README.md'
         try {
-          const contents = this.zip.file('README.md').async('string')
+          const contents = await Zip.readFile('README.md')
           if (contents)
             compiledMarkdown = marked(contents, { sanitize: true, gfm: true })
-        } catch (e) {}
+        } catch (e) {
+          // Silent
+        }
 
         this.compiledMarkdown = compiledMarkdown
       }

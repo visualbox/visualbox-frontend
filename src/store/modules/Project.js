@@ -3,32 +3,8 @@ import JSZip from 'jszip'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import isObject from 'lodash-es/isObject'
-import {
-  cloneDeep,
-  isValidPath,
-  pathMeta,
-  getFullPath
-} from '@/lib/utils'
-
-const getUniqueName = (prefix, folder) => {
-  let i = 1
-  let uniqueName = prefix
-  while (Object.keys(folder.files).find(name => name === uniqueName)) {
-    uniqueName = `${prefix} (${i})`
-    i++
-  }
-  return uniqueName
-}
-
-const getDisplayName = (name, dir) => {
-  try {
-    const arr = name.split('/')
-    return dir ? arr[arr.length - 2]: arr.pop()
-  } catch (e) {
-    console.log(e)
-    return name
-  }
-}
+import { cloneDeep } from '@/lib/utils'
+import { Zip } from '@/service'
 
 const parseSettings = (opts = {}) => {
   const settings = get(opts, 'settings', null)
@@ -49,7 +25,6 @@ const state = {
 
   id: null,
   uid: null,
-  zip: new JSZip(),
   fileTree: [],
   settings: {},
   versions: {},
@@ -71,7 +46,6 @@ const mutations = {
 
     state.id = null
     state.uid = null
-    state.zip = new JSZip()
     state.fileTree = []
     state.settings = {}
     state.versions = {}
@@ -90,11 +64,8 @@ const mutations = {
     state.versions = parseVersions(copy)
     state.ready = true
   },
-  [t.PROJECT_SET_ZIP] (state, zip) {
-    state.zip = zip
-  },
-  [t.PROJECT_SET_FILE_TREE] (state, fileTree) {
-    state.fileTree = fileTree
+  [t.PROJECT_UPDATE_FILE_TREE] (state) {
+    state.fileTree = Zip.fileTree
   },
   [t.PROJECT_SET_SETTINGS] (state, { key, value }) {
     Vue.set(state.settings, key, value)
@@ -160,8 +131,7 @@ const mutations = {
     state.showInfo = false
     state.showSettings = false
   },
-  [t.PROJECT_WRITE_FILE] (state, { name, contents }) {
-    state.zip.file(name, contents)
+  [t.PROJECT_TOUCH_FILE] (state, name) {
     state.dirty.add(name)
     state.dirty = new Set(state.dirty)
 
@@ -171,25 +141,38 @@ const mutations = {
       state.open = new Set(state.open)
     }
   },
-  [t.PROJECT_RENAME_FILE] (state, { fullPath, newFullPath, newName }) {
-    if (!isValidPath(fullPath))
-      return
-
-    const copy = cloneDeep(state.files[fullPath])
-    copy.fullPath = newFullPath
-    copy.name = newName
-    Vue.delete(state.files, fullPath)
-    Vue.set(state.files, newFullPath, copy)
-
+  [t.PROJECT_RENAME_FILE] (state, { name, newName }) {
     // Handle dirty state
-    state.dirty.delete(fullPath)
-    state.dirty.add(newFullPath)
+    state.dirty.delete(name)
+    state.dirty.add(newName)
     state.dirty = new Set(state.dirty)
+  },
+  [t.PROJECT_RENAME_FOLDER] (state, { name, newName }) {
+    const len = name.length
+
+    // Basically swap out old prefix everywhere
+    if (state.peek && state.peek.substring(0, len) === name)
+      state.peek = newName + state.peek.substring(len)
+    if (state.active && state.active.substring(0, len) === name)
+      state.active = newName + state.active.substring(len)
+    state.open.forEach(open => {
+      if (open.substring(0, len) === name) {
+        state.open.delete(open)
+        state.open.add(newName + open.substring(len))
+      }
+    })
+    state.dirty.forEach(dirty => {
+      if (dirty.substring(0, len) === name) {
+        state.dirty.delete(dirty)
+        state.dirty.add(newName + dirty.substring(len))
+      }
+    })
+    state.open = new Set(state.open)
   }
 }
 
 const actions = {
-  async load ({ commit, dispatch }, { project, signedUrl }) {
+  async load ({ commit }, { project, signedUrl }) {
     commit(t.PROJECT_RESET)
     commit(t.PROJECT_SET_LOADED, project)
 
@@ -202,135 +185,37 @@ const actions = {
     try {
       const result = await fetch(signedUrl)
       const blob = await result.blob()
-      const zip = await JSZip.loadAsync(blob)
-
-      commit(t.PROJECT_SET_ZIP, zip)
-      dispatch('calculateFileTree')
+      Zip.reset(await JSZip.loadAsync(blob))
+      commit(t.PROJECT_UPDATE_FILE_TREE)
     } catch (e) {
       console.log(e)
     }
   },
-  doubleClick ({ commit }, name) {
-    commit(t.PROJECT_ADD_OPEN, name)
-  },
-  click ({ commit }, name) {
-    commit(t.PROJECT_SET_PEEK, name)
-  },
 
-  calculateFileTree ({ commit, state }) {
-    const convertLevel = (lvl, folder) => {
-      let outFolder = []
-
-      folder.forEach((_, file) => {
-        const { name, dir } = file
-
-        // JSZip bug, disregard subfolder item
-        const relName = name.substring(folder.root.length, name.length)
-        const index = relName.indexOf('/')
-        if (index >= 0 && index < relName.length - 1)
-          return
-
-        // Generate display name
-        const displayName = getDisplayName(name, dir)
-
-        const item = { name, displayName, dir }
-
-        if (dir)
-          item.children = convertLevel(lvl + 1, state.zip.folder(name))
-
-        outFolder.push(item)
-      })
-
-      return outFolder
-    }
-    const level = convertLevel(0, state.zip)
-    commit(t.PROJECT_SET_FILE_TREE, level)
-  },
-
-  add ({ dispatch, state }, { parent = '', dir = false, prefix = 'New File' }) {
+  async renameFile ({ commit }, { name, newName }) {
     try {
-      // Convert to folder
-      const folder = state.zip.folder(parent)
-      const name = getUniqueName(prefix, folder)
-
-      if (dir)
-        folder.folder(name)
-      else
-        folder.file(name, '')
-
-      dispatch('calculateFileTree')
-
-      return {
-        name,
-        displayName: getDisplayName(name, dir)
-      }
+      newName = await Zip.renameFile({ name, newName })
+      commit(t.PROJECT_UPDATE_FILE_TREE)
+      commit(t.PROJECT_CLOSE_OPEN, name)
+      commit(t.PROJECT_ADD_OPEN, newName)
+      commit(t.PROJECT_SET_ACTIVE, newName)
+      commit(t.PROJECT_RENAME_FILE, { name, newName })
     } catch (e) {
       console.log(e)
     }
   },
 
-  del ({ dispatch, state }, name) {
+  async renameFolder ({ commit }, { name, newName }) {
     try {
-      state.zip.remove(name)
-      dispatch('calculateFileTree')
+      newName = await Zip.renameFolder({ name, newName })
+      commit(t.PROJECT_RENAME_FOLDER, { name, newName })
+      commit(t.PROJECT_UPDATE_FILE_TREE)
+
+      // Used to swap openTree in EditorCtx
+      return { name, newName }
+
     } catch (e) {
       console.log(e)
-    }
-  },
-
-  async rename ({ commit, dispatch, state }, { name, newName, dir }) {
-    try {
-      if (!dir) {
-        const contents = await state.zip.file(name).async('text')
-        state.zip.file(newName, contents)
-        state.zip.remove(name)
-        commit(t.PROJECT_CLOSE_OPEN, name)
-        commit(t.PROJECT_ADD_OPEN, newName)
-        commit(t.PROJECT_SET_ACTIVE, newName)
-      }
-
-      dispatch('calculateFileTree')
-      // !dir
-      // read contents, create new file
-      // delete old file
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  renameNestedFile ({ commit, getters, state }, { fullPath, newName }) {
-    if (!isValidPath(fullPath))
-      return
-
-    const { type } = getters.fileByFullPath(fullPath)
-    if (!type)
-      return
-
-    const { folders } = pathMeta(fullPath)
-    const newFullPath = getFullPath(folders.join('/'), newName)
-
-    // File already exists
-    if (state.files.hasOwnProperty(newFullPath))
-      return
-    
-    if (type === 'file') {
-      commit(t.PROJECT_RENAME_FILE, { fullPath, newFullPath, newName })
-      commit(t.PROJECT_CLOSE_OPEN, fullPath)
-      commit(t.PROJECT_ADD_OPEN, newFullPath)
-      commit(t.PROJECT_SET_ACTIVE, newFullPath)
-    } else {
-      const len = fullPath.length
-      const files = cloneDeep(state.files) // Mutating iteratee
-      for (let name in files) {
-        if (name.substr(0, len) === fullPath) {
-          const meta = pathMeta(name)
-          commit(t.PROJECT_RENAME_FILE, {
-            fullPath: name,
-            newFullPath: getFullPath(newFullPath, name.substr(len)),
-            newName: meta.name
-          })
-        }
-      }
     }
   },
 
@@ -350,10 +235,9 @@ const actions = {
   async saveFiles ({ commit, state }) {
     commit(t.PROJECT_SAVE)
 
-    // Generate ZIP blob
     try {
       const { id } = state
-      const blob = await state.zip.generateAsync({ type: 'blob' })
+      const blob = await Zip.getBlob()
 
       return { id, blob }
     } catch (e) {
@@ -363,25 +247,6 @@ const actions = {
 }
 
 const getters = {
-  filesInFolder: ({ files }) => (folder = null, fileType = 'file') => {
-    const fileValues = Object.values(files)
-
-    // Root
-    if (!folder) {
-      return fileValues.filter(({ fullPath, type }) => {
-        return fullPath.indexOf('/') < 0 && type === fileType
-      })
-    }
-
-    const len = folder.length
-    return fileValues.filter(({ fullPath, type }) => {
-      const preCut = fullPath.substr(len)
-      return preCut !== ''
-             && preCut.indexOf('/') < 0
-             && type === fileType
-    })
-  },
-
   /**
    * Return the registry version of the project.
    * 0  - not been published before

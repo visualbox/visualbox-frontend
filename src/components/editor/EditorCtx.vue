@@ -92,6 +92,7 @@
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
+import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
 
 const DOUBLE_CLICK_TIMEOUT = 500
@@ -112,8 +113,7 @@ export default {
     localActive: [],
     lastClick: +new Date(),
     editFileName: null,
-    editFileDisplayName: null,
-    editFileDir: false
+    editFileDisplayName: null
   }),
   computed: {
     ...mapState('Route', ['path']),
@@ -140,9 +140,9 @@ export default {
     localActive ([ newVal ], [ oldVal ]) {
       const dblClicked = this.isDoubleClick(newVal, oldVal)
       if (dblClicked)
-        this.doubleClick(dblClicked)
+        this.PROJECT_ADD_OPEN(dblClicked)
       else if (newVal)
-        this.click(newVal)
+        this.PROJECT_SET_PEEK(newVal)
     },
   },
   methods: {
@@ -151,14 +151,14 @@ export default {
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
       'PROJECT_SHOW_HELPER',
-      'PROJECT_SET_ACTIVE'
+      'PROJECT_SET_ACTIVE',
+      'PROJECT_ADD_OPEN',
+      'PROJECT_SET_PEEK',
+      'PROJECT_UPDATE_FILE_TREE'
     ]),
     ...mapActions('Project', [
-      'doubleClick',
-      'click',
-      'add',
-      'del',
-      'rename',
+      'renameFile',
+      'renameFolder',
       'save'
     ]),
     /**
@@ -181,11 +181,11 @@ export default {
       this.openPanel.files = true
 
       try {
-        const newFile = await this.add({ parent: name })
+        const newFile = Zip.addFile({ parent: name })
+        this.PROJECT_UPDATE_FILE_TREE()
 
         // Ensure folder is open when adding file to it
         this.openTree.push(name)
-
         this.editFile(newFile)
       } catch (e) {
         console.log(e)
@@ -195,23 +195,25 @@ export default {
       this.openPanel.files = true
 
       try {
-        const newFile = await this.add({
+        const newFile = Zip.addFile({
           parent: name,
           dir: true,
           prefix: 'New Folder'
         })
+        this.PROJECT_UPDATE_FILE_TREE()
 
         // Ensure folder is open when adding folder to it
         this.openTree.push(name)
-
         this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
     },
     deleteFile ({ name }) {
-      if (confirm('Are you sure you want to delete the file?'))
-        this.del(name)
+      if (confirm('Are you sure you want to delete the file?')) {
+        Zip.deleteFile(name)
+        this.PROJECT_UPDATE_FILE_TREE()
+      }
     },
     /**
      * Edit a file by storing the name of the file
@@ -220,10 +222,9 @@ export default {
      * used to focus the input, and selecting (if possible)
      * only the file name and not the file ending.
      */
-    editFile ({ name, displayName, dir }) {
+    editFile ({ name, displayName }) {
       this.editFileName = name
       this.editFileDisplayName = displayName
-      this.editFileDir = dir
 
       this.$nextTick(() => {
         const input = this.$refs[Object.keys(this.$refs)[0]]
@@ -239,24 +240,30 @@ export default {
     /**
      * When input is blurred, update file name.
      */
-    editFileBlur () {
+    async editFileBlur () {
       if (!this.editFileName || !this.editFileDisplayName)
         return
 
-      // Contruct absolute newName
-      const arr = this.editFileName.split('/')
-      arr.pop()
-      arr.push(this.editFileDisplayName)
-      const newName = arr.join('/')
+      if (this.editFileName[this.editFileName.length - 1] === '/') {
+        const { name, newName } = await this.renameFolder({
+          name: this.editFileName,
+          newName: this.editFileDisplayName
+        })
 
-      this.rename({
-        name: this.editFileName,
-        newName,
-        dir: this.editFileDir
-      })
+        // Swap out openTree prefix
+        const len = name.length
+        for (const i in this.openTree) {
+          if (this.openTree[i].substring(0, len) === name)
+            this.$set(this.openTree, i, newName + this.openTree[i].substring(len))
+        }
+      } else {
+        this.renameFile({
+          name: this.editFileName,
+          newName: this.editFileDisplayName
+        })
+      }
       this.editFileName = null
       this.editFileDisplayName = null
-      this.editFileDir = false
     },
     /**
      * Save and commit the project.

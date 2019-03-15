@@ -1,4 +1,6 @@
-export default (fileType: string) => {
+export default (name: string) => {
+  const fileType = name.split('.').pop()
+
   switch (fileType) {
     case 'js':
       return {

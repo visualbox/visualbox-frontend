@@ -37,11 +37,11 @@ export default {
     async saveProject (files) {
       try {
         // Save files only
-        if (files)
+        if (files) {
           await this.commitFiles(await this.saveFiles())
 
         // Save integration metadata
-        else
+        } else
           await this.commit(await this.save())
       } catch (e) {
         throw e
@@ -110,7 +110,6 @@ export default {
 
     try {
       const integration = this.integrationById()(this.$route.params.id)
-      console.log('int', integration)
       const signedUrl = await this.signedUrl(integration)
       this.load({
         project: integration,
@@ -125,6 +124,7 @@ export default {
     EventBus.$off('vbox:publishProject')
     EventBus.$off('vbox:depublishProject')
     this.saveProject()
+    this.saveProject(true)
   }
 }
 </script>

@@ -54,6 +54,8 @@ const mutations = {
     state.open.clear()
     state.dirty.clear()
     state.peek = null
+
+    Zip.reset()
   },
   [t.PROJECT_SET_LOADED] (state, payload) {
     const copy = cloneDeep(payload)

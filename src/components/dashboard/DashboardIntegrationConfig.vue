@@ -46,7 +46,7 @@ export default {
       const { id, version } = this.focusedIntegration
       let configMap
 
-      // Local, fetch from store
+      // Local, fetch from list
       if (version === '^') {
         configMap = this.configMapById(id)
 

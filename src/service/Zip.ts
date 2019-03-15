@@ -14,19 +14,21 @@ interface IFileTreeNode {
  *  - foo/bar      -> bar
  *  - foo/bar/baz/ -> baz
  */
-const getDisplayName = name => {
+const getDisplayName = (name: string): string => {
   try {
     const arr = name.split('/')
     const last = arr.pop()
+    let out: any
 
     // Is folder
     if (last === '')
-      return arr.length > 0 ? arr.pop() : ''
+      out = arr.length > 0 ? arr.pop() : ''
     // Is file
     else
-      return last
+      out = last
+
+    return out ? out : ''
   } catch (e) {
-    console.log(e)
     return name
   }
 }
@@ -37,7 +39,7 @@ const getDisplayName = name => {
  *  - baz bar -> bar
  *  - foo/bar /baz -> foo/baz
  */
-const getNewFileAbsolutePath = (name, newName) => {
+const getNewFileAbsolutePath = (name: string, newName: string) => {
   try {
     newName = newName.replace(/^\//, '') // Remove leading '/'
     const arr = name.split('/')
@@ -55,7 +57,7 @@ const getNewFileAbsolutePath = (name, newName) => {
  *  - baz/ bar -> bar/
  *  - foo/bar/ /baz -> foo/baz/
  */
-const getNewFolderAbsolutePath = (name, newName) => {
+const getNewFolderAbsolutePath = (name: string, newName: string) => {
   try {
     newName = newName.replace(/^\//, '') // Remove leading '/'
     const arr = name.split('/')
@@ -72,8 +74,8 @@ const getNewFolderAbsolutePath = (name, newName) => {
  * Given a JSZip folder, return
  * only files in current level.
  */
-const getFilesInFolder = folder => {
-  return folder.filter(relativePath => {
+const getFilesInFolder = (folder: JSZip) => {
+  return folder.filter((relativePath: string) => {
     // Count number of '/'
     const arr = relativePath.split('/')
     // Current folder item can only be file or two-entry arr with empty end
@@ -81,7 +83,7 @@ const getFilesInFolder = folder => {
   })
 }
 
-const getUniqueName = (prefix, dir, folder) => {
+const getUniqueName = (prefix: string, dir: boolean, folder: JSZip) => {
   const suffix = dir ? '/' : ''
   const folderFiles = getFilesInFolder(folder).map(({ name }) => name)
 
@@ -95,7 +97,7 @@ const getUniqueName = (prefix, dir, folder) => {
 }
 
 class Zip {
-  public zip
+  public zip: JSZip
 
   constructor () {
     this.zip = new JSZip()
@@ -105,7 +107,7 @@ class Zip {
     return this.zip
   }
 
-  public reset (val = null) {
+  public reset (val?: JSZip) {
     this.zip = val ? val : new JSZip()
   }
 
@@ -114,7 +116,7 @@ class Zip {
   }
 
   get fileTree () {
-    const convertLevel = (lvl, folder) => {
+    const convertLevel = (folder: JSZip) => {
       const outFolder: IFileTreeNode[] = []
 
       getFilesInFolder(folder).forEach(({ name, dir }) => {
@@ -126,7 +128,7 @@ class Zip {
 
         // Recurse down sub-folder
         if (dir)
-          item.children = convertLevel(lvl + 1, this.zip.folder(name))
+          item.children = convertLevel(this.zip.folder(name))
 
         outFolder.push(item)
       })
@@ -134,7 +136,7 @@ class Zip {
       return outFolder
     }
 
-    return convertLevel(0, this.zip)
+    return convertLevel(this.zip)
   }
 
   /**
@@ -158,8 +160,9 @@ class Zip {
     }
   }
 
-  public deleteFile (name) {
-    this.zip.remove(name)
+  public deleteFile (name: string) {
+    if (this.zip)
+      this.zip.remove(name)
   }
 
   /**
@@ -220,7 +223,7 @@ class Zip {
     this.zip.file(name, contents)
   }
 
-  public async readFile (name) {
+  public async readFile (name: string) {
     return await this.zip.file(name).async('text')
   }
 }

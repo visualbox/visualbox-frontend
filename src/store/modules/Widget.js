@@ -1,8 +1,8 @@
 import Vue from 'vue'
+import Storage from '@aws-amplify/storage'
 import * as t from '@/store/types'
-import get from 'lodash-es/get'
 import API from '@/service/API'
-import { cloneDeep, fileContents } from '@/lib/utils'
+import { cloneDeep } from '@/lib/utils'
 
 const state = {
   list: [],
@@ -40,6 +40,20 @@ const mutations = {
     const index = state.list.findIndex(({ id }) => id === payload.id)
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
+  },
+  [t.WIDGET_SET_CONFIG_SOURCE_MAP] (state, payload) {
+    let configMap = {}
+    try {
+      configMap = JSON.parse(payload.configMap)
+    } catch (e) {
+      console.log(e)
+    }
+
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0) {
+      Vue.set(state.list[index], 'configMap', configMap)
+      Vue.set(state.list[index], 'sourceMap', payload.sourceMap)
+    }
   }
 }
 
@@ -90,6 +104,32 @@ const actions = {
     }
   },
 
+  async commitFiles (_, { id, blob }) {
+    try {
+      // Commit config/source maps
+      const configMap = await Zip.readFile('config.json')
+      const sourceMap = await Zip.readFile('index.html')
+      commit(t.WIDGET_SET_CONFIG_SOURCE_MAP, { id, configMap, sourceMap })
+
+      const result = await Storage.put(`${id}.zip`, blob, {
+        bucket: process.env.VUE_APP_BUCKET_WIDGET
+      })
+      console.log('put result', result)
+    } catch (e) {
+      throw e
+    }
+  },
+
+  async signedUrl (_, { id }) {
+    try {
+      return await Storage.get(`${id}.zip`, {
+        bucket: process.env.VUE_APP_BUCKET_WIDGET
+      })
+    } catch (e) {
+      return null
+    }
+  },
+
   async publish ({ commit }, id) {
     try {
       const { versions } = await API.invoke('post', '/registry', {
@@ -132,12 +172,7 @@ const getters = {
     if (!widget)
       return null
 
-    const config = fileContents(widget.files, ['config.json'])
-    try {
-      return JSON.parse(config)
-    } catch (e) {
-      return e.message
-    }
+    return widget.configMap
   },
 
   /**
@@ -149,7 +184,7 @@ const getters = {
     if (!widget)
       return null
 
-    return fileContents(widget.files, ['index.html'])
+    return widget.sourceMap
   }
 }
 

@@ -115,6 +115,10 @@ class Zip {
     return await this.zip.generateAsync({ type: 'blob' })
   }
 
+  public async getBase64 () {
+    return await this.zip.generateAsync({ type: 'base64' })
+  }
+
   get fileTree () {
     const convertLevel = (folder: JSZip) => {
       const outFolder: IFileTreeNode[] = []
@@ -224,7 +228,8 @@ class Zip {
   }
 
   public async readFile (name: string) {
-    return await this.zip.file(name).async('text')
+    const file = this.zip.file(name)
+    return file ? await file.async('text') : ''
   }
 }
 

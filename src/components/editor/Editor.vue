@@ -51,6 +51,7 @@
         v-html="compiledMarkdown"
       )
       editor-settings(v-else-if="showSettings")
+      editor-import(v-else-if="showImport")
       .monaco(v-else)
         monaco-editor(
           :theme="'vs-' + theme"
@@ -70,6 +71,7 @@ import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import EditorSettings from '@/components/editor/EditorSettings'
+import EditorImport from '@/components/editor/EditorImport'
 import { parseFileType, fileTypeMeta } from '@/lib/utils'
 import { Zip } from '@/service'
 
@@ -77,7 +79,8 @@ export default {
   name: 'Editor',
   components: {
     ContextToolbar,
-    EditorSettings
+    EditorSettings,
+    EditorImport
   },
   data: () => ({
     split: Split({}),
@@ -96,13 +99,14 @@ export default {
       'active',
       'showInfo',
       'showSettings',
+      'showImport',
       'showHelper',
       'layoutHelper'
     ]),
     ...mapGetters('Project', ['fileByFullPath']),
     ...mapGetters('App', ['theme']),
     editorIsOpen () {
-      return !this.showInfo && !this.showSettings
+      return !this.showInfo && !this.showSettings && !this.showImport
     },
     activeTab: {
       /**
@@ -136,22 +140,12 @@ export default {
       return open
     },
     monacoLanguage () {
-      return 'text'
-      /*
-      const file = this.fileByFullPath(this.active)
-      if (!file)
-        return 'text'
-
-      const { fullPath } = file
-      const fileType = parseFileType(fullPath)
-      const { monacoLanguage } = fileTypeMeta(fileType)
+      const { monacoLanguage } = fileTypeMeta(this.active)
       return monacoLanguage || 'text'
-      */
     }
   },
   methods: {
     ...mapMutations('Project', [
-      'PROJECT_RESET',
       'PROJECT_SET_ACTIVE',
       'PROJECT_CLOSE_OPEN',
       'PROJECT_SHOW_HELPER',
@@ -251,9 +245,6 @@ export default {
         this.compiledMarkdown = compiledMarkdown
       }
     }
-  },
-  beforeDestroy () {
-    this.PROJECT_RESET()
   }
 }
 </script>

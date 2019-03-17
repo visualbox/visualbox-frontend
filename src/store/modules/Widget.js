@@ -1,12 +1,11 @@
 import Vue from 'vue'
 import Storage from '@aws-amplify/storage'
 import * as t from '@/store/types'
-import API from '@/service/API'
+import { API, Zip } from '@/service'
 import { cloneDeep } from '@/lib/utils'
 
 const state = {
-  list: [],
-  public: null
+  list: []
 }
 
 const mutations = {
@@ -42,11 +41,11 @@ const mutations = {
       Vue.set(state.list[index], 'versions', payload.versions)
   },
   [t.WIDGET_SET_CONFIG_SOURCE_MAP] (state, payload) {
-    let configMap = {}
+    let configMap
     try {
       configMap = JSON.parse(payload.configMap)
     } catch (e) {
-      console.log(e)
+      configMap = {}
     }
 
     const index = state.list.findIndex(({ id }) => id === payload.id)
@@ -104,17 +103,16 @@ const actions = {
     }
   },
 
-  async commitFiles (_, { id, blob }) {
+  async commitFiles ({ commit }, { id, blob }) {
     try {
       // Commit config/source maps
       const configMap = await Zip.readFile('config.json')
       const sourceMap = await Zip.readFile('index.html')
       commit(t.WIDGET_SET_CONFIG_SOURCE_MAP, { id, configMap, sourceMap })
 
-      const result = await Storage.put(`${id}.zip`, blob, {
+      await Storage.put(`${id}.zip`, blob, {
         bucket: process.env.VUE_APP_BUCKET_WIDGET
       })
-      console.log('put result', result)
     } catch (e) {
       throw e
     }

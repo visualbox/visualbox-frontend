@@ -10,11 +10,37 @@
         v-icon mdi-floppy
 
   v-list.hover-actions(dense)
+    //- Info
+    v-list-tile.no-hover(
+      @click="showPage('info')"
+      :class="{ 'v-list__tile--active' : showInfo }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-information-outline
+      v-list-tile-content View Info
+
+    //- Settings
+    v-list-tile.no-hover(
+      @click="showPage('settings')"
+      :class="{ 'v-list__tile--active' : showSettings }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-settings
+      v-list-tile-content Settings
+
+    //- Import
+    v-list-tile.no-hover(
+      @click="showPage('import')"
+      :class="{ 'v-list__tile--active' : showImport }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-package-up
+      v-list-tile-content Import Files
 
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
       v-list-tile-action.hover-actions-always
-        v-icon {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+        v-icon(small) {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
       v-list-tile-action
         tooltip(text="Add File" :open-delay="800" bottom)
@@ -72,20 +98,6 @@
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
-
-    //- Info
-    v-list-tile(
-      @click="showPage('info')"
-      :class="{ 'v-list__tile--active' : showInfo }"
-    )
-      v-list-tile-content View Info
-
-    //- Settings
-    v-list-tile(
-      @click="showPage('settings')"
-      :class="{ 'v-list__tile--active' : showSettings }"
-    )
-      v-list-tile-content Settings
 </template>
 
 <script>
@@ -121,6 +133,7 @@ export default {
       'fileTree',
       'showInfo',
       'showSettings',
+      'showImport',
       'settings',
       'active',
       'dirty'
@@ -150,6 +163,7 @@ export default {
     ...mapMutations('Project', [
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
+      'PROJECT_SHOW_IMPORT',
       'PROJECT_SHOW_HELPER',
       'PROJECT_SET_ACTIVE',
       'PROJECT_ADD_OPEN',
@@ -266,10 +280,10 @@ export default {
       this.editFileDisplayName = null
     },
     /**
-     * Save and commit the project.
+     * Save project files.
      */
     saveProject () {
-      EventBus.$emit('vbox:saveProject')
+      EventBus.$emit('vbox:saveProject', true)
     },
     showPage (page) {
       this.PROJECT_SHOW_HELPER(false)
@@ -277,8 +291,10 @@ export default {
 
       if (page === 'info')
         this.PROJECT_SHOW_INFO()
-      else
+      else if (page === 'settings')
         this.PROJECT_SHOW_SETTINGS()
+      else
+        this.PROJECT_SHOW_IMPORT()
     },
     /**
      * Need to calculate destination because

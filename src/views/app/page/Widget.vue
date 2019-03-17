@@ -4,7 +4,7 @@ editor(v-if="ready")
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { Editor } from '@/components/editor'
 import { HelperWidget } from '@/components/helper'
 import EventBus from '@/lib/eventBus'
@@ -25,6 +25,7 @@ export default {
       'publish',
       'depublish'
     ]),
+    ...mapMutations('Project', ['PROJECT_RESET']),
     ...mapActions('Project', [
       'load',
       'save',
@@ -111,20 +112,34 @@ export default {
     try {
       const widget = this.widgetById()(this.$route.params.id)
       const signedUrl = await this.signedUrl(widget)
-      this.load({
+      await this.load({
         project: widget,
         signedUrl
       })
     } catch (e) {
-      console.log(e)
+      this.setSnackbar({
+        type: 'error',
+        msg: e.message
+      })
     }
   },
-  beforeDestroy () {
+  async beforeDestroy () {
     EventBus.$off('vbox:saveProject')
     EventBus.$off('vbox:publishProject')
     EventBus.$off('vbox:depublishProject')
-    this.saveProject()
-    this.saveProject(true)
+
+    try {
+      await Promise.all([
+        this.saveProject(),
+        this.saveProject(true)
+      ])
+      this.PROJECT_RESET()
+    } catch (e) {
+      this.setSnackbar({
+        type: 'error',
+        msg: e.message
+      })
+    }
   }
 }
 </script>

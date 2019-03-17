@@ -20,6 +20,7 @@ const state = {
   ready: false,
   showInfo: true,
   showSettings: false,
+  showImport: false,
   showHelper: false,
   layoutHelper: 'horizontal',
 
@@ -41,6 +42,7 @@ const mutations = {
 
     state.showInfo = true
     state.showSettings = false
+    state.showImport = false
     state.showHelper = false
     state.layoutHelper = 'horizontal'
 
@@ -82,10 +84,17 @@ const mutations = {
   [t.PROJECT_SHOW_INFO] (state) {
     state.showInfo = true
     state.showSettings = false
+    state.showImport = false
   },
   [t.PROJECT_SHOW_SETTINGS] (state) {
     state.showInfo = false
     state.showSettings = true
+    state.showImport = false
+  },
+  [t.PROJECT_SHOW_IMPORT] (state) {
+    state.showInfo = false
+    state.showSettings = false
+    state.showImport = true
   },
   [t.PROJECT_SHOW_HELPER] (state, payload) {
     state.showHelper = !!payload
@@ -125,6 +134,7 @@ const mutations = {
     // Disable open info/settings
     state.showInfo = false
     state.showSettings = false
+    state.showImport = false
   },
   [t.PROJECT_SET_ACTIVE] (state, payload) {
     state.active = payload
@@ -132,6 +142,7 @@ const mutations = {
     // Disable open info/settings
     state.showInfo = false
     state.showSettings = false
+    state.showImport = false
   },
   [t.PROJECT_TOUCH_FILE] (state, name) {
     state.dirty.add(name)
@@ -176,10 +187,9 @@ const mutations = {
 const actions = {
   async load ({ commit }, { project, signedUrl }) {
     commit(t.PROJECT_RESET)
-    commit(t.PROJECT_SET_LOADED, project)
 
     if (!signedUrl)
-      return
+      throw new Error('Unable to load files')
 
     /**
      * Fetch ZIP from signedUrl.
@@ -189,8 +199,18 @@ const actions = {
       const blob = await result.blob()
       Zip.reset(await JSZip.loadAsync(blob))
       commit(t.PROJECT_UPDATE_FILE_TREE)
+      commit(t.PROJECT_SET_LOADED, project)
     } catch (e) {
-      console.log(e)
+      throw e
+    }
+  },
+
+  async import ({ commit }, file) {
+    try {
+      Zip.reset(await JSZip.loadAsync(file))
+      commit(t.PROJECT_UPDATE_FILE_TREE)
+    } catch (e) {
+      throw e
     }
   },
 

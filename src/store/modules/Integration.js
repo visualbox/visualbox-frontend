@@ -41,11 +41,11 @@ const mutations = {
       Vue.set(state.list[index], 'versions', payload.versions)
   },
   [t.INTEGRATION_SET_CONFIG_MAP] (state, payload) {
-    let configMap = {}
+    let configMap
     try {
       configMap = JSON.parse(payload.configMap)
     } catch (e) {
-      console.log(e)
+      configMap = {}
     }
 
     const index = state.list.findIndex(({ id }) => id === payload.id)
@@ -107,8 +107,7 @@ const actions = {
       const configMap = await Zip.readFile('config.json')
       commit(t.INTEGRATION_SET_CONFIG_MAP, { id, configMap })
 
-      const result = await Storage.put(`${id}.zip`, blob)
-      console.log('put result', result)
+      await Storage.put(`${id}.zip`, blob)
     } catch (e) {
       throw e
     }

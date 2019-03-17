@@ -4,7 +4,7 @@ class IO {
   private io
 
   constructor () {
-    this.io = null // io(process.env.VUE_APP_SOCKET_IO_SERVER)
+    this.io = io(process.env.VUE_APP_SOCKET_IO_SERVER)
   }
 
   public reset () {

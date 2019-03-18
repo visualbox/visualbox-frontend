@@ -35,6 +35,7 @@ export default {
     ...mapActions('App', ['setSnackbar']),
     ...mapActions('Project', ['import']),
     async importZip () {
+      // tslint:disable-next-line
       if (confirm('The imported ZIP file will replace all other files in the current project. Do you want to contiue?')) {
         const zip = this.$refs.file.files[0]
 

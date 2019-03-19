@@ -1,11 +1,11 @@
 import Vue from 'vue'
+import Storage from '@aws-amplify/storage'
 import * as t from '@/store/types'
-import API from '@/service/API'
-import { cloneDeep, fileContents } from '@/lib/utils'
+import { API, Zip } from '@/service'
+import { cloneDeep } from '@/lib/utils'
 
 const state = {
-  list: [],
-  public: null
+  list: []
 }
 
 const mutations = {
@@ -39,6 +39,18 @@ const mutations = {
     const index = state.list.findIndex(({ id }) => id === payload.id)
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
+  },
+  [t.INTEGRATION_SET_CONFIG_MAP] (state, payload) {
+    let configMap
+    try {
+      configMap = JSON.parse(payload.configMap)
+    } catch (e) {
+      configMap = {}
+    }
+
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0)
+      Vue.set(state.list[index], 'configMap', configMap)
   }
 }
 
@@ -89,6 +101,26 @@ const actions = {
     }
   },
 
+  async commitFiles ({ commit }, { id, blob }) {
+    try {
+      // Commit config map
+      const configMap = await Zip.readFile('config.json')
+      commit(t.INTEGRATION_SET_CONFIG_MAP, { id, configMap })
+
+      await Storage.put(`${id}.zip`, blob)
+    } catch (e) {
+      throw e
+    }
+  },
+
+  async signedUrl (_, { id }) {
+    try {
+      return await Storage.get(`${id}.zip`)
+    } catch (e) {
+      return null
+    }
+  },
+
   async publish ({ commit }, id) {
     try {
       const { versions } = await API.invoke('post', '/registry', {
@@ -131,12 +163,7 @@ const getters = {
     if (!integration)
       return null
 
-    const config = fileContents(integration.files, ['config.json'])
-    try {
-      return JSON.parse(config)
-    } catch (e) {
-      return e.message
-    }
+    return integration.configMap
   }
 }
 

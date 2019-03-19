@@ -10,11 +10,37 @@
         v-icon mdi-floppy
 
   v-list.hover-actions(dense)
+    //- Info
+    v-list-tile.no-hover(
+      @click="showPage('info')"
+      :class="{ 'v-list__tile--active' : showInfo }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-information-outline
+      v-list-tile-content View Info
+
+    //- Settings
+    v-list-tile.no-hover(
+      @click="showPage('settings')"
+      :class="{ 'v-list__tile--active' : showSettings }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-settings
+      v-list-tile-content Settings
+
+    //- Import
+    v-list-tile.no-hover(
+      @click="showPage('import')"
+      :class="{ 'v-list__tile--active' : showImport }"
+    )
+      v-list-tile-action.hover-actions-always
+        v-icon(small) mdi-package-up
+      v-list-tile-content Import Files
 
     //- Files
     v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
       v-list-tile-action.hover-actions-always
-        v-icon {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+        v-icon(small) {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
       v-list-tile-content Files
       v-list-tile-action
         tooltip(text="Add File" :open-delay="800" bottom)
@@ -25,34 +51,34 @@
 
     v-treeview(
       v-if="openPanel.files"
-      :items="projectFiles"
+      :items="fileTree"
       :active.sync="activeTab"
       :open.sync="openTree"
-      :edit-file="editFileFullPath"
-      item-key="fullPath"
+      :edit-file="editFileName"
+      item-key="name"
       activatable
       open-on-click
     )
       template(#prepend="{ item, open }")
         v-icon(
-          v-if="item.type === 'folder'"
+          v-if="item.dir"
           small
         ) {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
         template(v-else)
           v-icon.dirty(
-            v-if="dirty.has(item.fullPath)"
+            v-if="dirty.has(item.name)"
             color="#52b054"
             small
           ) mdi-circle-medium
           v-icon(
-            :color="fileTypeMeta(item.file).color"
+            :color="fileTypeMeta(item.name).color"
             small
-          ) {{ fileTypeMeta(item.file).icon }}
+          ) {{ fileTypeMeta(item.name).icon }}
       template(#label="{ item }")
         input.edit-file-input(
-          v-if="item.fullPath === editFileFullPath"
-          v-model="editFileName"
-          :ref="{ 'editFile' : item.fullPath === editFileFullPath }"
+          v-if="item.name === editFileName"
+          v-model="editFileDisplayName"
+          :ref="{ 'editFile' : item.name === editFileName }"
           @keyup.enter.stop="editFileBlur"
           @blur="editFileBlur"
           autocomplete="off"
@@ -60,10 +86,10 @@
           autocapitalize="off"
           spellcheck="false"
         )
-        span(v-else) {{ item.name }}
+        span(v-else) {{ item.displayName }}
       template(#append="{ item }")
-        .options(v-if="item.fullPath !== editFileFullPath")
-          template(v-if="item.type === 'folder'")
+        .options(v-if="item.name !== editFileName")
+          template(v-if="item.dir")
             tooltip(text="Add File" :open-delay="800" bottom)
               v-icon(@click.stop="addFile(item)" small) mdi-file-plus
             tooltip(text="Add Folder" :open-delay="800" bottom)
@@ -72,26 +98,13 @@
             v-icon(@click.stop="editFile(item)" small) mdi-textbox
           tooltip(text="Delete" :open-delay="800" bottom)
             v-icon(@click.stop="deleteFile(item)" small) mdi-trash-can-outline
-
-    //- Info
-    v-list-tile(
-      @click="showPage('info')"
-      :class="{ 'v-list__tile--active' : showInfo }"
-    )
-      v-list-tile-content View Info
-
-    //- Settings
-    v-list-tile(
-      @click="showPage('settings')"
-      :class="{ 'v-list__tile--active' : showSettings }"
-    )
-      v-list-tile-content Settings
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
+import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
 
 const DOUBLE_CLICK_TIMEOUT = 500
@@ -111,15 +124,16 @@ export default {
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
-    editFileFullPath: null,
-    editFileName: null
+    editFileName: null,
+    editFileDisplayName: null
   }),
   computed: {
     ...mapState('Route', ['path']),
-    ...mapGetters('Project', ['projectFiles']),
     ...mapState('Project', [
+      'fileTree',
       'showInfo',
       'showSettings',
+      'showImport',
       'settings',
       'active',
       'dirty'
@@ -139,9 +153,9 @@ export default {
     localActive ([ newVal ], [ oldVal ]) {
       const dblClicked = this.isDoubleClick(newVal, oldVal)
       if (dblClicked)
-        this.doubleClick(dblClicked)
+        this.PROJECT_ADD_OPEN(dblClicked)
       else if (newVal)
-        this.click(newVal)
+        this.PROJECT_SET_PEEK(newVal)
     },
   },
   methods: {
@@ -149,16 +163,16 @@ export default {
     ...mapMutations('Project', [
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
+      'PROJECT_SHOW_IMPORT',
       'PROJECT_SHOW_HELPER',
-      'PROJECT_SET_ACTIVE'
+      'PROJECT_SET_ACTIVE',
+      'PROJECT_ADD_OPEN',
+      'PROJECT_SET_PEEK',
+      'PROJECT_UPDATE_FILE_TREE'
     ]),
     ...mapActions('Project', [
-      'doubleClick',
-      'click',
-      'addNewFile',
-      'addNewFolder',
-      'deleteNestedFile',
-      'renameNestedFile',
+      'renameFile',
+      'renameFolder',
       'save'
     ]),
     /**
@@ -177,52 +191,54 @@ export default {
         return newVal
       return null
     },
-    async addFile ({ fullPath, type }) {
+    async addFile ({ name = '' }) {
       this.openPanel.files = true
 
       try {
-        fullPath = fullPath || ''
-        const newFile = await this.addNewFile(fullPath)
+        const newFile = Zip.addFile({ parent: name })
+        this.PROJECT_UPDATE_FILE_TREE()
 
         // Ensure folder is open when adding file to it
-        if (type === 'folder')
-          this.openTree.push(fullPath)
-
+        this.openTree.push(name)
         this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
     },
-    async addFolder ({ fullPath, type }) {
+    async addFolder ({ name = '' }) {
       this.openPanel.files = true
 
       try {
-        fullPath = fullPath || ''
-        const newFile = await this.addNewFolder(fullPath)
+        const newFile = Zip.addFile({
+          parent: name,
+          dir: true,
+          prefix: 'New Folder'
+        })
+        this.PROJECT_UPDATE_FILE_TREE()
 
         // Ensure folder is open when adding folder to it
-        if (type === 'folder')
-          this.openTree.push(fullPath)
-
+        this.openTree.push(name)
         this.editFile(newFile)
       } catch (e) {
         console.log(e)
       }
     },
-    deleteFile ({ fullPath }) {
-      if (confirm('Are you sure you want to delete the file?'))
-        this.deleteNestedFile(fullPath)
+    deleteFile ({ name }) {
+      if (confirm('Are you sure you want to delete the file?')) {
+        Zip.deleteFile(name)
+        this.PROJECT_UPDATE_FILE_TREE()
+      }
     },
     /**
-     * Edit a file by storing the fullPath of the file
-     * and the name as v-model of the file.
+     * Edit a file by storing the name of the file
+     * and the displayName as v-model of the file.
      * A dynamic $ref is created for the input and is
      * used to focus the input, and selecting (if possible)
      * only the file name and not the file ending.
      */
-    editFile ({ fullPath, name }) {
-      this.editFileFullPath = fullPath
+    editFile ({ name, displayName }) {
       this.editFileName = name
+      this.editFileDisplayName = displayName
 
       this.$nextTick(() => {
         const input = this.$refs[Object.keys(this.$refs)[0]]
@@ -238,22 +254,36 @@ export default {
     /**
      * When input is blurred, update file name.
      */
-    editFileBlur () {
-      if (this.editFileFullPath === null || this.editFileName === null)
+    async editFileBlur () {
+      if (!this.editFileName || !this.editFileDisplayName)
         return
 
-      this.renameNestedFile({
-        fullPath: this.editFileFullPath,
-        newName: this.editFileName
-      })
-      this.editFileFullPath = null
+      if (this.editFileName[this.editFileName.length - 1] === '/') {
+        const { name, newName } = await this.renameFolder({
+          name: this.editFileName,
+          newName: this.editFileDisplayName
+        })
+
+        // Swap out openTree prefix
+        const len = name.length
+        for (const i in this.openTree) {
+          if (this.openTree[i].substring(0, len) === name)
+            this.$set(this.openTree, i, newName + this.openTree[i].substring(len))
+        }
+      } else {
+        this.renameFile({
+          name: this.editFileName,
+          newName: this.editFileDisplayName
+        })
+      }
       this.editFileName = null
+      this.editFileDisplayName = null
     },
     /**
-     * Save and commit the project.
+     * Save project files.
      */
     saveProject () {
-      EventBus.$emit('vbox:saveProject')
+      EventBus.$emit('vbox:saveProject', true)
     },
     showPage (page) {
       this.PROJECT_SHOW_HELPER(false)
@@ -261,8 +291,10 @@ export default {
 
       if (page === 'info')
         this.PROJECT_SHOW_INFO()
-      else
+      else if (page === 'settings')
         this.PROJECT_SHOW_SETTINGS()
+      else
+        this.PROJECT_SHOW_IMPORT()
     },
     /**
      * Need to calculate destination because

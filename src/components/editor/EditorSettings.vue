@@ -54,7 +54,7 @@ v-container#editor-settings(fill-height)
       v-layout.mt-4
         v-spacer
         v-btn.ma-0.px-3(
-          @click=""
+          @click="downloadZip"
           color="primary"
           large outline
         )
@@ -98,6 +98,7 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { SelectRuntime } from '@/components'
 import { cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
+import { Zip } from '@/service'
 
 export default {
   name: 'EditorSettings',
@@ -118,6 +119,7 @@ export default {
   },
   methods: {
     ...mapMutations('Project', ['PROJECT_SET_SETTINGS']),
+    ...mapActions('App', ['setSnackbar']),
     saveProject () {
       EventBus.$emit('vbox:saveProject')
     },
@@ -127,6 +129,17 @@ export default {
     depublishProject () {
       if (confirm('You cannot re-publish to the registry once removed. Are you sure you want to continue?'))
         EventBus.$emit('vbox:depublishProject')
+    },
+    async downloadZip () {
+      try {
+        const base64 = await Zip.getBase64()
+        window.location = `data:application/zip;base64,${base64}`
+      } catch (e) {
+        this.setSnackbar({
+          type: 'error',
+          msg: e.message
+        })
+      }
     }
   }
 }

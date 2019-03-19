@@ -17,16 +17,16 @@
         template
           v-icon.mr-2(:color="item.color") {{ item.icon }}
           template(v-if="item.peek")
-            i {{ item.name }}
+            i {{ item.displayName }}
           template(v-else)
-            | {{ item.name }}
+            | {{ item.displayName }}
           v-icon.ml-2(
-            :class="tabIconHidden(index, item.fullPath)"
-            @click="PROJECT_CLOSE_OPEN(item.fullPath)"
+            :class="tabIconHidden(index, item.name)"
+            @click="PROJECT_CLOSE_OPEN(item.name)"
             @mouseover="hoverIndexIcon = index"
             @mouseout="hoverIndexIcon = null"
             small
-          ) {{ tabIcon(index, item.fullPath) }}
+          ) {{ tabIcon(index, item.name) }}
 
       v-spacer
       v-toolbar-items
@@ -51,6 +51,7 @@
         v-html="compiledMarkdown"
       )
       editor-settings(v-else-if="showSettings")
+      editor-import(v-else-if="showImport")
       .monaco(v-else)
         monaco-editor(
           :theme="'vs-' + theme"
@@ -70,59 +71,66 @@ import marked from 'marked'
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import { ContextToolbar } from '@/components'
 import EditorSettings from '@/components/editor/EditorSettings'
-import { parseFileType, fileTypeMeta, fileContents } from '@/lib/utils'
+import EditorImport from '@/components/editor/EditorImport'
+import { parseFileType, fileTypeMeta } from '@/lib/utils'
+import { Zip } from '@/service'
 
 export default {
   name: 'Editor',
   components: {
     ContextToolbar,
-    EditorSettings
+    EditorSettings,
+    EditorImport
   },
   data: () => ({
     split: Split({}),
     hoverIndex: null,
-    hoverIndexIcon: null
+    hoverIndexIcon: null,
+    initEditorModel: true,
+    editorModel: '',
+    compiledMarkdown: ''
   }),
   computed: {
     ...mapState('Project', [
-      'files',
+      'zip',
       'open',
       'dirty',
       'peek',
       'active',
       'showInfo',
       'showSettings',
+      'showImport',
       'showHelper',
       'layoutHelper'
     ]),
     ...mapGetters('Project', ['fileByFullPath']),
     ...mapGetters('App', ['theme']),
     editorIsOpen () {
-      return !this.showInfo && !this.showSettings
+      return !this.showInfo && !this.showSettings && !this.showImport
     },
     activeTab: {
       /**
-       * Translate fullPath -> tab index
+       * Translate name -> tab index
        */
       get () {
-        return this.openTabs.findIndex(({ fullPath }) => fullPath && fullPath === this.active)
+        return this.openTabs.findIndex(({ name }) => name && name === this.active)
       },
       /**
-       * Translate tab index -> fullPath
+       * Translate tab index -> name
        */
       set (index) {
         if (!this.openTabs.hasOwnProperty(index) || !this.active)
           return
 
-        const { fullPath } = this.openTabs[index]
-        this.PROJECT_SET_ACTIVE(fullPath)
+        const { name } = this.openTabs[index]
+        this.PROJECT_SET_ACTIVE(name)
       }
     },
     openTabs () {
-      const open = [...this.open].map(fullPath => this.fullPathMeta(fullPath))
+      const open = [...this.open].map(name => this.fileMeta(name))
 
       if (this.peek) {
-        const meta = this.fullPathMeta(this.peek)
+        const meta = this.fileMeta(this.peek)
         if (meta) {
           meta.peek = true
           open.push(meta)
@@ -131,68 +139,38 @@ export default {
 
       return open
     },
-    editorModel: {
-      get () {
-        const file = this.fileByFullPath(this.active)
-        if (!file)
-          return ''
-
-        return file.contents || ''
-      },
-      set (contents) {
-        this.PROJECT_WRITE_FILE({ fullPath: this.active, contents })
-      }
-    },
-    compiledMarkdown () {
-      try {
-        const contents = fileContents(this.files, ['README.md'])
-        return contents ? marked(contents, { sanitize: true, gfm: true }) : 'No README.md'
-      } catch (e) {
-        return 'No README.md'
-      }
-    },
     monacoLanguage () {
-      const file = this.fileByFullPath(this.active)
-      if (!file)
-        return 'text'
-
-      const { fullPath } = file
-      const fileType = parseFileType(fullPath)
-      const { monacoLanguage } = fileTypeMeta(fileType)
+      const { monacoLanguage } = fileTypeMeta(this.active)
       return monacoLanguage || 'text'
     }
   },
   methods: {
     ...mapMutations('Project', [
-      'PROJECT_RESET',
       'PROJECT_SET_ACTIVE',
-      'PROJECT_WRITE_FILE',
       'PROJECT_CLOSE_OPEN',
-      'PROJECT_SHOW_HELPER'
+      'PROJECT_SHOW_HELPER',
+      'PROJECT_TOUCH_FILE'
     ]),
     formatCode () {
       this.$refs.editor.getMonaco().trigger('anyString', 'editor.action.formatDocument')
     },
-    fullPathMeta (fullPath) {
-      const file = this.fileByFullPath(fullPath)
-      if (!file)
-        return null
+    fileMeta (name) {
+      const displayName = name.split('/').pop()
 
-      const { name } = file
-      const fileType = parseFileType(name)
+      const fileType = parseFileType(displayName)
       const { icon, color } = fileTypeMeta(fileType)
 
-      return { name, fullPath, icon, color }
+      return { name, displayName, icon, color }
     },
-    tabIconHidden (index, fullPath) {
-      return (!this.dirty.has(fullPath)
+    tabIconHidden (index, name) {
+      return (!this.dirty.has(name)
              && this.hoverIndex !== index
-             && fullPath !== this.active)
+             && name !== this.active)
              ? 'hidden'
              : null
     },
-    tabIcon (index, fullPath) {
-      return (this.dirty.has(fullPath)
+    tabIcon (index, name) {
+      return (this.dirty.has(name)
              && this.hoverIndexIcon !== index)
              ? 'mdi-circle-medium'
              : 'mdi-close'
@@ -227,10 +205,46 @@ export default {
         this.split.removeRowGutter(1)
         this.split.addColumnGutter(this.$refs.gutter, 1)
       }
+    },
+    async active (name) {
+      this.initEditorModel = true
+      try {
+        this.editorModel = await Zip.readFile(name)
+      } catch (e) {
+        this.editorModel = ''
+      }
+    },
+    editorModel (contents) {
+      // Don't write if switching file
+      if (this.initEditorModel) {
+        this.initEditorModel = false
+        return
+      }
+
+      Zip.writeFile({
+        name: this.active,
+        contents
+      })
+      this.PROJECT_TOUCH_FILE(this.active)
+    },
+    showInfo: {
+      immediate: true,
+      async handler (val) {
+        if (!val)
+          return
+
+        let compiledMarkdown = 'No README.md'
+        try {
+          const contents = await Zip.readFile('README.md')
+          if (contents)
+            compiledMarkdown = marked(contents, { sanitize: true, gfm: true })
+        } catch (e) {
+          // Silent
+        }
+
+        this.compiledMarkdown = compiledMarkdown
+      }
     }
-  },
-  beforeDestroy () {
-    this.PROJECT_RESET()
   }
 }
 </script>

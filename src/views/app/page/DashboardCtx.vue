@@ -32,7 +32,7 @@
       v-flex(xs4)
         tooltip(text="Dashboard Settings" bottom)
           v-btn.ma-0(
-            @click="clickToggleSettings"
+            @click="clickToggleSettings(null)"
             :color="isSettings ? 'white' : 'grey'"
             flat block large
           )
@@ -119,15 +119,19 @@ export default {
         : 'grey'
     },
     clickOpenExplorer (type) {
+      this.clickToggleSettings(false)
       if (this.isExploring && this.explorer.type === type)
         this.closeExplorer()
       else
         this.openExplorer(type)
     },
-    clickToggleSettings () {
+    clickToggleSettings (val = null) {
       this.DASHBOARD_SET_FOCUSED_WIDGET(null)
       this.DASHBOARD_SET_FOCUSED_INTEGRATION(null)
-      this.isSettings = !this.isSettings
+      this.isSettings = val === null ? !this.isSettings : val
+
+      if (this.isExploring && this.isSettings)
+        this.closeExplorer()
     },
     goBack () {
       if (this.focusedWidget)
@@ -138,7 +142,7 @@ export default {
         this.closeExplorer()
       else {
         this.DASHBOARD_SET_EDITING(false)
-        this.$router.go(-1)
+        this.$router.push('/app/d')
       }
     }
   }

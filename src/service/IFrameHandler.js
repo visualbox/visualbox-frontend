@@ -42,21 +42,20 @@ class IFrameHandler {
     widgets.forEach(widget => {
       try {
         // Get source code and config vars from widget
-        const { i, id, version, model } = widget
+        const { i, id, version, model, settings: { source } } = widget
 
         const code = this.widgetSourceMap(id, version)
 
         // Create iframe content with injected config vars
         this.refs[i][0].src = BuildIFrame(code, model)
-
+        
         /**
-         * Try to send initial data with a
-         * 2s timeout to let the window
-         * render.
+         * Try to send initial data when the
+         * IFrame is loaded.
          */
-        setTimeout(() => {
-          // this.onDataSourceChange(i, source)
-        }, 2000)
+        this.refs[i][0].addEventListener('load', () => {
+          this.onDataSourceChange(i, source)
+        })
       } catch (e) {
         console.log('Failed to generate a widget', e)
       }

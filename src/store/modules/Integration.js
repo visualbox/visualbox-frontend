@@ -40,7 +40,7 @@ const mutations = {
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
   },
-  [t.INTEGRATION_SET_CONFIG_MAP] (state, payload) {
+  [t.INTEGRATION_SET_MAPS] (state, payload) {
     let configMap
     try {
       configMap = JSON.parse(payload.configMap)
@@ -49,8 +49,10 @@ const mutations = {
     }
 
     const index = state.list.findIndex(({ id }) => id === payload.id)
-    if (index >= 0)
+    if (index >= 0) {
       Vue.set(state.list[index], 'configMap', configMap)
+      Vue.set(state.list[index], 'readme', payload.readme)
+    }
   }
 }
 
@@ -105,7 +107,8 @@ const actions = {
     try {
       // Commit config map
       const configMap = await Zip.readFile('config.json')
-      commit(t.INTEGRATION_SET_CONFIG_MAP, { id, configMap })
+      const readme = await Zip.readFile('README.md')
+      commit(t.INTEGRATION_SET_MAPS, { id, configMap, readme })
 
       await Storage.put(`${id}.zip`, blob)
     } catch (e) {

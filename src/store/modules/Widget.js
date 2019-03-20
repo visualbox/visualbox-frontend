@@ -40,7 +40,7 @@ const mutations = {
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
   },
-  [t.WIDGET_SET_CONFIG_SOURCE_MAP] (state, payload) {
+  [t.WIDGET_SET_MAPS] (state, payload) {
     let configMap
     try {
       configMap = JSON.parse(payload.configMap)
@@ -52,6 +52,7 @@ const mutations = {
     if (index >= 0) {
       Vue.set(state.list[index], 'configMap', configMap)
       Vue.set(state.list[index], 'sourceMap', payload.sourceMap)
+      Vue.set(state.list[index], 'readme', payload.readme)
     }
   }
 }
@@ -108,7 +109,8 @@ const actions = {
       // Commit config/source maps
       const configMap = await Zip.readFile('config.json')
       const sourceMap = await Zip.readFile('index.html')
-      commit(t.WIDGET_SET_CONFIG_SOURCE_MAP, { id, configMap, sourceMap })
+      const readme = await Zip.readFile('README.md')
+      commit(t.WIDGET_SET_MAPS, { id, configMap, sourceMap, readme })
 
       await Storage.put(`${id}.zip`, blob, {
         bucket: process.env.VUE_APP_BUCKET_WIDGET

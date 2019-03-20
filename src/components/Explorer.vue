@@ -153,8 +153,7 @@ export default {
         : this.listWidget
 
       return list.map(item => {
-        let readme = get(item, ['files', 'README.md', 'contents'], '')
-        readme = marked(readme, {
+        const readme = marked(item.readme, {
           sanitize: true,
           gfm: true,
           silent: true
@@ -352,7 +351,13 @@ export default {
         top 0; left 0; right 0; bottom 0;
         background-size cover
         background-position center
-        filter brightness(0.4)
+        filter brightness(0.5)
+
+        &:before
+          content ''
+          position absolute
+          top 0; left 0; right 0; bottom 0;
+          background-image linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, .75))
       
       .text
         position absolute

@@ -38,6 +38,12 @@ export default (name: string) => {
         color: '#4180b1',
         monacoLanguage: 'python'
       }
+    case 'txt':
+      return {
+        icon: 'mdi-script-text',
+        color: '#b9ae00',
+        monacoLanguage: 'text'
+      }
     default:
       return {
         icon: 'mdi-file-question',

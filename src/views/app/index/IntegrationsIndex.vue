@@ -70,7 +70,7 @@ export default {
     },
     settings: {
       name: '',
-      runtime: 'nodejs'
+      runtime: 'node'
     }
   }),
   computed: mapState('App', ['isLoading']),

@@ -52,9 +52,9 @@
       v-for="(item, index) in consoleBuffer"
       :key="index"
     )
-      template(v-if="item.status")
+      //- template(v-if="item.status")
         b.mr-1(:style="{ 'color': item.status.color }") {{ item.status.text }}
-      pre {{ item.ln }}
+      pre(:style="{ 'color': item.status.color || 'white' }") {{ item.ln }}
 </template>
 
 <script>
@@ -272,7 +272,6 @@ export default {
          * component.
          */
         case 'OUTPUT':
-          console.log('OUTPUT')
           this.print(m.data, T_OUTPUT)
           break;
 

@@ -44,7 +44,12 @@ class DashboardHandler {
        * know where to send the data.
        */
       case 'OUTPUT':
-        const { i, data } = m
+        let { i, data } = m
+
+        try {
+          data = JSON.parse(data)
+        } catch (e) {}
+
         this.data[i] = data
         IFrameHandler.onDataChange(i, data)
 

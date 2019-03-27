@@ -28,17 +28,17 @@ export default {
     runtimes: [
       {
         text: 'Node.js',
-        runtime: 'nodejs',
+        runtime: 'node',
         icon: 'mdi-nodejs',
         color: '#43853d'
-      }
-      /*
+      },
       {
         text: 'Python 3.6',
         runtime: 'python3',
         icon: 'mdi-language-python',
         color: '#4180b1'
       }
+      /*
       {
         text: 'Java',
         runtime: 'java',

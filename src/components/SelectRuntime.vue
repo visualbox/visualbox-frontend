@@ -32,11 +32,24 @@ export default {
         icon: 'mdi-nodejs',
         color: '#43853d'
       },
+      // Backward compat
+      {
+        text: 'Node.js',
+        runtime: 'nodejs',
+        icon: 'mdi-nodejs',
+        color: '#43853d'
+      },
       {
         text: 'Python 3.6',
         runtime: 'python3',
         icon: 'mdi-language-python',
         color: '#4180b1'
+      },
+      {
+        text: 'Go',
+        runtime: 'golang',
+        icon: 'mdi-language-go',
+        color: '#29beb1'
       }
       /*
       {
@@ -44,12 +57,6 @@ export default {
         runtime: 'java',
         icon: 'mdi-language-java',
         color: '#e11e21'
-      },
-      {
-        text: 'Go',
-        runtime: 'go',
-        icon: 'mdi-language-go',
-        color: '#29beb1'
       },
       {
         text: 'C',

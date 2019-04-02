@@ -18,6 +18,8 @@ VisualBox is for visualizing any kind of data. You can for example:
 VisualBox maintains a **public registry** for integrations and widgets which lets you re-use existing implementations. You can fork registry items and extend or modify the functionality to suit your own needs. Different **runtimes** are supported for integrations to run in:
 
 - Node.js 11
+- Python 3
+- Go
 
 ...and more are added all the time!
 

@@ -38,6 +38,12 @@ export default (name: string) => {
         color: '#4180b1',
         monacoLanguage: 'python'
       }
+    case 'go':
+      return {
+        icon: 'mdi-language-go',
+        color: '#29beb1',
+        monacoLanguage: 'go'
+      }
     case 'txt':
       return {
         icon: 'mdi-script-text',

@@ -54,6 +54,8 @@ Example:
 
 Output:
 
+![Text](./text.png)
+
 ### Password
 
 Renders a simple password text field.
@@ -77,6 +79,8 @@ Example:
 ```
 
 Output:
+
+![Password](./password.png)
 
 ### Color
 
@@ -102,6 +106,8 @@ Example:
 
 Output:
 
+![Color](./color.png)
+
 ### Switch
 
 Renders an on / off switch.
@@ -125,6 +131,8 @@ Example:
 ```
 
 Output:
+
+![Switch](./switch.png)
 
 ### Slider
 
@@ -154,6 +162,8 @@ Example:
 
 Output:
 
+![Slider](./slider.png)
+
 ### Date
 
 Renders a date picker.
@@ -177,6 +187,8 @@ Example:
 ```
 
 Output:
+
+![Date](./date.png)
 
 ### Select
 
@@ -223,3 +235,5 @@ Example:
 ```
 
 Output:
+
+![Select](./select.png)

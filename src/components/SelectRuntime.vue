@@ -32,6 +32,13 @@ export default {
         icon: 'mdi-nodejs',
         color: '#43853d'
       },
+      // Backward compat
+      {
+        text: 'Node.js',
+        runtime: 'nodejs',
+        icon: 'mdi-nodejs',
+        color: '#43853d'
+      },
       {
         text: 'Python 3.6',
         runtime: 'python3',

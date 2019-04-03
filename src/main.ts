@@ -9,6 +9,7 @@ import '@/assets/styles/global.styl'
 // Libraries
 import '@/lib/amplify'
 import '@/lib/vuetify'
+import '@/lib/vue-analytics'
 
 // Services
 import '@/service/RegisterServiceWorker'

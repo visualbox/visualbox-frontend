@@ -28,6 +28,7 @@
     "split-grid": "^1.0.9",
     "uuid": "^3.3.2",
     "vue": "^2.6.3",
+    "vue-analytics": "^5.16.4",
     "vue-color": "^2.7.0",
     "vue-grid-layout": "2.3.0",
     "vue-router": "^3.0.1",

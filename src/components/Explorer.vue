@@ -229,10 +229,10 @@ export default {
 
         if (this.config.type === 'INTEGRATION')
           await this.addIntegration({ id, version })
-        else {
+        else
           await this.addWidget({ id, version })
-          this.closeExplorer()
-        }
+
+        this.closeExplorer()
       } catch (e) {
         console.log('Failed to add', e)
       } finally {

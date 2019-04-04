@@ -83,7 +83,7 @@ const mutations = {
     state.loaded = cloneDeep(payload)
   },
   [t.DASHBOARD_CONCAT_LOADED] (state, payload) {
-    state.loaded = mergeDeep(state.loaded, payload)
+    state.loaded = cloneDeep(mergeDeep(state.loaded, payload))
   },
   [t.DASHBOARD_COMMIT_LOADED] (state) {
     const { loaded } = state
@@ -277,6 +277,7 @@ const actions = {
       item.model = await dispatch('applyDefaults', { type: 'INTEGRATION', item })
 
       commit(t.DASHBOARD_ADD_INTEGRATION, item)
+      commit(t.DASHBOARD_SET_FOCUSED_INTEGRATION, item.i)
 
       DashboardHandler.addIntegration(item)
     } catch (e) {

@@ -39,19 +39,30 @@ div
     //- @change="v => internalValue[field.name] = v"
     //-
     //- v-model="internalValue[field.name]"
-    template(v-if="field.type === 'slider'")
-      .ma-0 {{ field.label }}
-      v-slider.mt-0(
-        @change="v => internalValue[field.name] = v"
-        :value="internalValue[field.name]"
-        :label="String(internalValue[field.name])"
-        :max="field.max"
-        :min="field.min"
-        :thumb-size="32"
-        inverse-label
-        thumb-label
-        hide-details
+    v-layout(row v-if="field.type === 'slider'")
+      v-flex
+        .ma-0 {{ field.label }}
+        v-slider.mt-0(
+          @change="v => internalValue[field.name] = v"
+          :value="internalValue[field.name]"
+          :max="field.max"
+          :min="field.min"
+          :thumb-size="32"
+          thumb-label
+          hide-details
+        )
+      v-flex(
+        shrink
+        style="max-width:60px"
       )
+        v-text-field.mt-0.ml-3(
+          @input="v => inputSlider(v, field)"
+          :value="internalValue[field.name]"
+          type="number"
+          style="padding-top:5px"
+          hide-details
+          single-line
+        )
     //- Select type
     v-select(
       v-if="field.type === 'select'"
@@ -111,7 +122,16 @@ export default {
   methods: {
     inputColor: debounce(function (fieldName, { hex }) {
       this.internalValue[fieldName] = hex
-    }, 20)
+    }, 20),
+    inputSlider (val, field) {
+      try {
+        val = parseInt(val, 10)
+        if (!isNaN(val) && val >= field.min && val <= field.max)
+          this.internalValue[field.name] = val
+      } catch (e) {
+        console.log('Could not change slider value, ', e)
+      }
+    }
   }
 }
 </script>

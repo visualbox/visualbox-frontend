@@ -76,11 +76,11 @@ The [configuration model](/configmodel/) is accessible through the `visualbox.MO
 myVariable = visualbox.MODEL["myVariable"]
 ```
 
-To send data back to VisualBox dashboard, use the `visualbox.output()` method:
+To send data back to VisualBox dashboard, use the `visualbox.Output()` method (with a capital "O"):
 
 ``` go
-visualbox.output(myVariable)
-// or: visualbox.output("a string")
+visualbox.Output(myVariable)
+// or: visualbox.Output("a string")
 ```
 
-The `output()` method will try to parse a Go map into a JSON string.
+The `Output()` method will try to parse a Go map into a JSON string.

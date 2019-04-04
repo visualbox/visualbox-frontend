@@ -95,9 +95,29 @@ export default {
       this.DASHBOARD_CONCAT_LOADED({ widgets })
     },
     getWidgetStyle (settings) {
+      // rgba
       const { r, g, b, a } = settings.rgba
-      const bgc = `rgba(${r}, ${g}, ${b}, ${a})`
-      return { 'background-color': bgc }
+      // radius
+      const radius = typeof this.loaded.settings.radius === 'undefined'
+        ? 5
+        : this.loaded.settings.radius
+      // shadow
+      const shadow = typeof this.loaded.settings.shadow === 'undefined'
+        ? 3
+        : this.loaded.settings.shadow
+      // shadowRadius
+      const shadowRadius = typeof this.loaded.settings.shadowRadius === 'undefined'
+        ? 5
+        : this.loaded.settings.shadowRadius
+
+      const cssBgc = `rgba(${r}, ${g}, ${b}, ${a})`
+      const cssRadius = `${radius}px`
+      const cssShadow = `0 0 ${shadowRadius}px rgba(0, 0, 0, ${shadow / 100}`
+      return {
+        'background-color': cssBgc,
+        'border-radius': cssRadius,
+        'box-shadow': cssShadow
+      }
     },
     isFocused (wI) {
       return wI === get(this, 'focusedWidget.i', null)
@@ -150,6 +170,8 @@ export default {
   background #FFF
 
   .vue-grid-item
+    overflow hidden
+
     &.focused
       // z-index 3
       outline 2px dashed #FFF

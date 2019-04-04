@@ -4,11 +4,10 @@
     navigation-drawer
   .grid-item.gutter(ref="gutter")
   .grid-item
-    v-scroll-x-transition(mode="out-in")
-      router-view(
-        v-if="appIsReady"
-        :class="{ 'no-transition': disableTransition }"
-      )
+    router-view(
+      v-if="appIsReady"
+      :class="{ 'no-transition': disableTransition }"
+    )
 </template>
 
 <script>

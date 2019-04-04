@@ -45,8 +45,7 @@
               ) {{ item.icon }}
 
   #context
-    v-scroll-x-transition(mode="out-in")
-      router-view(name="context")
+    router-view(name="context")
 </template>
 
 <script lang="ts">

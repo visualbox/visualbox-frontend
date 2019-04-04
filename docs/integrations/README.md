@@ -72,7 +72,7 @@ import "visualbox"
 The [configuration model](/configmodel/) is accessible through the `visualbox.MODEL` interface:
 
 ``` go
-# visualbox.MODEL[<name>]
+// visualbox.MODEL[<name>]
 myVariable = visualbox.MODEL["myVariable"]
 ```
 

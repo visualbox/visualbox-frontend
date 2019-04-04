@@ -65,20 +65,20 @@ The entrypoint for the Go environment is a `main.go` file in the root folder. A 
 
 You must import the globally accessible `visualbox` package to access the [configuration model](/configmodel/) as well as send data back to VisualBox dashboard:
 
-``` golang
+``` go
 import "visualbox"
 ```
 
 The [configuration model](/configmodel/) is accessible through the `visualbox.MODEL` interface:
 
-``` golang
+``` go
 # visualbox.MODEL[<name>]
 myVariable = visualbox.MODEL["myVariable"]
 ```
 
 To send data back to VisualBox dashboard, use the `visualbox.output()` method:
 
-``` js
+``` go
 visualbox.output(myVariable)
 // or: visualbox.output("a string")
 ```

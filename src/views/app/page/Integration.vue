@@ -15,7 +15,7 @@ export default {
     Editor,
     HelperContainer
   },
-  computed: mapState('Project', ['ready', 'id']),
+  computed: mapState('Project', ['ready', 'id', 'dirty']),
   methods: {
     ...mapGetters('Integration', ['integrationById']),
     ...mapActions('Integration', [
@@ -37,9 +37,10 @@ export default {
     ]),
     async saveProject (files) {
       try {
-        // Save files only
+        // Save files only (if dirty)
         if (files) {
-          await this.commitFiles(await this.saveFiles())
+          if (this.dirty.size > 0)
+            await this.commitFiles(await this.saveFiles())
 
         // Save integration metadata
         } else
@@ -129,10 +130,7 @@ export default {
     EventBus.$off('vbox:depublishProject')
 
     try {
-      await Promise.all([
-        this.saveProject(),
-        this.saveProject(true)
-      ])
+      await this.saveProject(true)
       this.PROJECT_RESET()
     } catch (e) {
       this.setSnackbar({

@@ -32,7 +32,6 @@
     "vue-color": "^2.7.0",
     "vue-grid-layout": "2.3.0",
     "vue-router": "^3.0.1",
-    "vue-split-panel": "^1.0.4",
     "vuetify": "^1.5.0",
     "vuex": "^3.0.1",
     "vuex-router-sync": "^5.0.0"
@@ -45,7 +44,6 @@
     "@types/lodash-es": "^4.17.1",
     "@types/node": "^11.11.3",
     "@types/uuid": "^3.4.4",
-    "@types/vivus": "^0.4.0",
     "@vue/cli-plugin-babel": "^3.4.0",
     "@vue/cli-plugin-pwa": "^3.3.0",
     "@vue/cli-plugin-typescript": "^3.3.0",
@@ -53,15 +51,12 @@
     "@vue/cli-service": "^3.4.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "babel-core": "^6.26.3",
-    "butternut": "^0.4.6",
     "jest": "^24.0.0",
     "lodash-es": "^4.17.11",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
     "raw-loader": "^0.5.1",
-    "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-nodent": "^0.2.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "ts-jest": "^23.10.5",
@@ -71,7 +66,7 @@
     "vuepress": "^0.14.9",
     "vuetify-loader": "^1.2.0",
     "webpack": "^4.28.4",
-    "webpack-bundle-analyzer": "^3.0.3",
+    "webpack-bundle-analyzer": "^3.2.0",
     "worker-loader": "^2.0.0"
   }
 }

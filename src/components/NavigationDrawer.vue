@@ -117,6 +117,9 @@ export default Vue.extend({
     position absolute
     top 0; right 0; bottom 0; left 60px;
 
+    > div
+      background-color $vb-drawer-ctx
+
     >>> .v-list
       padding 0
       background unset

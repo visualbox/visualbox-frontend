@@ -71,6 +71,7 @@ const T_INFO = 'T_INFO'
 const T_WARNING = 'T_WARNING'
 const T_ERROR = 'T_ERROR'
 const T_OUTPUT = 'T_OUTPUT'
+const T_TICK = 'T_TICK'
 
 export default {
   name: 'HelperContainer',
@@ -190,6 +191,9 @@ export default {
      * Print a line to the console.
      */
     print (ln, statusType) {
+      if (statusType === T_TICK)
+        return
+
       if (this.consoleBuffer.length > BUFFER_MAX)
         this.consoleBuffer.shift()
 

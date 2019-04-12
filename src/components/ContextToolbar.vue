@@ -16,7 +16,7 @@ export default Vue.extend({
 
 .v-toolbar
   white-space nowrap
-  background-color $vb-app-ctx-toolbar
+  background-color $vb-app-ctx-toolbar !important
 
   >>> .v-toolbar__content
     padding 0 16px !important

@@ -3,13 +3,14 @@
   context-toolbar
     .subheading Dashboards
     v-spacer
-    v-btn(
-      icon
-      @click="submit"
-      :loading="isLoading"
-      :disabled="isLoading"
-    )
-      v-icon mdi-plus-box
+    tooltip(text="New Dashboard" :open-delay="800" bottom)
+      v-btn(
+        icon
+        @click="submit"
+        :loading="isLoading"
+        :disabled="isLoading"
+      )
+        v-icon mdi-plus-box
 
   //- List
   v-list.hover-actions(dense)

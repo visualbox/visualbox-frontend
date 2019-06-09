@@ -91,17 +91,45 @@
           hide-details
           single-line
         )
+    v-layout.mt-3(column xs12)
+      v-layout(row)
+        v-flex
+          v-switch.ma-1(
+            v-model="isPublic"
+            label="Public"
+            color="primary"
+            hide-details
+          )
+        v-flex(
+          v-if="isPublic"
+          align-self-end
+          shrink
+        )
+          tooltip(text="Open Public Dashboard" :open-delay="800" bottom)
+            v-btn(
+              :href="publicUrl"
+              target="_blank"
+              icon
+            )
+              v-icon mdi-launch
+      v-flex.mt-2
+        .body-2.grey--text
+          | This option will make your dashboard publicly available.
+          | Integration configurations <b class="white--text">will be hidden</b>. Widget configurations <b class="white--text">will not be hidden</b>.
+          | Only enable this option if you are okay with that.
 </template>
 
 <script>
 import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations } from 'vuex'
+import { Tooltip } from '@/components'
 
 export default {
   name: 'DashboardSettings',
   components: {
-    'color-picker': Chrome
+    'color-picker': Chrome,
+    Tooltip
   },
   data: () => ({
     colors: '#FFF',
@@ -115,9 +143,16 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['loaded']),
+    publicUrl () {
+      return `/public/${this.loaded.id}`
+    },
     label: {
       get () { return this.loaded.label },
       set (label) { this.DASHBOARD_CONCAT_LOADED({ label }) }
+    },
+    isPublic: {
+      get () { return !!this.loaded.public },
+      set (isPublic) { this.DASHBOARD_CONCAT_LOADED({ public: isPublic }) }
     },
     bgc: {
       get () {

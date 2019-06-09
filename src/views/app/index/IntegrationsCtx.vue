@@ -3,18 +3,20 @@
   context-toolbar
     .subheading Manage Integrations
     v-spacer
-    v-btn(
-      @click="toggleExplorer"
-      icon
-    )
-      v-icon mdi-magnify
-    v-btn(
-      @click="addIntegration"
-      :loading="isLoading"
-      :disabled="isLoading"
-      icon
-    )
-      v-icon mdi-plus-box
+    tooltip(text="Explore Integrations" :open-delay="800" bottom)
+      v-btn(
+        @click="toggleExplorer"
+        icon
+      )
+        v-icon mdi-magnify
+    tooltip(text="New Integration" :open-delay="800" bottom)
+      v-btn(
+        @click="addIntegration"
+        :loading="isLoading"
+        :disabled="isLoading"
+        icon
+      )
+        v-icon mdi-plus-box
 
   //- List
   v-list.hover-actions(dense)

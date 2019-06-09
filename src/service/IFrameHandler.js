@@ -5,6 +5,17 @@ class IFrameHandler {
   attachStore (store) {
     this.store = store
     this.refs = null
+    this.isPublicDashboard = false
+  }
+
+  /**
+   * Configure IFrame handler instance so
+   * that widget source is fetched from
+   * correct Vuex module for public dashboards.
+   * Significant in this.widgets and this.widgetSourceMap().
+   */
+  makePublicDashboard () {
+    this.isPublicDashboard = true
   }
 
   attachRefs (refs) {
@@ -15,7 +26,9 @@ class IFrameHandler {
    * Convenience store mappers.
    */
   get widgets () {
-    return this.store.state.Dashboard.loaded.widgets
+    return this.isPublicDashboard
+           ? this.store.state.Public.loaded.widgets
+           : this.store.state.Dashboard.loaded.widgets
   }
 
   /**
@@ -25,6 +38,12 @@ class IFrameHandler {
    * fetched from store.
    */
   widgetSourceMap (id, version) {
+    // Public dashboard, exception.
+    if (this.isPublicDashboard) {
+      const hash = `${id}:${version}`
+      return this.store.state.Public.widgetSourceMap[hash]
+    }
+
     // Local, fetch from store
     if (version === '^') {
       return this.store.getters['Widget/sourceMapById'](id)

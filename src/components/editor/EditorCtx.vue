@@ -1,13 +1,15 @@
 <template lang="pug">
 #editor-ctx
   context-toolbar
-    v-btn(@click="goBack" icon)
-      v-icon mdi-menu-left
+    tooltip(text="Back" :open-delay="800" bottom)
+      v-btn(@click="goBack" icon)
+        v-icon mdi-menu-left
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
-      v-btn(@click="saveProject" icon)
-        v-icon mdi-floppy
+      tooltip(text="Save" :open-delay="800" bottom)
+        v-btn(@click="saveProject" icon)
+          v-icon mdi-floppy
 
   v-list.hover-actions(dense)
     //- Info

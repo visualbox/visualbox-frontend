@@ -32,7 +32,8 @@ export default {
     ...mapState('Cognito', ['user']),
     ...mapState('Route', ['path']),
     showToolbar () {
-      return this.path.substr(0, 4) !== '/app'
+      return this.path.substr(0, 4) !== '/app' &&
+             this.path.substr(0, 7) !== '/public'
     }
   },
   methods: mapActions('Cognito', ['signOut'])

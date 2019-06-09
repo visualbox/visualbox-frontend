@@ -1,15 +1,18 @@
 <template lang="pug">
 #dashboard-ctx(v-if="loaded")
   context-toolbar
-    v-btn(@click="goBack" icon)
-      v-icon mdi-menu-left
+    tooltip(text="Back" :open-delay="800" bottom)
+      v-btn(@click="goBack" icon)
+        v-icon mdi-menu-left
     .subheading {{ loaded.label }}
     template(v-if="!isExploring")
       v-spacer
-      v-btn(@click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)" icon)
-        v-icon {{ fullscreenIcon }}
-      v-btn(@click="DASHBOARD_SET_EDITING(!isEditing)" icon)
-        v-icon {{ editingIcon }}
+      tooltip(text="Fullscreen" :open-delay="800" bottom)
+        v-btn.mr-1(@click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)" icon)
+          v-icon {{ fullscreenIcon }}
+      tooltip(text="Move / Resize" :open-delay="800" bottom)
+        v-btn(@click="DASHBOARD_SET_EDITING(!isEditing)" icon)
+          v-icon {{ editingIcon }}
 
   template(v-if="!focusedIntegration && !focusedWidget")
     v-layout

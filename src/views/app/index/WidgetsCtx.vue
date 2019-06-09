@@ -3,18 +3,20 @@
   context-toolbar
     .subheading Manage Widgets
     v-spacer
-    v-btn(
-      @click="toggleExplorer"
-      icon
-    )
-      v-icon mdi-magnify
-    v-btn(
-      icon
-      @click="addWidget"
-      :loading="isLoading"
-      :disabled="isLoading"
-    )
-      v-icon mdi-plus-box
+    tooltip(text="Explore Widgets" :open-delay="800" bottom)
+      v-btn(
+        @click="toggleExplorer"
+        icon
+      )
+        v-icon mdi-magnify
+    tooltip(text="New Widget" :open-delay="800" bottom)
+      v-btn(
+        icon
+        @click="addWidget"
+        :loading="isLoading"
+        :disabled="isLoading"
+      )
+        v-icon mdi-plus-box
 
   //- List
   v-list.hover-actions(dense)

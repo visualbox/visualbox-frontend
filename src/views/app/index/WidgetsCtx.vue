@@ -18,14 +18,14 @@
 
   //- List
   v-list.hover-actions(dense)
-    v-list-tile(
+    v-list-item(
       v-for="(item, index) in list"
       :key="index"
       @click="$router.push(`/app/w/${item.id}`)"
     )
-      v-list-tile-content
-        v-list-tile-sub-title {{ item.settings.name || 'Untitled' }}
-      v-list-tile-action
+      v-list-item-content
+        v-list-item-subtitle {{ item.settings.name || 'Untitled' }}
+      v-list-item-action
         tooltip(text="Delete" :open-delay="800" bottom)
           v-icon(@click.stop="deleteWidget(item.id)" small) mdi-trash-can-outline
 </template>

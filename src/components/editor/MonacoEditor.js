@@ -3,14 +3,7 @@ import * as monaco from 'monaco-editor'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 import EventBus from '@/lib/eventBus'
 
-declare global {
-  interface Window {
-    monaco: any
-    require: any
-  }
-}
-
-Vue.component('monaco-editor', Vue.extend({
+Vue.component('monaco-editor', {
   name: 'MonacoEditor',
 
   props: {
@@ -36,8 +29,8 @@ Vue.component('monaco-editor', Vue.extend({
   },
 
   data: () => ({
-    editor: null as any,
-    resizeSensor: null as any
+    editor: null,
+    resizeSensor: null
   }),
 
   watch: {
@@ -84,7 +77,7 @@ Vue.component('monaco-editor', Vue.extend({
   },
 
   methods: {
-    initMonaco (monacoInstance: any) {
+    initMonaco (monacoInstance) {
       const options = Object.assign(
         {
           value: this.value,
@@ -120,7 +113,7 @@ Vue.component('monaco-editor', Vue.extend({
         this.$emit('model', e)
       })
       */
-      this.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
+      this.editor.onDidChangeModelContent((e /* monaco.editor.IModelContentChangedEvent */) => {
         const value = this.editor.getValue()
         if (this.value !== value)
           this.$emit('change', value, e)
@@ -149,7 +142,7 @@ Vue.component('monaco-editor', Vue.extend({
       */
     },
 
-    getMonaco (): any {
+    getMonaco () {
       return this.editor
     },
 
@@ -161,4 +154,4 @@ Vue.component('monaco-editor', Vue.extend({
   render (h) {
     return h('div')
   }
-}))
+})

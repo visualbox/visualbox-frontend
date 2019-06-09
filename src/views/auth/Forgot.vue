@@ -22,7 +22,7 @@ base-card
         v-if="false"
         to="/auth/resend"
         color="primary"
-        outline
+        outlined
       ) Resend verification
       v-spacer
       v-btn.ma-0(

@@ -11,21 +11,22 @@ div
       :label="field.label"
       :type="field.type"
       hide-details
-      outline
+      outlined
     )
     //- Color type
-    v-expansion-panel.mt-3(v-if="field.type === 'color'")
-      v-expansion-panel-content
-        div(slot="header")
+    v-expansion-panels.mt-3.elevation-1(v-if="field.type === 'color'")
+      v-expansion-panel
+        v-expansion-panel-header
           v-avatar.mr-3(
             :size="30"
             :color="internalValue[field.name]"
           )
           | {{ field.label }}
-        color-picker(
-          :value="internalValue[field.name] || '#FFF'"
-          @input="v => inputColor(field.name, v)"
-        )
+        v-expansion-panel-content
+          color-picker(
+            :value="internalValue[field.name] || '#FFF'"
+            @input="v => inputColor(field.name, v)"
+          )
     //- Switch type
     v-switch(
       v-if="field.type === 'switch'"
@@ -48,6 +49,7 @@ div
           :max="field.max"
           :min="field.min"
           :thumb-size="32"
+          track-color="grey darken-2"
           thumb-label
           hide-details
         )
@@ -59,7 +61,7 @@ div
           @input="v => inputSlider(v, field)"
           :value="internalValue[field.name]"
           type="number"
-          style="padding-top:5px"
+          style="padding-top:8px"
           hide-details
           single-line
         )
@@ -71,28 +73,30 @@ div
       :label="field.label"
       item-text="label"
       item-value="value"
+      outlined
     )
     //- Date type
     v-menu(
       v-if="field.type === 'date'"
       :close-on-content-click="false"
       transition="scale-transition"
-      lazy offset-y full-width
+      offset-y full-width
       min-width="290px"
     )
-      v-text-field(
-        slot="activator"
-        v-model="internalValue[field.name]"
-        :label="field.label"
-        append-icon="mdi-calendar"
-        readonly hide-details
-        outline
-      )
-      v-date-picker(
-        v-model="internalValue[field.name]"
-        color="primary"
-        no-title scrollable
-      )
+      template(#activator="{ on }")
+        v-text-field(
+          v-on="on"
+          v-model="internalValue[field.name]"
+          :label="field.label"
+          append-icon="mdi-calendar"
+          readonly hide-details
+          outlined
+        )
+        v-date-picker(
+          v-model="internalValue[field.name]"
+          color="primary"
+          no-title scrollable
+        )
 
   //- Integration config parse errors
   v-alert(
@@ -100,7 +104,7 @@ div
     :key="index"
     :value="true"
     type="error"
-    outline
+    outlined
   ) {{ item }}
 </template>
 

@@ -9,28 +9,32 @@
       fullscreen
       hide-overlay
       transition="dialog-bottom-transition"
+      content-class="data-source"
     )
-      v-expansion-panel(slot="activator")
-        v-expansion-panel-content(expand-icon="")
-          div(slot="header")
-            v-icon(small).ml-2.mr-4 mdi-code-braces
-            | Data Source
+      template(#activator="{ on }")
+        v-expansion-panels.elevation-1
+          v-expansion-panel(v-on="on")
+            v-expansion-panel-header(
+              expand-icon=""
+              style="min-height: unset;"
+            )
+              v-icon(small).ml-2.mr-4 mdi-code-braces
+              | Data Source
       v-card
-        v-toolbar(fixed)
-          v-btn(@click="dialog = false" icon)
+        v-toolbar(color="black")
+          v-btn.ma-0(@click="dialog = false" icon)
             v-icon mdi-close
           v-toolbar-title Data Source
           v-spacer
           v-toolbar-items
-            v-btn(@click="updateDataSource" flat) Save
-        v-container.mt-5(fluid)
+            v-btn(@click="updateDataSource" text) Save
+        v-container(fluid)
           v-layout(
-            align-center
             justify-center
-            fill-height row
+            row
           )
             v-flex(xs12 sm12 md10 lg8 xl6)
-              v-treeview#data-source-tree.mt-3(
+              v-treeview#data-source-tree(
                 :items="dataTree"
                 :active.sync="active"
                 :open.sync="open"
@@ -41,15 +45,16 @@
                 template(slot="label" slot-scope="{ item }")
                   span(v-html="item.text")
 
-    v-expansion-panel.mt-3
-      v-expansion-panel-content
-        div(slot="header")
+    v-expansion-panels.mt-3.elevation-1
+      v-expansion-panel
+        v-expansion-panel-header
           v-avatar.mr-3(
             :size="30"
             :color="bgc"
           )
           | Background Color
-        color-picker(v-model="bgc")
+        v-expansion-panel-content
+          color-picker(v-model="bgc")
 
     input-types.mt-3(
       v-model="model"

@@ -64,7 +64,7 @@ base-card
           v-btn.ma-0(
             to="/auth"
             color="primary"
-            outline
+            outlined
           ) Sign in instead
           v-btn.ma-0(
             :disabled="!form"

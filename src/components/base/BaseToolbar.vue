@@ -2,7 +2,7 @@
 v-container.base-toolbar(v-if="showToolbar")
   v-toolbar(
     color="transparent"
-    flat clipped-left
+    flat
   )
     img(
       @click="$router.push('/')"
@@ -14,11 +14,11 @@ v-container.base-toolbar(v-if="showToolbar")
       v-btn(
         href="https://docs.visualbox.io"
         target="_new"
-        flat exact
+        text exact
       ) Docs
       v-btn(
         to="/auth"
-        flat exact
+        text exact
       ) Sign In
 </template>
 
@@ -43,14 +43,16 @@ export default {
 .base-toolbar
   padding 0
   max-height 64px
+  z-index 10
 
   img
     width 40px
     cursor pointer
 
   .v-toolbar__title
-    cursor pointer
+    padding-left 15px
     font-weight 300
+    cursor pointer
 
   >>> .v-toolbar__content
     padding 0 0 0 16px !important

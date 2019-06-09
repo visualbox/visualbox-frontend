@@ -8,7 +8,7 @@ import '@/assets/styles/global.styl'
 
 // Libraries
 import '@/lib/amplify'
-import '@/lib/vuetify'
+import vuetify from '@/lib/vuetify'
 import '@/lib/vue-analytics'
 
 // Services
@@ -28,5 +28,6 @@ Vue.config.errorHandler = function (err, vm, info) {
 new Vue({
   router,
   store,
+  vuetify,
   render: h => h(App)
 }).$mount('#app')

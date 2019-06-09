@@ -18,7 +18,7 @@
           v-btn.ma-0(
             @click="clickOpenExplorer('INTEGRATION')"
             :color="buttonColorExplorer('INTEGRATION')"
-            flat block large
+            text block large
           )
             v-icon mdi-source-pull
       v-flex(xs4)
@@ -26,7 +26,7 @@
           v-btn.ma-0(
             @click="clickOpenExplorer('WIDGET')"
             :color="buttonColorExplorer('WIDGET')"
-            flat block large
+            text block large
           )
             v-icon mdi-hexagon
       v-flex(xs4)
@@ -34,7 +34,7 @@
           v-btn.ma-0(
             @click="clickToggleSettings(null)"
             :color="isSettings ? 'white' : 'grey'"
-            flat block large
+            text block large
           )
             v-icon mdi-settings
 

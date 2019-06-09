@@ -8,7 +8,7 @@ base-card
         v-slide-y-transition(mode="out-in")
           v-chip(
             v-if="model"
-            outline
+            outlined
             color="white"
             @click.native="model--"
           )

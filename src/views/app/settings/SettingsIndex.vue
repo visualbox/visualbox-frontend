@@ -10,7 +10,7 @@ v-container(fill-height)
             :disabled="loading.info"
             :rules="[rules.required('Enter full name')]"
             label="Full Name"
-            outline
+            outlined
           )
       v-layout
         v-spacer
@@ -19,7 +19,7 @@ v-container(fill-height)
           :loading="loading.info"
           @click="submitInfo"
           color="primary"
-          large outline
+          large outlined
         ) Update
 
       .headline.mb-3.mt-4 Change Email
@@ -30,7 +30,7 @@ v-container(fill-height)
             :disabled="loading.changeEmail"
             :rules="[rules.required('Enter email address')]"
             label="Email"
-            outline
+            outlined
           )
       v-layout
         v-spacer
@@ -39,7 +39,7 @@ v-container(fill-height)
           :loading="loading.changeEmail"
           @click="submitEmail"
           color="primary"
-          large outline
+          large outlined
         ) Change
 
       v-container.mt-4.pa-0(grid-list-lg)
@@ -52,7 +52,7 @@ v-container(fill-height)
               :rules="[rules.required('Enter your old password'), rules.pwdLength]"
               label="Old password"
               type="password"
-              outline
+              outlined
             )
           v-flex(xs12 sm6)
             v-text-field(
@@ -61,7 +61,7 @@ v-container(fill-height)
               :rules="[rules.required('Enter a new password'), rules.pwdLength]"
               label="Confirm password"
               type="password"
-              outline
+              outlined
             )
           v-flex.pb-4
             v-messages(:value="['Use a password with 6 or more characters']")
@@ -72,7 +72,7 @@ v-container(fill-height)
             :loading="loading.changePassword"
             @click="submitPassword"
             color="primary"
-            large outline
+            large outlined
           ) Change
 </template>
 

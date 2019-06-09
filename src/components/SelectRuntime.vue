@@ -6,7 +6,7 @@ v-select(
   item-text="text"
   item-value="runtime"
   hide-details single-line
-  outline
+  outlined
 )
   template(#selection="{ item }")
     v-icon.mr-3(:color="item.color") {{ item.icon }}

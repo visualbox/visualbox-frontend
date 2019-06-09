@@ -6,18 +6,19 @@
         v-model="label"
         label="Dashboard Name"
         hide-details
-        outline
+        outlined
       )
     v-flex.mt-3(xs12)
-      v-expansion-panel
-        v-expansion-panel-content
-          div(slot="header")
+      v-expansion-panels.elevation-1
+        v-expansion-panel
+          v-expansion-panel-header
             v-avatar.mr-3(
               :size="30"
               :color="bgc"
             )
             | Background Color
-          color-picker(v-model="bgc")
+          v-expansion-panel-content
+            color-picker(v-model="bgc")
     v-layout.mt-3(row xs12)
       v-flex
         .ma-0 Widget Border Radius
@@ -27,6 +28,7 @@
           :max="radiusMax"
           :min="radiusMin"
           :thumb-size="32"
+          track-color="grey darken-2"
           thumb-label
           hide-details
         )
@@ -37,7 +39,7 @@
         v-text-field.mt-0.ml-3(
           v-model="radius"
           type="number"
-          style="padding-top:5px"
+          style="padding-top:8px"
           hide-details
           single-line
         )
@@ -50,6 +52,7 @@
           :max="100"
           :min="0"
           :thumb-size="32"
+          track-color="grey darken-2"
           thumb-label
           hide-details
         )
@@ -60,7 +63,7 @@
         v-text-field.mt-0.ml-3(
           v-model="shadow"
           type="number"
-          style="padding-top:5px"
+          style="padding-top:8px"
           hide-details
           single-line
         )
@@ -73,6 +76,7 @@
           :max="shadowRadiusMax"
           :min="shadowRadiusMin"
           :thumb-size="32"
+          track-color="grey darken-2"
           thumb-label
           hide-details
         )
@@ -83,7 +87,7 @@
         v-text-field.mt-0.ml-3(
           v-model="shadowRadius"
           type="number"
-          style="padding-top:5px"
+          style="padding-top:8px"
           hide-details
           single-line
         )

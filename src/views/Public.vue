@@ -2,10 +2,20 @@
 v-container#public(fluid fill-height)
   v-layout(
     :align-center="isLoading"
+    :column="isLoading"
+    :row="!isLoading"
     justify-center
-    row fill-height
+    fill-height
   )
-    b(v-if="isLoading") LOADING
+    //- Loading
+    template(v-if="isLoading")
+      img(
+        :src="require('../assets/img/vbox-white.svg')"
+        width="150"
+      )
+      .headline.font-weight-light.mt-3 VisualBox
+
+    //- Dashboard
     public-dashboard-layout(
       v-if="!isLoading"
       :style="style"

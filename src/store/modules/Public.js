@@ -32,7 +32,7 @@ const actions = {
         token
       } = await API.invoke('post', `/dashboard/public`, {
         body: { id }
-      })
+      }, false)
 
       commit(t.PUBLIC_SET_W_SOURCE_MAP, widgetSourceMap)
       commit(t.PUBLIC_SET_LOADED, dashboard)

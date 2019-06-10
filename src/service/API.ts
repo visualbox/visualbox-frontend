@@ -8,12 +8,16 @@ class API {
     this.store = store
   }
 
-  public async invoke (method: string, path: string, opts?: IObject) {
+  public async invoke (method: string, path: string, opts?: IObject, authCheck: boolean = true) {
     try {
-      if (this.isLoggedIn())
+      if (authCheck) {
+        if (this.isLoggedIn())
+          return await API_AWS(method, path, opts)
+        else
+          throw new Error('Not authenticated')
+      } else {
         return await API_AWS(method, path, opts)
-      else
-        throw new Error('Not authenticated')
+      }
     } catch (e) {
       throw e
     }

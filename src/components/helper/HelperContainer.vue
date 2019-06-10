@@ -23,14 +23,14 @@
       ) mdi-snowflake
 
     //- Dock bottom
-    tooltip(text="Dock to Bottom" :open-delay="800" top)
+    tooltip(text="Dock Bottom" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
-    tooltip(text="Dock to Right" :open-delay="800" top)
+    tooltip(text="Dock Right" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'vertical' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"

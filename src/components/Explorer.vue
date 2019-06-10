@@ -20,7 +20,7 @@ v-container#explorer(fluid)
       template(v-if="!selected")
         v-btn.ma-0.mr-4.pl-2(
           @click="local = false"
-          :flat="local"
+          :text="local"
           :disabled="!local"
         )
           v-icon.mr-2 mdi-earth
@@ -28,7 +28,7 @@ v-container#explorer(fluid)
         v-btn.ma-0.pl-2(
           v-if="showLocal"
           @click="local = true"
-          :flat="!local"
+          :text="!local"
           :disabled="local"
         )
           v-icon.mr-2 mdi-home
@@ -38,7 +38,7 @@ v-container#explorer(fluid)
       template(v-else)
         v-btn.ma-0.mr-4.pl-2(
           @click="selected = null"
-          flat
+          text
         )
           v-icon.mr-2 mdi-menu-left
           | Back
@@ -91,12 +91,16 @@ v-container#explorer(fluid)
             @click="selected = item"
             v-bind="cols"
           )
-            v-card
-              v-responsive(:aspect-ratio="4/3")
-                .background(:style="{ 'background-image': `url(${item.settings.thumb})` }")
-                .text
-                  .headline {{ item.settings.name }}
-                  .subheading {{ item.intro }}
+            v-responsive(:aspect-ratio="1")
+              v-card(flat)
+                v-img(
+                  :src="item.settings.thumb || require('../assets/img/vbox-default-thumb.png')"
+                  height="40%"
+                )
+                .content
+                  v-btn(color="primary") View
+                  v-card-title.subtitle-1.font-weight-medium {{ item.settings.name }}
+                  v-card-text {{ item.intro }}
 
     //- Selected
     template(v-else-if="!search && selected")
@@ -321,62 +325,80 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../assets/styles/colors';
+
 #explorer
   width 100%
   height 100%
   min-height 100%
 
-  .v-card
-    overflow hidden
-
+  // Needed to access responsive content
+  >>> .v-responsive__content
     &:hover
-      z-index 2
+      .v-card
+        .v-image
+          -webkit-transform scale(1.0235) translateZ(0)
+          -ms-transform scale(1.0235) translateZ(0)
+          -moz-transform scale(1.0235) translateZ(0)
+          transform scale(1.0235) translateZ(0)
+
+        .content
+          .v-btn
+            opacity 1
+
+    .v-card
+      position absolute
+      top 0; bottom 0; left 0; right 0;
+      background-color $vb-drawer-mini
+      overflow hidden
+      border-radius 10px
       cursor pointer
-      -webkit-transition all 50ms ease-in
-      -webkit-transform scale(1.015)
-      -ms-transition all 50ms ease-in
-      -ms-transform scale(1.015)
-      -moz-transition all 50ms ease-in
-      -moz-transform scale(1.015)
-      transition all 50ms ease-in
-      transform scale(1.015)
 
-    >>> .v-responsive__content
-      display flex
-      flex-direction column
-      justify-content center
+      -webkit-transition all 125ms ease-in
+      -ms-transition all 125ms ease-in
+      -moz-transition all 125ms ease-in
+      transition all 125ms ease-in
 
-      .background
-        position absolute
-        top 0; left 0; right 0; bottom 0;
-        background-size cover
-        background-position center
-        filter brightness(0.5)
+      .v-image
+        height 40%
+
+        -webkit-transition all 125ms ease-in
+        -ms-transition all 125ms ease-in
+        -moz-transition all 125ms ease-in
+        transition all 125ms ease-in
 
         &:before
           content ''
+          height 50%
           position absolute
-          top 0; left 0; right 0; bottom 0;
-          background-image linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, .75))
-      
-      .text
-        position absolute
-        padding 10px
-        z-index 1
+          bottom 0; left 0; right 0;
+          background-image linear-gradient(transparent, $vb-drawer-mini)
 
-        .headline
-          margin-bottom 10px
-          font-weight 300
+      .content
+        height 60%
+        position relative
 
-        .subheading
-          max-height 100px
-          font-weight 300
+        .v-btn
+          position absolute
+          top -52px; right 16px;
+          opacity 0
+
+        .subtitle-1
+          padding 8px 16px
+          white-space nowrap
+          text-overflow ellipsis
+          overflow hidden
+          display block
+
+        .v-card__text
+          position absolute
+          top 44px; bottom 0; left 0; right 0;
           overflow hidden
 
-  .select
-    width 140px
-    top 2px
-
-    >>> .v-input__control
-      min-height 36px
+          &:before
+            content ''
+            height 50px
+            position absolute
+            bottom 0; left 0; right 0;
+            background-image linear-gradient(transparent, $vb-drawer-mini)
 </style>

@@ -8,7 +8,7 @@
       :rules="[v => !!v || 'Required']"
       label="Name"
       color="primary"
-      required outline
+      required outlined
       hide-details
     )
     input-types(
@@ -18,7 +18,7 @@
     v-btn(
       @click="submit"
       color="primary"
-      outline block large
+      outlined block large
     ) Save
 </template>
 

@@ -1,51 +1,57 @@
 <template lang="pug">
 #editor-ctx
   context-toolbar
-    v-btn(@click="goBack" icon)
-      v-icon mdi-menu-left
+    tooltip(text="Back" :open-delay="800" bottom)
+      v-btn(@click="goBack" icon)
+        v-icon mdi-menu-left
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
-      v-btn(@click="saveProject" icon)
-        v-icon mdi-floppy
+      tooltip(text="Save" :open-delay="800" bottom)
+        v-btn(@click="saveProject" icon)
+          v-icon mdi-floppy
 
   v-list.hover-actions(dense)
     //- Info
-    v-list-tile.no-hover(
+    v-list-item.no-hover(
       @click="showPage('info')"
-      :class="{ 'v-list__tile--active' : showInfo }"
+      :class="{ 'v-list-item--active' : showInfo }"
     )
-      v-list-tile-action.hover-actions-always
+      v-list-item-action.hover-actions-always
         v-icon(small) mdi-information-outline
-      v-list-tile-content View Info
+      v-list-item-content
+        v-list-item-subtitle View Info
 
     //- Settings
-    v-list-tile.no-hover(
+    v-list-item.no-hover(
       @click="showPage('settings')"
-      :class="{ 'v-list__tile--active' : showSettings }"
+      :class="{ 'v-list-item--active' : showSettings }"
     )
-      v-list-tile-action.hover-actions-always
+      v-list-item-action.hover-actions-always
         v-icon(small) mdi-settings
-      v-list-tile-content Settings
+      v-list-item-content
+        v-list-item-subtitle Settings
 
     //- Import
-    v-list-tile.no-hover(
+    v-list-item.no-hover(
       @click="showPage('import')"
-      :class="{ 'v-list__tile--active' : showImport }"
+      :class="{ 'v-list-item--active' : showImport }"
     )
-      v-list-tile-action.hover-actions-always
+      v-list-item-action.hover-actions-always
         v-icon(small) mdi-package-up
-      v-list-tile-content Import Files
+      v-list-item-content
+        v-list-item-subtitle Import Files
 
     //- Files
-    v-list-tile.no-hover(@click="openPanel.files = !openPanel.files")
-      v-list-tile-action.hover-actions-always
+    v-list-item.no-hover(@click="openPanel.files = !openPanel.files")
+      v-list-item-action.hover-actions-always
         v-icon(small) {{ openPanel.files ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-      v-list-tile-content Files
-      v-list-tile-action
+      v-list-item-content
+        v-list-item-subtitle Files
+      v-list-item-action
         tooltip(text="Add File" :open-delay="800" bottom)
           v-icon(@click.stop="addFile" small) mdi-file-plus
-      v-list-tile-action
+      v-list-item-action.hover-actions-files
         tooltip(text="Add Folder" :open-delay="800" bottom)
           v-icon(@click.stop="addFolder" small) mdi-folder-plus
 
@@ -317,11 +323,14 @@ export default {
 
 #editor-ctx
   >>> .v-list
-    .v-icon, .v-list__tile__content
+    .v-icon, .v-list-item__content
       color rgba(255, 255, 255, .7)
 
-    .v-list__tile
+    .v-list-item
       padding-left 40px
+
+      .v-list-item__action
+        min-width 25px !important
 
       a, a:active, a:visited
         color #FFF
@@ -329,15 +338,14 @@ export default {
         &:hover
           text-decoration underline
 
-    .no-hover
-      .v-list__tile
-        padding-left 16px
+    .no-hover.v-list-item
+      padding-left 16px
 
-        &:hover
-          background-color unset !important
+      &:before
+        display none
 
-        &:before
-          display none
+      .hover-actions-files
+        min-width 15px !important
 
     .container
       padding-left 40px
@@ -378,7 +386,7 @@ export default {
             z-index 6
 
         &:hover .options
-          display block
+          display flex
 
       .v-treeview-node--active
         background unset

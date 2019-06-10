@@ -11,6 +11,7 @@ import Dashboard from '@/store/modules/Dashboard'
 import Widget from '@/store/modules/Widget'
 import Integration from '@/store/modules/Integration'
 import Project from '@/store/modules/Project'
+import Public from '@/store/modules/Public'
 
 Vue.use(Vuex)
 
@@ -21,7 +22,8 @@ const store = new Vuex.Store({
     Dashboard,
     Widget,
     Integration,
-    Project
+    Project,
+    Public
   },
   // eslint-disable-next-line
   strict: process.env.NODE_ENV !== 'production'

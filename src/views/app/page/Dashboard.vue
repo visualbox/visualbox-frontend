@@ -8,7 +8,7 @@ v-container#dashboard(
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
-      flat
+      text
     ) VisualBox.io
     v-spacer
 

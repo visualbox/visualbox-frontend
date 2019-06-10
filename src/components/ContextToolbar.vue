@@ -19,7 +19,10 @@ export default Vue.extend({
   background-color $vb-app-ctx-toolbar !important
 
   >>> .v-toolbar__content
-    padding 0 16px !important
+    padding 0 7px 0 16px !important
+
+    & > .tooltip-element:first-child
+      margin 0 5px 0 -10px
 
     .subheading
       white-space nowrap

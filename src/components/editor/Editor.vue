@@ -32,13 +32,13 @@
       v-toolbar-items
         v-btn(
           @click="formatCode"
-          flat
+          text
         )
           v-icon mdi-auto-fix
         v-btn(
           :color="showHelper ? 'primary' : ''"
           @click="PROJECT_SHOW_HELPER(!showHelper)"
-          flat
+          text
         )
           v-icon mdi-console
   .grid-layout(
@@ -259,8 +259,25 @@ export default {
     padding 0 !important
 
     .editor-tabs
-      .v-tabs__item--active
-        box-shadow inset 0 -1px 0 #52b054
+      margin-right 0 !important
+      margin-left 0 !important
+
+      .v-tab
+        color #FFF
+        font-weight unset
+        text-transform unset
+
+        -webkit-transition none !important
+        transition none !important
+
+        &--active
+          background-color $vb-application
+          box-shadow inset 0 -1px 0 #52b054
+        
+        &:hover:before
+          opacity 0 !important
+          -webkit-transition none !important
+          transition none !important
 
       .v-icon
         -webkit-transition none !important
@@ -274,17 +291,6 @@ export default {
 
         &.hidden
           color transparent
-
-      .v-tabs__div
-        font-weight unset
-        text-transform unset
-
-        .v-tabs__item
-          -webkit-transition none !important
-          transition none !important
-
-          &--active
-            background-color $vb-application
 
       .v-btn
         padding 0

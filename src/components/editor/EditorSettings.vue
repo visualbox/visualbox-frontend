@@ -9,7 +9,7 @@ v-container#editor-settings(fill-height)
             v-model="name"
             :disabled="isLoading"
             hide-details single-line
-            outline
+            outlined
           )
       .headline.mb-3.mt-4 Cover Image URL
       v-layout
@@ -18,7 +18,7 @@ v-container#editor-settings(fill-height)
             v-model="thumb"
             :disabled="isLoading"
             hide-details single-line
-            outline
+            outlined
           )
 
       //- Widget only have 'javascript' runtime
@@ -42,7 +42,7 @@ v-container#editor-settings(fill-height)
           :loading="isLoading"
           :disabled="isLoading"
           color="primary"
-          large outline
+          large outlined
         )
           v-icon.mr-3 mdi-content-save
           | Save
@@ -56,7 +56,7 @@ v-container#editor-settings(fill-height)
         v-btn.ma-0.px-3(
           @click="downloadZip"
           color="primary"
-          large outline
+          large outlined
         )
           v-icon.mr-3 mdi-cloud-download-outline
           | Download
@@ -73,14 +73,14 @@ v-container#editor-settings(fill-height)
           v-if="registryVersion > 0"
           @click="depublishProject"
           color="red"
-          large outline
+          large outlined
         ) Remove from Registry
         v-btn.ma-0.px-3(
           @click="publishProject"
           :loading="isLoading"
           :disabled="isLoading"
           color="primary"
-          large outline
+          large outlined
         )
           v-icon.mr-3 mdi-publish
           | Publish

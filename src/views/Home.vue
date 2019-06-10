@@ -19,7 +19,7 @@ v-container
             v-btn(
               to="/auth/signup"
               color="white"
-              round outline
+              rounded outlined
             ) Try Now
 </template>
 

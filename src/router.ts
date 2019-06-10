@@ -7,6 +7,7 @@ import SignIn from '@/views/auth/SignIn.vue'
 import SignUp from '@/views/auth/SignUp.vue'
 import Verify from '@/views/auth/Verify.vue'
 import Forgot from '@/views/auth/Forgot.vue'
+import Public from '@/views/Public.vue'
 import App from '@/views/app/App.vue'
 import SignOut from '@/views/app/SignOut.vue'
 
@@ -71,6 +72,11 @@ export default new Router({
           component: Forgot
         }
       ]
+    },
+    {
+      path: '/public/:id',
+      name: 'public-dashboard',
+      component: Public
     },
     {
       path: '/app',

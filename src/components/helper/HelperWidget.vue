@@ -8,14 +8,14 @@
     v-spacer
 
     //- Dock bottom
-    tooltip(text="Dock to Bottom" :open-delay="800" top)
+    tooltip(text="Dock Bottom" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
-    tooltip(text="Dock to Right" :open-delay="800" top)
+    tooltip(text="Dock Right" :open-delay="800" top)
       v-icon(
         :color="layoutHelper === 'vertical' ? 'primary' : ''"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
@@ -155,7 +155,7 @@ export default {
   height 100%
   background #000
 
-  .v-system-bar
+  >>> .v-system-bar
     margin 0
     padding 0
     height 30px !important
@@ -165,17 +165,17 @@ export default {
       padding 5px 6px 4px
       display inline-block
       cursor pointer
+      z-index 25
 
       &[active]
         color white
         background #000
 
     // Place above gutter overlay
-    .tab, .v-tooltip, .v-icon
-      z-index 25
-
-    .v-icon
+    .tooltip-element, >.v-icon
+      height 24px
       margin-right 10px
+      z-index 25
 
   .pane
     display none

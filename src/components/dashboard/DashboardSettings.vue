@@ -122,7 +122,7 @@
 <script>
 import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { Tooltip } from '@/components'
 
 export default {
@@ -152,7 +152,16 @@ export default {
     },
     isPublic: {
       get () { return !!this.loaded.public },
-      set (isPublic) { this.DASHBOARD_CONCAT_LOADED({ public: isPublic }) }
+      set (isPublic) {
+        this.DASHBOARD_CONCAT_LOADED({ public: isPublic })
+        /**
+         * Immediately commit dashboard changes when public
+         * is changed so that if the public dashboard is
+         * accessible immediately (and not "only" after the
+         * automatically scheduled commit happens).
+         */
+        this.commit()
+      }
     },
     bgc: {
       get () {
@@ -216,7 +225,10 @@ export default {
       }
     }
   },
-  methods: mapMutations('Dashboard', ['DASHBOARD_CONCAT_LOADED'])
+  methods: {
+    ...mapMutations('Dashboard', ['DASHBOARD_CONCAT_LOADED']),
+    ...mapActions('Dashboard', ['commit'])
+  }
 }
 </script>
 

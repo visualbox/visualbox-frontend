@@ -21,11 +21,8 @@ export default Vue.extend({
   >>> .v-toolbar__content
     padding 0 7px 0 16px !important
 
-    & > .tooltip-element
+    & > .tooltip-element:first-child
       margin 0 5px 0 -10px
-
-    & > .tooltip-element ~ .tooltip-element
-      margin 0
 
     .subheading
       white-space nowrap

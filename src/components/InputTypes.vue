@@ -92,11 +92,11 @@ div
           readonly hide-details
           outlined
         )
-        v-date-picker(
-          v-model="internalValue[field.name]"
-          color="primary"
-          no-title scrollable
-        )
+      v-date-picker(
+        v-model="internalValue[field.name]"
+        color="primary"
+        no-title scrollable
+      )
 
   //- Integration config parse errors
   v-alert(

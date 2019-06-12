@@ -65,7 +65,7 @@ import API from '@/service/API'
 import { InputTypes, Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
-const BUFFER_MAX = 100
+const BUFFER_MAX = 10000
 
 const T_INFO = 'T_INFO'
 const T_WARNING = 'T_WARNING'

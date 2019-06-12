@@ -7,6 +7,9 @@
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
+      tooltip(text="Build" :open-delay="800" bottom)
+        v-btn(@click="buildProject" icon)
+          v-icon mdi-progress-wrench
       tooltip(text="Save" :open-delay="800" bottom)
         v-btn(@click="saveProject" icon)
           v-icon mdi-floppy
@@ -290,6 +293,9 @@ export default {
      */
     saveProject () {
       EventBus.$emit('vbox:saveProject', true)
+    },
+    buildProject () {
+      EventBus.$emit('vbox:buildProject')
     },
     showPage (page) {
       this.PROJECT_SHOW_HELPER(false)

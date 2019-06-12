@@ -146,6 +146,17 @@ const actions = {
     } catch (e) {
       throw e
     }
+  },
+
+  async build ({ commit }, id) {
+    try {
+      const result = await API.invoke('post', '/build', {
+        body: { id }
+      })
+      console.log(result)
+    } catch (e) {
+      throw e
+    }
   }
 }
 

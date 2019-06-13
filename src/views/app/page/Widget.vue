@@ -113,6 +113,7 @@ export default {
       const widget = this.widgetById()(this.$route.params.id)
       const signedUrl = await this.signedUrl(widget)
       await this.load({
+        type: 'WIDGET',
         project: widget,
         signedUrl
       })

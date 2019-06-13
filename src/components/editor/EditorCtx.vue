@@ -7,9 +7,6 @@
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
-      tooltip(text="Build" :open-delay="800" bottom)
-        v-btn(@click="buildProject" icon)
-          v-icon mdi-progress-wrench
       tooltip(text="Save" :open-delay="800" bottom)
         v-btn(@click="saveProject" icon)
           v-icon mdi-floppy
@@ -23,7 +20,7 @@
       v-list-item-action.hover-actions-always
         v-icon(small) mdi-information-outline
       v-list-item-content
-        v-list-item-subtitle View Info
+        v-list-item-subtitle View README.md
 
     //- Settings
     v-list-item.no-hover(
@@ -41,9 +38,22 @@
       :class="{ 'v-list-item--active' : showImport }"
     )
       v-list-item-action.hover-actions-always
-        v-icon(small) mdi-package-up
+        v-icon(small) mdi-import
       v-list-item-content
         v-list-item-subtitle Import Files
+
+    //- Configuration Model
+    template
+      v-list-item.no-hover(@click="openPanel.config = !openPanel.config")
+        v-list-item-action.hover-actions-always
+          v-icon(small)  {{ openPanel.config ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+        v-list-item-content
+          v-list-item-subtitle Configuration Model
+      input-types.pt-3.pl-3.pr-3(
+        v-if="openPanel.config"
+        v-model="configMapModel"
+        :config="parsedConfigMap"
+      )
 
     //- Files
     v-list-item.no-hover(@click="openPanel.files = !openPanel.files")
@@ -110,8 +120,9 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
-import { ContextToolbar, Tooltip } from '@/components'
+import get from 'lodash-es/get'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { ContextToolbar, Tooltip, InputTypes } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
@@ -122,19 +133,22 @@ export default {
   name: 'EditorCtx',
   components: {
     ContextToolbar,
-    Tooltip
+    Tooltip,
+    InputTypes
   },
   data: () => ({
     fileTypeMeta,
     openPanel: {
       files: true,
-      settings: false
+      settings: false,
+      config: false
     },
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileName: null,
-    editFileDisplayName: null
+    editFileDisplayName: null,
+    configMapModel: {}
   }),
   computed: {
     ...mapState('Route', ['path']),
@@ -147,6 +161,7 @@ export default {
       'active',
       'dirty'
     ]),
+    ...mapGetters('Project', ['parsedConfigMap']),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
@@ -166,6 +181,30 @@ export default {
       else if (newVal)
         this.PROJECT_SET_PEEK(newVal)
     },
+
+    /**
+     * Re-apply defaults to model bound to configuration
+     * model input types.
+     */
+    parsedConfigMap: {
+      immediate: true,
+      deep: true,
+      handler () {
+        const variables = get(this.parsedConfigMap, 'variables', [])
+        const defaults = variables.reduce((acc, cur) => {
+          acc[cur.name] = cur.default || null
+          return acc
+        }, {})
+
+        // Apply user input
+        for (const name in this.configMapModel) {
+          if (defaults.hasOwnProperty(name))
+            defaults[name] = this.configMapModel[name]
+        }
+
+        this.configMapModel = defaults
+      }
+    }
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
@@ -293,9 +332,6 @@ export default {
      */
     saveProject () {
       EventBus.$emit('vbox:saveProject', true)
-    },
-    buildProject () {
-      EventBus.$emit('vbox:buildProject')
     },
     showPage (page) {
       this.PROJECT_SHOW_HELPER(false)

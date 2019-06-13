@@ -2,7 +2,7 @@
 #helper-integration
   v-system-bar
     //- Tabs
-    .tab(:active="tab === 0" @click="tab = 0") Configure
+    .tab(:active="tab === 0" @click="tab = 0") Build
     .tab(:active="tab === 1" @click="tab = 1") Console
 
     //- Clear console
@@ -14,13 +14,6 @@
       v-icon(@click="restart" color="yellow") mdi-restart
 
     v-spacer
-    
-    //- Freeze
-    tooltip(text="Freeze Console" :open-delay="800" top)
-      v-icon(
-        :color="freeze ? 'blue' : ''"
-        @click="freeze = !freeze"
-      ) mdi-snowflake
 
     //- Dock bottom
     tooltip(text="Dock Bottom" :open-delay="800" top)
@@ -39,12 +32,11 @@
     //- Close helper
     v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
 
-  //- Config pane
+  //- Build pane
   .pane(:active="tab === 0")
-    input-types(
-      v-model="model"
-      :config="config"
-    )
+    v-container(fill-height)
+      v-layout(align-center justify-center)
+        v-btn(large outlined) Build Project
 
   //- Console pane
   .pane(:active="tab === 1" ref="terminal")
@@ -59,10 +51,10 @@
 
 <script>
 import get from 'lodash-es/get'
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import IO from '@/lib/socket'
 import API from '@/service/API'
-import { InputTypes, Tooltip } from '@/components'
+import { Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
 const BUFFER_MAX = 10000
@@ -75,41 +67,20 @@ const T_TICK = 'T_TICK'
 
 export default {
   name: 'HelperContainer',
-  components: {
-    InputTypes,
-    Tooltip
-  },
+  components: { Tooltip },
   data: () => ({
     tab: 1,
-    model: {},
-    modelDirty: false,
     consoleBuffer: [],
-    freeze: false,
     token: null,
     tick: null
   }),
   computed: {
-    ...mapGetters('Integration', ['configMapById']),
     ...mapState('Project', [
       'layoutHelper',
       'dirty',
       'files',
       'id'
     ]),
-    config () {
-      const configMap = this.configMapById(this.id)
-
-      // Something went wrong retieving local config map
-      if (!configMap || typeof configMap === 'string') {
-        const error = !configMap ? 'Unable to get config.json' : configMap
-        return {
-          error: [error],
-          variables: []
-        }
-      }
-
-      return parseConfig(configMap)
-    },
     integration () {
       return {
         i: '_0', // Dummy 'i' in helper
@@ -117,56 +88,6 @@ export default {
         version: '^', // always local in helper
         model: this.model
       }
-    }
-  },
-  watch: {
-    /**
-     * Re-apply defaults to model bound to input types.
-     */
-    config: {
-      immediate: true,
-      deep: true,
-      handler () {
-        const variables = get(this.config, 'variables', [])
-        const defaults = variables.reduce((acc, cur) => {
-          acc[cur.name] = cur.default || null
-          return acc
-        }, {})
-
-        // Apply user input
-        for (const name in this.model) {
-          if (defaults.hasOwnProperty(name))
-            defaults[name] = this.model[name]
-        }
-
-        this.model = defaults
-      }
-    },
-
-    model: {
-      deep: true,
-      handler () {
-        this.modelDirty = true
-      }
-    },
-
-    /**
-     * Watch to see if model was dirty and changed
-     * "back" to console. If so, restart container.
-     */
-    tab (val) {
-      if (val === 1 && this.modelDirty) {
-        this.modelDirty = false
-        this.print('model was changed', T_INFO)
-        this.restart()
-      }
-    },
-
-    freeze (val) {
-      if (val)
-        this.terminate()
-      else
-        this.restart()
     }
   },
   methods: {
@@ -237,7 +158,6 @@ export default {
      */
     restart () {
       this.print('restarting container', T_INFO)
-      this.freeze = false
       this.publish({
         type: 'START',
         integration: this.integration
@@ -354,7 +274,7 @@ export default {
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 5px 6px 4px
+      padding 5px 8px 4px
       display inline-block
       cursor pointer
       z-index 25

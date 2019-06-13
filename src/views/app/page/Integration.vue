@@ -23,8 +23,7 @@ export default {
       'commit',
       'commitFiles',
       'publish',
-      'depublish',
-      'build'
+      'depublish'
     ]),
     ...mapMutations('Project', ['PROJECT_RESET']),
     ...mapActions('Project', [
@@ -111,29 +110,11 @@ export default {
       }
     })
 
-    EventBus.$on('vbox:buildProject', async () => {
-      try {
-        this.setIsLoading(true)
-        await this.build(this.id)
-        this.setSnackbar({
-          type: 'info',
-          msg: `Built integration`,
-          timeout: 1000
-        })
-      } catch (e) {
-        this.setSnackbar({
-          type: 'error',
-          msg: e.message
-        })
-      } finally {
-        this.setIsLoading(false)
-      }
-    })
-
     try {
       const integration = this.integrationById()(this.$route.params.id)
       const signedUrl = await this.signedUrl(integration)
       await this.load({
+        type: 'INTEGRATION',
         project: integration,
         signedUrl
       })
@@ -148,7 +129,6 @@ export default {
     EventBus.$off('vbox:saveProject')
     EventBus.$off('vbox:publishProject')
     EventBus.$off('vbox:depublishProject')
-    EventBus.$off('vbox:buildProject')
 
     try {
       await this.saveProject(true)

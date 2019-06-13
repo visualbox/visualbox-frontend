@@ -3,7 +3,7 @@ import JSZip from 'jszip'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import isObject from 'lodash-es/isObject'
-import { cloneDeep } from '@/lib/utils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 import { Zip } from '@/service'
 
 const parseSettings = (opts = {}) => {
@@ -26,6 +26,7 @@ const state = {
 
   id: null,
   uid: null,
+  type: null,
   fileTree: [],
   settings: {},
   versions: {},
@@ -48,6 +49,7 @@ const mutations = {
 
     state.id = null
     state.uid = null
+    state.type = null
     state.fileTree = []
     state.settings = {}
     state.versions = {}
@@ -59,11 +61,12 @@ const mutations = {
 
     Zip.reset()
   },
-  [t.PROJECT_SET_LOADED] (state, payload) {
-    const copy = cloneDeep(payload)
+  [t.PROJECT_SET_LOADED] (state, { type, project }) {
+    const copy = cloneDeep(project)
 
-    state.id = payload.id
-    state.uid = payload.uid
+    state.id = copy.id
+    state.uid = copy.uid
+    state.type = type
     state.settings = parseSettings(copy)
     state.versions = parseVersions(copy)
     state.ready = true
@@ -185,7 +188,7 @@ const mutations = {
 }
 
 const actions = {
-  async load ({ commit }, { project, signedUrl }) {
+  async load ({ commit }, { type, project, signedUrl }) {
     commit(t.PROJECT_RESET)
 
     if (!signedUrl)
@@ -199,7 +202,7 @@ const actions = {
       const blob = await result.blob()
       Zip.reset(await JSZip.loadAsync(blob))
       commit(t.PROJECT_UPDATE_FILE_TREE)
-      commit(t.PROJECT_SET_LOADED, project)
+      commit(t.PROJECT_SET_LOADED, { type, project })
     } catch (e) {
       throw e
     }
@@ -283,6 +286,34 @@ const getters = {
     return (keys.length <= 0)
       ? 0
       : Math.max(...keys)
+  },
+
+  /**
+   * Retrieve parsed config map for current project.
+   * Make use if type to determine which Vuex module
+   * to fetch from.
+   */
+  parsedConfigMap: ({ type, id }, getters, rootState, rootGetters) => {
+    if (type !== 'INTEGRATION' && type !== 'WIDGET') {
+      return {
+        error: [`Invalid project type '${type}'`],
+        variables: []
+      }
+    }
+
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
+    const configMap = rootGetters[`${capitalizedType}/configMapById`](id)
+
+    // Something went wrong retieving local config map
+    if (!configMap || typeof configMap === 'string') {
+      const error = !configMap ? 'Unable to get config.json' : configMap
+      return {
+        error: [error],
+        variables: []
+      }
+    }
+
+    return parseConfig(configMap)
   }
 }
 

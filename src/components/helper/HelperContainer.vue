@@ -36,7 +36,7 @@
   .pane(:active="tab === 0")
     v-container(fill-height)
       v-layout(align-center justify-center)
-        v-btn(large outlined) Build Project
+        v-btn(@click="startBuild" large outlined) Build Project
 
   //- Console pane
   .pane(:active="tab === 1" ref="terminal")
@@ -53,7 +53,7 @@
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import IO from '@/lib/socket'
-import API from '@/service/API'
+import { API, CloudWatchLogs } from '@/service'
 import { Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
@@ -95,6 +95,7 @@ export default {
       'PROJECT_SET_HELPER_LAYOUT',
       'PROJECT_SHOW_HELPER'
     ]),
+    ...mapActions('Integration', ['build']),
 
     scrollTerminal () {
       const el = this.$refs.terminal
@@ -244,6 +245,17 @@ export default {
         this.initSocket()
       } catch (e) {
         console.log('[DashboardHandler]: error; ', e)
+      }
+    },
+
+    async startBuild () {
+      try {
+        const { groupName, streamName } = await this.build(this.id)
+        CloudWatchLogs.startLoop({ groupName, streamName }, events => {
+          console.log(events)
+        })
+      } catch (e) {
+        console.log(e)
       }
     }
   },

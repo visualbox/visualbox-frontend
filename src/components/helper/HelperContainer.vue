@@ -2,8 +2,8 @@
 #helper-integration
   v-system-bar
     //- Tabs
-    .tab(:active="tab === 0" @click="tab = 0") Build
-    .tab(:active="tab === 1" @click="tab = 1") Console
+    //- .tab(:active="tab === 0" @click="tab = 0") Build
+    .tab(active) Console
 
     //- Clear console
     tooltip(text="Clear Console" :open-delay="800" top)
@@ -12,6 +12,10 @@
     //- Restart
     tooltip(text="Restart" :open-delay="800" top)
       v-icon(@click="restart" color="yellow") mdi-restart
+
+    //- Build
+    tooltip(text="Build" :open-delay="800" top)
+      v-icon(@click="startBuild" color="blue") mdi-progress-wrench
 
     v-spacer
 
@@ -32,14 +36,8 @@
     //- Close helper
     v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
 
-  //- Build pane
-  .pane(:active="tab === 0")
-    v-container(fill-height)
-      v-layout(align-center justify-center)
-        v-btn(@click="startBuild" large outlined) Build Project
-
   //- Console pane
-  .pane(:active="tab === 1" ref="terminal")
+  .pane(active ref="terminal")
     .ln(
       v-for="(item, index) in consoleBuffer"
       :key="index"
@@ -69,7 +67,6 @@ export default {
   name: 'HelperContainer',
   components: { Tooltip },
   data: () => ({
-    tab: 1,
     consoleBuffer: [],
     token: null,
     tick: null
@@ -85,7 +82,7 @@ export default {
       return {
         i: '_0', // Dummy 'i' in helper
         id: this.id,
-        version: '^', // always local in helper
+        version: '^', // Always local in helper
         model: this.model
       }
     }
@@ -158,7 +155,7 @@ export default {
      * Restart container.
      */
     restart () {
-      this.print('restarting container', T_INFO)
+      this.print('Restarting container', T_INFO)
       this.publish({
         type: 'START',
         integration: this.integration
@@ -170,9 +167,12 @@ export default {
      */
     terminate () {
       this.publish({
-        type: 'TERMINATE',
-        i: -1
+        type: 'TERMINATE'
       })
+      IO.end()
+
+      if (this.tick !== null)
+        clearInterval(this.tick)
     },
 
     /**
@@ -187,7 +187,7 @@ export default {
          * Container sent an INIT message.
          */
         case 'INIT':
-          this.print('container started', T_INFO)
+          this.print('Container started', T_INFO)
           break
 
         /**
@@ -234,10 +234,10 @@ export default {
      */
     async initContainer () {
       this.clear()
-      this.print('starting container', T_INFO)
+      this.print('Starting container', T_INFO)
 
       try {
-        const { token } = await API.invoke('post', '/containers/ltl', {
+        const { token } = await API.invoke('post', '/containers/ltl2', {
           body: { integrations: [this.integration] }
         })
 
@@ -249,13 +249,25 @@ export default {
     },
 
     async startBuild () {
+      this.terminate()
+      this.clear()
+      this.print('Starting build', T_INFO)
+
       try {
         const { groupName, streamName } = await this.build(this.id)
-        CloudWatchLogs.startLoop({ groupName, streamName }, events => {
-          console.log(events)
-        })
+        CloudWatchLogs.startLoop(
+          { groupName, streamName },
+          events => {
+            events.forEach(({ message }) => this.print(message, T_INFO))
+          },
+          event => {
+            this.print(event.message, T_WARNING)
+          }
+        )
       } catch (e) {
         console.log(e)
+        console.log('FAIL')
+        // this.isBuilding = false
       }
     }
   },
@@ -263,11 +275,7 @@ export default {
     this.initContainer()
   },
   beforeDestroy () {
-    this.publish({ type: 'TERMINATE' })
-    IO.end()
-
-    if (this.tick !== null)
-      clearInterval(this.tick)
+    this.terminate()
   }
 }
 </script>

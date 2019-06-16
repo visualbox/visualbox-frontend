@@ -60,6 +60,8 @@ v-container#editor-settings(fill-height)
         )
           v-icon.mr-3 mdi-cloud-download-outline
           | Download
+
+      //- Publish to registry
       .headline.mb-3.mt-4 Publish to Registry
       v-layout
         v-flex
@@ -67,24 +69,34 @@ v-container#editor-settings(fill-height)
             | By publishing to the registry you allow other users to add your code to their dashboards.
             | The registry is versioned so you can safely update your code without breaking dashboards.
             | VisualBox uses <a href="https://semver.org/" target="_new">Semantic Versioning</a> for registry items.
-      v-layout.mt-4(v-if="registryVersion > -1")
-        v-spacer
-        v-btn.ma-0.mr-3.px-3(
-          v-if="registryVersion > 0"
-          @click="depublishProject"
-          color="red"
-          large outlined
-        ) Remove from Registry
-        v-btn.ma-0.px-3(
-          @click="publishProject"
-          :loading="isLoading"
-          :disabled="isLoading"
-          color="primary"
-          large outlined
-        )
-          v-icon.mr-3 mdi-publish
-          | Publish
-          template(v-if="registryVersion > 0") &nbsp;Version {{ registryVersion + 1 }}
+      template(v-if="registryVersion > -1")
+        v-layout.mt-4
+          v-flex
+            v-text-field(
+              v-model="newSemver"
+              :disabled="isLoading"
+              hide-details single-line
+              outlined
+            )
+        v-layout.mt-4
+          v-spacer
+          v-btn.ma-0.mr-3.px-3(
+            v-if="registryVersion > 0"
+            @click="depublishProject"
+            color="red"
+            large outlined
+          ) Remove from Registry
+          v-btn.ma-0.px-3(
+            @click="publishProject"
+            :loading="isLoading"
+            :disabled="isLoading"
+            color="primary"
+            large outlined
+          )
+            v-icon.mr-3 mdi-publish
+            | Publish
+            template(v-if="registryVersion > 0")
+              | &nbsp;Version {{ registryVersion + 1 }}
 
       //- Published but later removed
       v-layout.mt-4(v-if="registryVersion < 0")
@@ -103,6 +115,9 @@ import { Zip } from '@/service'
 export default {
   name: 'EditorSettings',
   components: { SelectRuntime },
+  data: () => ({
+    newSemver: null
+  }),
   computed: {
     ...mapState('App', ['isLoading']),
     ...mapState('Project', ['settings']),
@@ -141,6 +156,9 @@ export default {
         })
       }
     }
+  },
+  mounted () {
+    this.newSemver = this.registryVersion || '1.0.0'
   }
 }
 </script>

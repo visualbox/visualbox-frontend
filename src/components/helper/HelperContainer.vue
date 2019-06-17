@@ -68,7 +68,6 @@ export default {
   components: { Tooltip },
   data: () => ({
     consoleBuffer: [],
-    token: null,
     tick: null
   }),
   computed: {
@@ -175,36 +174,6 @@ export default {
         clearInterval(this.tick)
     },
 
-    /**
-     * The container has sent a message.
-     */
-    onMessage (m) {
-      const { type } = m
-
-      switch (type) {
-
-        /**
-         * Container sent an INIT message.
-         */
-        case 'INIT':
-          this.print('Container started', T_INFO)
-          break
-
-        /**
-         * Container integration is giving output.
-         * 'i' is included in the message but we
-         * don't care about it in the helper
-         * component.
-         */
-        case 'OUTPUT':
-          this.print(m.data, T_OUTPUT)
-          break;
-
-        case 'STATUS':
-          this.print(m.data, m.statusType)
-          break;
-      }
-    },
 
     /**
      * Init container socket connection.
@@ -229,10 +198,7 @@ export default {
       }, 15000)
     },
 
-    /**
-     * Init container by calling LTL.
-     */
-    async initContainer () {
+    async launch () {
       this.clear()
       this.print('Starting container', T_INFO)
 
@@ -240,12 +206,31 @@ export default {
         const { token } = await API.invoke('post', '/containers/ltl2', {
           body: { integrations: [this.integration] }
         })
-
-        this.token = token
-        this.initSocket()
       } catch (e) {
         console.log('[DashboardHandler]: error; ', e)
       }
+
+      WS.join(token, ({ type, data }) => {
+        switch (type) {
+          case 'INIT':
+            this.print('Container started', T_INFO)
+            break
+
+          /**
+           * Container integration is giving output.
+           * 'i' is included in the message but we
+           * don't care about it in the helper
+           * component.
+           */
+          case 'OUTPUT':
+            this.print(data, T_OUTPUT)
+            break;
+
+          case 'STATUS':
+            this.print(data, m.statusType)
+            break;
+        }
+      })
     },
 
     async startBuild () {
@@ -272,7 +257,7 @@ export default {
     }
   },
   mounted () {
-    this.initContainer()
+    this.launch()
   },
   beforeDestroy () {
     this.terminate()

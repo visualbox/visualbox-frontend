@@ -7,7 +7,7 @@
 
     //- Clear console
     tooltip(text="Clear Console" :open-delay="800" top)
-      v-icon.ml-2(@click="clear" color="red") mdi-cancel
+      v-icon.ml-2(@click="consoleClear" color="red") mdi-cancel
 
     //- Restart
     tooltip(text="Restart" :open-delay="800" top)
@@ -42,33 +42,34 @@
       v-for="(item, index) in consoleBuffer"
       :key="index"
     )
-      //- template(v-if="item.status")
-        b.mr-1(:style="{ 'color': item.status.color }") {{ item.status.text }}
-      pre(:style="{ 'color': item.status.color || 'white' }") {{ item.ln }}
+      pre(:style="{ 'color': item.color }") {{ item.ln }}
 </template>
 
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import IO from '@/lib/socket'
-import { API, CloudWatchLogs } from '@/service'
+import { API, CloudWatchLogs, WS } from '@/service'
 import { Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
 const BUFFER_MAX = 10000
 
-const T_INFO = 'T_INFO'
-const T_WARNING = 'T_WARNING'
-const T_ERROR = 'T_ERROR'
-const T_OUTPUT = 'T_OUTPUT'
-const T_TICK = 'T_TICK'
+const WSType = {
+  TICK: 'TICK',
+  INIT: 'INIT',
+  TERMINATE: 'TERMINATE',
+  INFO: 'INFO',
+  OUTPUT: 'OUTPUT',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+}
 
 export default {
   name: 'HelperContainer',
   components: { Tooltip },
   data: () => ({
     consoleBuffer: [],
-    tick: null
+    token: null
   }),
   computed: {
     ...mapState('Project', [
@@ -93,7 +94,7 @@ export default {
     ]),
     ...mapActions('Integration', ['build']),
 
-    scrollTerminal () {
+    consoleScroll () {
       const el = this.$refs.terminal
       if (!el)
         return
@@ -105,148 +106,85 @@ export default {
       }
     },
 
-    /**
-     * Print a line to the console.
-     */
-    print (ln, statusType) {
-      if (statusType === T_TICK)
+    consolePrint (ln, wsMessageType) {
+      if (wsMessageType === WSType.TICK)
         return
 
       if (this.consoleBuffer.length > BUFFER_MAX)
         this.consoleBuffer.shift()
 
-      let status = null
-      if (statusType === T_INFO)
-        status = { text: '[info]:', color: 'green' }
-      else if (statusType === T_WARNING)
-        status = { text: '[warning]:', color: 'orange' }
-      else if (statusType === T_ERROR)
-        status = { text: '[error]:', color: 'red' }
-      else if (statusType === T_OUTPUT)
-        status = { text: '[output]:', color: 'deepskyblue' }
+      let color
+      switch (wsMessageType) {
+        case WSType.INFO: color = 'green'; break
+        case WSType.WARNING: color = 'orange'; break
+        case WSType.ERROR: color = 'red'; break
+        case WSType.OUTPUT: color = 'deepskyblue'; break
+        default: color = 'white'; break
+      }
 
       this.consoleBuffer.push({
         timestamp: +new Date(),
-        ln, status
+        color,
+        ln
       })
-
-      this.scrollTerminal()
+      this.consoleScroll()
     },
 
-    /**
-     * Clear the console.
-     */
-    clear () {
+    consoleClear () {
       this.consoleBuffer = []
     },
 
-    /**
-     * Send a message to the container.
-     */
-    publish (message) {
-      if (!this.token)
-        throw new Error('[DashboardHandler]: No token to publish to')
-
-      IO.emit('message', message)
+    onMessage ({ type, data }) {
+      console.log('onmsg', type, data)
+      switch (type) {
+        case 'INIT': this.consolePrint('Container started', WSType.INFO); break
+        case 'INFO': this.consolePrint(data, WSType.INFO); break
+        case 'OUTPUT': this.consolePrint(data, WSType.OUTPUT); break
+        case 'WARNING': this.consolePrint(data, WSType.WARNING); break
+        case 'ERROR': this.consolePrint(data, WSType.ERROR); break
+      }
     },
 
-    /**
-     * Restart container.
-     */
     restart () {
-      this.print('Restarting container', T_INFO)
-      this.publish({
-        type: 'START',
-        integration: this.integration
-      })
-    },
-
-    /**
-     * Terminate container.
-     */
-    terminate () {
-      this.publish({
-        type: 'TERMINATE'
-      })
-      IO.end()
-
-      if (this.tick !== null)
-        clearInterval(this.tick)
-    },
-
-
-    /**
-     * Init container socket connection.
-     */
-    initSocket () {
-      IO.reset()
-
-      if (!this.token)
-        throw new Error('[DashboardHandler]: No token to subscribe to')
-
-      IO.join(this.token)
-      IO.on('message', m => this.onMessage(m))
-
-      /**
-       * Start ticker to keep container
-       * alive.
-       */
-      if (this.tick !== null)
-        clearInterval(this.tick)
-      this.tick = setInterval(() => {
-        this.publish({ type: 'TICK' })
-      }, 15000)
+      this.consolePrint('Restarting container', WSType.INFO)
+      this.launch()
     },
 
     async launch () {
-      this.clear()
-      this.print('Starting container', T_INFO)
+      WS.messageTerminate()
+      this.consoleClear()
+      this.consolePrint('Starting container', WSType.INFO)
 
       try {
         const { token } = await API.invoke('post', '/containers/ltl2', {
-          body: { integrations: [this.integration] }
+          body: {
+            integrations: [this.integration],
+            token: this.token
+          }
         })
+        WS.join(token, message => {
+          this.onMessage(message)
+        })
+        this.token = token
       } catch (e) {
         console.log('[DashboardHandler]: error; ', e)
       }
-
-      WS.join(token, ({ type, data }) => {
-        switch (type) {
-          case 'INIT':
-            this.print('Container started', T_INFO)
-            break
-
-          /**
-           * Container integration is giving output.
-           * 'i' is included in the message but we
-           * don't care about it in the helper
-           * component.
-           */
-          case 'OUTPUT':
-            this.print(data, T_OUTPUT)
-            break;
-
-          case 'STATUS':
-            this.print(data, m.statusType)
-            break;
-        }
-      })
     },
 
     async startBuild () {
-      this.terminate()
-      this.clear()
-      this.print('Starting build', T_INFO)
+      WS.messageTerminate()
+      this.consoleClear()
+      this.consolePrint('Starting build', WSType.INFO)
 
       try {
         const { groupName, streamName } = await this.build(this.id)
         CloudWatchLogs.startLoop(
           { groupName, streamName },
           events => {
-            events.forEach(({ message }) => this.print(message, T_INFO))
+            events.forEach(({ message }) => this.consolePrint(message, WSType.INFO))
           },
           event => {
-            this.print(event.message, T_WARNING)
+            this.consolePrint(event.message, WSType.WARNING)
           }
         )
       } catch (e) {
@@ -260,7 +198,7 @@ export default {
     this.launch()
   },
   beforeDestroy () {
-    this.terminate()
+    WS.leave()
   }
 }
 </script>

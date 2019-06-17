@@ -1,3 +1,5 @@
+const TICK_INTERVAL = 15000
+
 interface IWSMessage {
   action: 'join' | 'leave' | 'message'
   type?: 'TICK' | 'INIT' | 'TERMINATE' | 'INFO' | 'OUTPUT' | 'WARNING' | 'ERROR'
@@ -8,45 +10,40 @@ interface IWSMessage {
 
 class WS {
   private socket: WebSocket
-  private cbMap: { [room: string]: (message: IWSMessage) => void }
+  private tick: NodeJS.Timeout | null
+  private room: string | null
 
   constructor () {
-    this.cbMap = {}
     this.socket = new WebSocket(process.env.VUE_APP_WEBSOCKET_ENDPOINT || '')
+    this.tick = null
+    this.room = null
 
-    this.socket.onclose = e => {
-
-    }
-    
-    this.socket.onerror = e => {
-
-    }
-    
-    this.socket.onmessage = ({ data }) => {
-      try {
-        const message = JSON.parse(data) as IWSMessage
-
-        // Route message to room cb
-        if (message.room) {
-          if (this.cbMap[message.room])
-            this.cbMap[message.room](message)
-
-        // Send to 'global' cb?
-        } else {
-          console.log('[WS]: onmessage: no room parameter in message', message)
-        }
-      } catch (e) {
-        console.log('[WS]: onmessage failed: ', e)
-      }
-    }
+    // this.socket.onclose = e => {}
+    // this.socket.onerror = e => {}
+    // this.socket.onmessage = e => {}
   }
 
-  public send (message: IWSMessage) {
-    try {
-      this.send(message)
-    } catch (e) {
-      throw e
-    }
+  public messageTick () {
+    if (!this.room)
+      return
+
+    this.send({
+      action: 'message',
+      type: 'TICK',
+      room: this.room
+    })
+  }
+
+  public messageTerminate (i?: string) {
+    if (!this.room)
+      return
+
+    this.send({
+      action: 'message',
+      type: 'TERMINATE',
+      room: this.room,
+      i
+    })
   }
 
   public join (room: string, cb: (message: IWSMessage) => void) {
@@ -55,9 +52,51 @@ class WS {
         action: 'join',
         room
       })
-      this.cbMap[room] = cb
-    } catch (e) {
+      this.socket.onmessage = ({ data }) => {
+        try {
+          const message = JSON.parse(data) as IWSMessage
+          cb(message)
+        } catch (e) {
+          console.log('[WS]: onmessage failed: ', e)
+        }
+      }
 
+      this.room = room
+
+      if (!this.tick)
+        this.tick = setInterval(() => this.messageTick(), TICK_INTERVAL)
+
+    } catch (e) {
+      console.log('[WS]: join failed: ', e)
+    }
+  }
+
+  public leave () {
+    if (!this.room)
+      return
+
+    try {
+      this.messageTerminate()
+      this.send({
+        action: 'leave',
+        room: this.room
+      })
+      this.socket.onmessage = null
+      this.room = null
+
+      if (this.tick)
+        clearInterval(this.tick)
+
+    } catch (e) {
+      console.log('[WS]: leave failed: ', e)
+    }
+  }
+
+  private send (message: IWSMessage) {
+    try {
+      this.socket.send(JSON.stringify(message))
+    } catch (e) {
+      throw e
     }
   }
 }

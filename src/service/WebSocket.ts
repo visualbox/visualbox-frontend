@@ -50,10 +50,16 @@ class WS {
     })
   }
 
-  public async join (room: string, cb: (message: IWSMessage) => void) {
+  public async join (
+    room: string,
+    cb: (message: IWSMessage) => void,
+    meta: string = 'client',
+    startTick: boolean = true
+  ) {
     try {
-      const endpoint = await this.getEndpoint()
-      this.socket = new WebSocket(endpoint)
+      this.leave()
+
+      this.socket = new WebSocket(await this.getEndpoint())
       this.socket.onmessage = ({ data }) => {
         try {
           const message = JSON.parse(data) as IWSMessage
@@ -65,14 +71,14 @@ class WS {
       this.socket.onopen = () => {
         this.send({
           action: 'join',
-          meta: 'client',
+          meta,
           room
         })
       }
 
       this.room = room
 
-      if (!this.tick)
+      if (!this.tick && startTick)
         this.tick = setInterval(() => this.messageTick(), TICK_INTERVAL)
 
     } catch (e) {

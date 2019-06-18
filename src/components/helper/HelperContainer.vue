@@ -48,7 +48,7 @@
 <script>
 import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { API, CloudWatchLogs, WS } from '@/service'
+import { API, WS } from '@/service'
 import { Tooltip } from '@/components'
 import { parseConfig } from '@/lib/utils'
 
@@ -162,12 +162,10 @@ export default {
             token: this.token
           }
         })
-        WS.join(token, message => {
-          this.onMessage(message)
-        })
+        WS.join(token, message => this.onMessage(message))
         this.token = token
       } catch (e) {
-        console.log('[DashboardHandler]: error; ', e)
+        console.log('[launch]: error:', e)
       }
     },
 
@@ -177,20 +175,10 @@ export default {
       this.consolePrint('Starting build', WSType.INFO)
 
       try {
-        const { groupName, streamName } = await this.build(this.id)
-        CloudWatchLogs.startLoop(
-          { groupName, streamName },
-          events => {
-            events.forEach(({ message }) => this.consolePrint(message, WSType.INFO))
-          },
-          event => {
-            this.consolePrint(event.message, WSType.WARNING)
-          }
-        )
+        const { buildId } = await this.build(this.id)
+        WS.join(buildId, message => this.onMessage(message), 'build', false)
       } catch (e) {
-        console.log(e)
-        console.log('FAIL')
-        // this.isBuilding = false
+        console.log('[startBuild]: error:', e)
       }
     }
   },

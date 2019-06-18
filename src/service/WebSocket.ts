@@ -1,3 +1,5 @@
+import Auth from '@aws-amplify/auth'
+
 const TICK_INTERVAL = 15000
 
 interface IWSMessage {
@@ -9,12 +11,12 @@ interface IWSMessage {
 }
 
 class WS {
-  private socket: WebSocket
+  private socket: WebSocket | null
   private tick: NodeJS.Timeout | null
   private room: string | null
 
   constructor () {
-    this.socket = new WebSocket(process.env.VUE_APP_WEBSOCKET_ENDPOINT || '')
+    this.socket = null
     this.tick = null
     this.room = null
 
@@ -46,12 +48,10 @@ class WS {
     })
   }
 
-  public join (room: string, cb: (message: IWSMessage) => void) {
+  public async join (room: string, cb: (message: IWSMessage) => void) {
     try {
-      this.send({
-        action: 'join',
-        room
-      })
+      const endpoint = await this.getEndpoint()
+      this.socket = new WebSocket(endpoint)
       this.socket.onmessage = ({ data }) => {
         try {
           const message = JSON.parse(data) as IWSMessage
@@ -59,6 +59,12 @@ class WS {
         } catch (e) {
           console.log('[WS]: onmessage failed: ', e)
         }
+      }
+      this.socket.onopen = () => {
+        this.send({
+          action: 'join',
+          room
+        })
       }
 
       this.room = room
@@ -72,7 +78,7 @@ class WS {
   }
 
   public leave () {
-    if (!this.room)
+    if (!this.socket || !this.room)
       return
 
     try {
@@ -81,7 +87,8 @@ class WS {
         action: 'leave',
         room: this.room
       })
-      this.socket.onmessage = null
+      this.socket.close()
+      this.socket = null
       this.room = null
 
       if (this.tick)
@@ -93,10 +100,24 @@ class WS {
   }
 
   private send (message: IWSMessage) {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN)
+      return
+
     try {
       this.socket.send(JSON.stringify(message))
     } catch (e) {
       throw e
+    }
+  }
+
+  private async getEndpoint () {
+    const endpoint = process.env.VUE_APP_WEBSOCKET_ENDPOINT || ''
+
+    try {
+      const token = (await Auth.currentSession()).getIdToken().getJwtToken()
+      return `${endpoint}?token=${token}`
+    } catch (e) {
+      return endpoint
     }
   }
 }

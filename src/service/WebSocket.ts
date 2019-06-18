@@ -8,6 +8,7 @@ interface IWSMessage {
   room?: string
   i?: string
   data?: string
+  meta?: string
 }
 
 class WS {
@@ -26,6 +27,7 @@ class WS {
   }
 
   public messageTick () {
+    console.log('TICK', this.room)
     if (!this.room)
       return
 
@@ -63,6 +65,7 @@ class WS {
       this.socket.onopen = () => {
         this.send({
           action: 'join',
+          meta: 'client',
           room
         })
       }
@@ -112,13 +115,19 @@ class WS {
 
   private async getEndpoint () {
     const endpoint = process.env.VUE_APP_WEBSOCKET_ENDPOINT || ''
+    return endpoint
+
+    /*
+    let token = 'anonymous'
 
     try {
-      const token = (await Auth.currentSession()).getIdToken().getJwtToken()
-      return `${endpoint}?token=${token}`
+      token = (await Auth.currentSession()).getIdToken().getJwtToken()
     } catch (e) {
-      return endpoint
+      // Silent...
     }
+
+    return `${endpoint}?token=${token}`
+    */
   }
 }
 

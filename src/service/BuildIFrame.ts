@@ -54,5 +54,5 @@ export default (code: string, config: IObject) => {
     code = 'Failed to compile widget...'
   }
 
-  return `data:text/html,${code}`
+  return `data:text/html;charset=UTF-8,${code}`
 }

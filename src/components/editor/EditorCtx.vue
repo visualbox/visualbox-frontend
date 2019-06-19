@@ -12,6 +12,7 @@
           v-icon mdi-floppy
 
   v-list.hover-actions(dense)
+    span(v-if="updatedAt > lastBuild") Need to build!
     //- Info
     v-list-item.no-hover(
       @click="showPage('info')"
@@ -30,7 +31,7 @@
       v-list-item-action.hover-actions-always
         v-icon(small) mdi-settings
       v-list-item-content
-        v-list-item-subtitle Settings
+        v-list-item-subtitle Options
 
     //- Import
     v-list-item.no-hover(
@@ -158,6 +159,8 @@ export default {
       'showSettings',
       'showImport',
       'settings',
+      'updatedAt',
+      'lastBuild',
       'active',
       'dirty'
     ]),

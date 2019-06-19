@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import JSZip from 'jszip'
+import semverMax from 'semver-max'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import isObject from 'lodash-es/isObject'
@@ -30,6 +31,8 @@ const state = {
   fileTree: [],
   settings: {},
   versions: {},
+  updatedAt: null,
+  lastBuild: null,
 
   active: null,
   open: new Set(),
@@ -53,6 +56,8 @@ const mutations = {
     state.fileTree = []
     state.settings = {}
     state.versions = {}
+    state.updatedAt = null
+    state.lastBuild = null
 
     state.active = null
     state.open.clear()
@@ -69,6 +74,8 @@ const mutations = {
     state.type = type
     state.settings = parseSettings(copy)
     state.versions = parseVersions(copy)
+    state.updatedAt = copy.updatedAt || 0
+    state.lastBuild = copy.lastBuild || 0
     state.ready = true
   },
   [t.PROJECT_UPDATE_FILE_TREE] (state) {
@@ -148,6 +155,8 @@ const mutations = {
     state.showImport = false
   },
   [t.PROJECT_TOUCH_FILE] (state, name) {
+    state.updatedAt = +new Date()
+
     state.dirty.add(name)
     state.dirty = new Set(state.dirty)
 
@@ -158,12 +167,16 @@ const mutations = {
     }
   },
   [t.PROJECT_RENAME_FILE] (state, { name, newName }) {
+    state.updatedAt = +new Date()
+
     // Handle dirty state
     state.dirty.delete(name)
     state.dirty.add(newName)
     state.dirty = new Set(state.dirty)
   },
   [t.PROJECT_RENAME_FOLDER] (state, { name, newName }) {
+    state.updatedAt = +new Date()
+
     const len = name.length
 
     // Basically swap out old prefix everywhere
@@ -274,18 +287,19 @@ const actions = {
 const getters = {
   /**
    * Return the registry version of the project.
-   * 0  - not been published before
-   * -1 - published but later removed
-   * >0 - latest version
+   * 0    - not been published before
+   * -1   - published but later removed
+   * else - latest version
    */
   registryVersion: ({ versions }) => {
     if (!isObject(versions))
       return -1
     
     const keys = Object.keys(versions)
+    console.log('KEYS', keys)
     return (keys.length <= 0)
       ? 0
-      : Math.max(...keys)
+      : keys.reduce(semverMax)
   },
 
   /**

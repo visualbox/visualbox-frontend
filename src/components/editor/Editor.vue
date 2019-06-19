@@ -328,7 +328,7 @@ export default {
       grid-template-columns unset !important
 
       .gutter
-        height 35px
+        height 40px
         margin-top -5px
 
         &:hover

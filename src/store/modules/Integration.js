@@ -40,6 +40,11 @@ const mutations = {
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
   },
+  [t.INTEGRATION_SET_LAST_BUILD] (state, payload) {
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0)
+      Vue.set(state.list[index], 'lastBuild', payload.lastBuild)
+  },
   [t.INTEGRATION_SET_MAPS] (state, payload) {
     let configMap
     try {
@@ -124,10 +129,14 @@ const actions = {
     }
   },
 
-  async publish ({ commit }, id) {
+  async publish ({ commit }, { id, version }) {
     try {
-      const { versions } = await API.invoke('post', '/registry', {
-        body: { type: 'INTEGRATION', id }
+      const { versions } = await API.invoke('post', '/registry2', {
+        body: {
+          type: 'INTEGRATION',
+          id,
+          version
+        }
       })
       commit(t.INTEGRATION_SET_VERSIONS, { id, versions })
       commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions }, { root: true })
@@ -150,9 +159,11 @@ const actions = {
 
   async build ({ commit }, id) {
     try {
-      return await API.invoke('post', '/build', {
+      const { buildId, lastBuild } = await API.invoke('post', '/build', {
         body: { id }
       })
+      commit(t.INTEGRATION_SET_LAST_BUILD, { id, lastBuild })
+      return { buildId }
     } catch (e) {
       throw e
     }

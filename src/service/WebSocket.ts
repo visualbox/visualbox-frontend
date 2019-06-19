@@ -39,7 +39,7 @@ class WS {
   }
 
   public messageTerminate (i?: string) {
-    if (!this.room)
+    if (!this.room || !this.socket)
       return
 
     this.send({
@@ -48,13 +48,16 @@ class WS {
       room: this.room,
       i
     })
+
+    if (!i)
+      this.socket.onmessage = null
   }
 
   public async join (
     room: string,
-    cb: (message: IWSMessage) => void,
     meta: string = 'client',
-    startTick: boolean = true
+    startTick: boolean = true,
+    cb: (message: IWSMessage) => void
   ) {
     try {
       this.leave()

@@ -158,11 +158,11 @@ export default {
   >>> .v-system-bar
     margin 0
     padding 0
-    height 30px !important
+    height 35px !important
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 5px 6px 4px
+      padding 6px 8px 8px
       display inline-block
       cursor pointer
       z-index 25
@@ -174,14 +174,14 @@ export default {
     // Place above gutter overlay
     .tooltip-element, >.v-icon
       height 24px
-      margin-right 10px
+      margin-right 16px
       z-index 25
 
   .pane
     display none
     padding 16px
     position absolute
-    top 31px; right 0; left 0; bottom 0;
+    top 35px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]

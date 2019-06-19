@@ -7,34 +7,37 @@
 
     //- Clear console
     tooltip(text="Clear Console" :open-delay="800" top)
-      v-icon.ml-2(@click="consoleClear" color="red") mdi-cancel
+      v-icon.pl-3(@click="consoleClear" color="grey") mdi-cancel
 
     //- Restart
     tooltip(text="Restart" :open-delay="800" top)
-      v-icon(@click="restart" color="yellow") mdi-restart
+      v-icon(@click="restart" :disabled="isBuilding" color="grey") mdi-restart
 
     //- Build
     tooltip(text="Build" :open-delay="800" top)
-      v-icon(@click="startBuild" color="blue") mdi-progress-wrench
+      v-icon(@click="startBuild" :disabled="isBuilding" color="blue") mdi-progress-wrench
 
     v-spacer
 
     //- Dock bottom
     tooltip(text="Dock Bottom" :open-delay="800" top)
       v-icon(
-        :color="layoutHelper === 'horizontal' ? 'primary' : ''"
+        :color="layoutHelper === 'horizontal' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
     tooltip(text="Dock Right" :open-delay="800" top)
       v-icon(
-        :color="layoutHelper === 'vertical' ? 'primary' : ''"
+        :color="layoutHelper === 'vertical' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
       ) mdi-page-layout-sidebar-right
 
     //- Close helper
-    v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
+    v-icon.pr-3(
+      color="grey"
+      @click="PROJECT_SHOW_HELPER(false)"
+    ) mdi-close
 
   //- Console pane
   .pane(active ref="terminal")
@@ -69,7 +72,7 @@ export default {
   components: { Tooltip },
   data: () => ({
     consoleBuffer: [],
-    token: null
+    isBuilding: false
   }),
   computed: {
     ...mapState('Project', [
@@ -135,7 +138,6 @@ export default {
     },
 
     onMessage ({ type, data }) {
-      console.log('onmsg', type, data)
       switch (type) {
         case 'INIT': this.consolePrint('Container started', WSType.INFO); break
         case 'INFO': this.consolePrint(data, WSType.INFO); break
@@ -157,13 +159,9 @@ export default {
 
       try {
         const { token } = await API.invoke('post', '/containers/ltl2', {
-          body: {
-            integrations: [this.integration],
-            token: this.token
-          }
+          body: { integrations: [this.integration] }
         })
-        WS.join(token, message => this.onMessage(message))
-        this.token = token
+        WS.join(token, 'client', true, message => this.onMessage(message))
       } catch (e) {
         console.log('[launch]: error:', e)
       }
@@ -173,17 +171,26 @@ export default {
       WS.messageTerminate()
       this.consoleClear()
       this.consolePrint('Starting build', WSType.INFO)
+      this.isBuilding = true
 
       try {
         const { buildId } = await this.build(this.id)
-        WS.join(buildId, message => this.onMessage(message), 'build', false)
+        WS.join(buildId, 'build', false, message => {
+          this.onMessage(message)
+
+          if (message.data.indexOf('visualbox-build-done') !== -1) {
+            this.consolePrint('Build is done!', WSType.OUTPUT)
+            this.isBuilding = false
+          }
+        })
       } catch (e) {
         console.log('[startBuild]: error:', e)
+        this.isBuilding = false
       }
     }
   },
   mounted () {
-    this.launch()
+    // this.launch()
   },
   beforeDestroy () {
     WS.leave()
@@ -201,11 +208,11 @@ export default {
   >>> .v-system-bar
     margin 0
     padding 0
-    height 30px !important
+    height 35px !important
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 5px 8px 4px
+      padding 6px 15px 8px
       display inline-block
       cursor pointer
       z-index 25
@@ -216,15 +223,16 @@ export default {
 
     // Place above gutter overlay
     .tooltip-element, >.v-icon
-      height 24px
-      margin-right 10px
       z-index 25
+
+    .tooltip-element .v-icon, >.v-icon
+      padding 10px 8px 9px
 
   .pane
     display none
     padding 16px
     position absolute
-    top 31px; right 0; left 0; bottom 0;
+    top 35px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]

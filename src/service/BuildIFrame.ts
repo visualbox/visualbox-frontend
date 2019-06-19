@@ -1,11 +1,8 @@
 /**
  * Build an IFrame URI string for a widget.
- * @param  {String} code   Widget source code
- * @param  {Object} config Widget configuration
- * @return {String}        URI encoded string
  */
 export default (code: string, config: IObject) => {
-  let configString
+  let configString: string
   try {
     configString = JSON.stringify(config)
   } catch (e) {
@@ -54,5 +51,5 @@ export default (code: string, config: IObject) => {
     code = 'Failed to compile widget...'
   }
 
-  return `data:text/html,${code}`
+  return `data:text/html;charset=UTF-8,${code}`
 }

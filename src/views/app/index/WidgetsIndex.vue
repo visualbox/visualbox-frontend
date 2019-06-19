@@ -20,7 +20,7 @@ v-container(fill-height fluid)
           v-text-field(
             v-model="settings.name"
             hide-details single-line
-            autofocus outline
+            autofocus outlined
           )
       .headline.mb-3.mt-4 Select Runtime
       v-layout
@@ -32,7 +32,7 @@ v-container(fill-height fluid)
             item-text="text"
             item-value="runtime"
             hide-details single-line
-            outline
+            outlined
           )
             template(#selection="{ item }")
               v-icon.mr-3(:color="item.color") {{ item.icon }}
@@ -44,14 +44,14 @@ v-container(fill-height fluid)
         v-spacer
         v-btn.ma-0.mr-3(
           @click="isAdding = false"
-          large outline
+          large outlined
         ) Cancel
         v-btn.ma-0(
           :disabled="isLoading"
           :loading="isLoading"
           @click="submit"
           color="primary"
-          large outline
+          large outlined
         ) Create
 
   //- Explore widgets

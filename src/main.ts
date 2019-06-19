@@ -8,7 +8,7 @@ import '@/assets/styles/global.styl'
 
 // Libraries
 import '@/lib/amplify'
-import '@/lib/vuetify'
+import vuetify from '@/lib/vuetify'
 import '@/lib/vue-analytics'
 
 // Services
@@ -18,15 +18,13 @@ import '@/components/editor/MonacoEditor'
 import App from '@/App.vue'
 
 Vue.config.productionTip = false
-/*
-Vue.config.errorHandler = function (err, vm, info) {
-  // noop
-}
-*/
+// Vue.config.errorHandler = function (err, vm, info) { /* noop */ }
 
 /* eslint-disable no-new */
 new Vue({
   router,
   store,
+  // @ts-ignore
+  vuetify,
   render: h => h(App)
 }).$mount('#app')

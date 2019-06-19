@@ -15,7 +15,7 @@ div
     v-btn.ma-0.mr-3(
       to="/auth/signup"
       color="primary"
-      outline
+      outlined
     ) Create account
     v-spacer
     v-btn.ma-0(

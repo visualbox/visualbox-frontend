@@ -32,19 +32,19 @@ grid-layout#dashboard-layout(
         slot="activator"
         @click.native.stop="DASHBOARD_SET_FOCUSED_WIDGET(item.i)"
         color="grey darken-3"
-        dark fab small
+        dark fab
       )
         v-icon mdi-pencil
       v-btn(
         @click.native.stop="copyWidget(item.i)"
         color="primary"
-        fab dark small
+        fab dark
       )
         v-icon mdi-content-copy
       v-btn(
         @click.native.stop="removeWidget(item)"
         color="red"
-        fab dark small
+        fab dark
       )
         v-icon mdi-delete
     iframe(

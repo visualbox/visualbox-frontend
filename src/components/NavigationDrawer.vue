@@ -1,6 +1,6 @@
 <template lang="pug">
 #navigation-drawer
-  v-navigation-drawer#mini(
+  v-navigation-drawer(
     mini-variant
     permanent
     floating
@@ -14,13 +14,13 @@
           :text="item.title"
           right
         )
-          v-list-tile(
+          v-list-item(
             :to="item.to"
             :href="item.href"
             :target="item.href ? '_new' : ''"
             :exact="item.to === '/app'"
           )
-            v-list-tile-action
+            v-list-item-action
               v-icon(
                 :color="item.color"
                 medium
@@ -34,11 +34,11 @@
           :text="item.title"
           right
         )
-          v-list-tile(
+          v-list-item(
             :to="item.to"
             :exact="item.to === '/app'"
           )
-            v-list-tile-action
+            v-list-item-action
               v-icon(
                 :color="item.color"
                 medium
@@ -89,7 +89,7 @@ export default Vue.extend({
       padding 0
       background unset
 
-      .v-list__tile
+      .v-list-item
         height 56px
         -webkit-transition none !important
         transition none !important
@@ -103,13 +103,19 @@ export default Vue.extend({
         &--link
           .v-icon
             color $vb-drawer-icon !important
+          
+          &:hover:before
+            opacity 0 !important
 
         &--link:hover, &--active
           .v-icon
             color $vb-drawer-icon-hoveractive !important
 
-        .v-list__tile__action
+        .v-list-item__action
           min-width 20px
+
+          .v-icon
+            font-size 28px
 
   // Context global styles
   #context
@@ -123,12 +129,12 @@ export default Vue.extend({
     >>> .v-list
       padding 0
       background unset
-      -webkit-transition none !important
-      transition none !important
 
-      .v-list__tile
-        -webkit-transition none !important
-        transition none !important
+      .v-list-item
+        &:before
+          background-color unset !important
+          -webkit-transition none !important
+          transition none !important
 
         &:hover
           background-color $vb-primary-list-hover
@@ -143,8 +149,12 @@ export default Vue.extend({
         .v-list__tile, .v-list__tile:hover
           background-color $vb-primary-list-active !important
 
-      .v-list__tile__action
-        min-width 25px
+      .v-list-item__subtitle
+        font-weight 400 !important
+
+      .v-list-item__action
+        min-width 18px
+        margin 8px 0
 
     // Color picker
     >>> .v-expansion-panel, .v-expansion-panel__container

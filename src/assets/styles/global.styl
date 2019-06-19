@@ -63,8 +63,20 @@ input:-webkit-autofill
   img
     max-width 100%
 
-.v-expansion-panel__body
-  transition none !important
+.v-expansion-panel
+  .v-expansion-panel-header
+    min-height 64px
+
+    .v-avatar, .v-icon
+      -webkit-box-flex unset
+      -ms-flex unset
+      flex unset
+
+  .v-expansion-panel-content
+    transition none !important
+
+    .v-expansion-panel-content__wrap
+      padding 0 !important
 
 .vc-chrome
   width unset !important
@@ -74,6 +86,10 @@ input:-webkit-autofill
   .vc-chrome-body
     border-radius 0 0 4px 4px
     background-color #424242
+
+    .vc-chrome-color-wrap
+      .vc-checkerboard
+        background none !important
 
     .vc-chrome-fields
       .vc-input__input, .vc-input__label
@@ -89,16 +105,35 @@ input:-webkit-autofill
     .vc-chrome-toggle-icon-highlight
         background #424242
 
+.data-source
+  top 50%
+  height 50%
+  overflow hidden
+
+  .v-card
+    border-radius 0 !important
+    position relative
+
+    .v-toolbar
+      margin-top unset !important
+      top 50%
+
+    .container
+      top 64px
+      bottom 0
+      position absolute
+      overflow auto
+
 .hover-actions
-  .v-list__tile
+  .v-list-item
     &:hover
-      .v-list__tile__action
-        display flex
+      .v-list-item__action
+        display inline-flex
 
     .hover-actions-always
       display flex !important
 
-    .v-list__tile__action
+    .v-list-item__action
       display none
 
 #data-source-tree

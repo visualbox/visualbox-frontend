@@ -1,7 +1,6 @@
 <template lang="pug">
 v-container(fluid fill-height)
   v-layout(column)
-
     .headline.mb-3 Theme
     v-switch(
       v-model="localTheme"

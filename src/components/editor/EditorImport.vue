@@ -14,7 +14,7 @@ v-container#editor-import(fill-height)
         v-btn.ma-0.px-3(
           @click="importZip"
           color="primary"
-          large outline
+          large outlined
         )
           v-icon.mr-3 mdi-zip-box
           | Import

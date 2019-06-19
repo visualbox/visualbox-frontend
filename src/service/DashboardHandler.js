@@ -9,10 +9,20 @@ class DashboardHandler {
     this.token = null
     this.tick = null
     this.data = {}
+    this.isPublicDashboard = false
   }
 
   attachStore (store) {
     this.store = store
+  }
+
+  /**
+   * Configure Dashboard handler instance so
+   * that correct Vuex module is chosen.
+   * Significant in this.addInitedIntegration().
+   */
+  makePublicDashboard () {
+    this.isPublicDashboard = true
   }
 
   get integrations () {
@@ -20,7 +30,10 @@ class DashboardHandler {
   }
 
   addInitedIntegration (i) {
-    this.store.commit('Dashboard/DASHBOARD_ADD_INITED_INTEGRATION', i)
+    if (this.isPublicDashboard)
+      this.store.commit('Public/DASHBOARD_ADD_INITED_INTEGRATION', i)
+    else
+      this.store.commit('Dashboard/DASHBOARD_ADD_INITED_INTEGRATION', i)
   }
 
   /**
@@ -70,8 +83,11 @@ class DashboardHandler {
     IO.emit('message', message)
   }
 
-  initSocket () {
+  initSocket (token = null) {
     IO.reset()
+
+    if (token)
+      this.token = token
 
     if (!this.token)
       throw new Error('[DashboardHandler]: No token to subscribe to')

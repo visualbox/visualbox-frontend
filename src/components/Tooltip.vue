@@ -10,8 +10,9 @@ v-tooltip(
   transition="fade-transition"
 )
   span {{ text }}
-  template(slot="activator")
-    slot
+  template(#activator="{ on }")
+    .tooltip-element(v-on="on")
+      slot
 </template>
 
 <script lang="ts">

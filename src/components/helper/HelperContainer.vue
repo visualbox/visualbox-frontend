@@ -153,7 +153,6 @@ export default {
     },
 
     async launch () {
-      WS.messageTerminate()
       this.consoleClear()
       this.consolePrint('Starting container', WSType.INFO)
 
@@ -168,7 +167,6 @@ export default {
     },
 
     async startBuild () {
-      WS.messageTerminate()
       this.consoleClear()
       this.consolePrint('Starting build', WSType.INFO)
       this.isBuilding = true
@@ -190,7 +188,7 @@ export default {
     }
   },
   mounted () {
-    // this.launch()
+    this.launch()
   },
   beforeDestroy () {
     WS.leave()

@@ -322,7 +322,7 @@ const actions = {
     commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
 
     const { i, id, version, model } = focused
-    DashboardHandler.restartIntegration({ i, id, version, model })
+    DashboardHandler.restartIntegration({ i, model })
   },
 
   /**

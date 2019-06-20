@@ -4,7 +4,7 @@ const TICK_INTERVAL = 15000
 
 interface IWSMessage {
   action: 'join' | 'leave' | 'message'
-  type?: 'TICK' | 'INIT' | 'TERMINATE' | 'INFO' | 'OUTPUT' | 'WARNING' | 'ERROR'
+  type?: 'TICK' | 'INIT' | 'TERMINATE' | 'RESTART' | 'INFO' | 'OUTPUT' | 'WARNING' | 'ERROR'
   room?: string
   i?: string
   data?: string
@@ -53,6 +53,22 @@ class WS {
       this.socket.onmessage = null
   }
 
+  public messageRestart ({ i, model }) {
+    if (!this.room || !this.socket)
+      return
+
+    this.send({
+      action: 'message',
+      type: 'RESTART',
+      room: this.room,
+      i,
+      data: JSON.stringify(model)
+    })
+
+    if (!i)
+      this.socket.onmessage = null
+  }
+
   public async join (
     room: string,
     meta: string = 'client',
@@ -81,8 +97,10 @@ class WS {
 
       this.room = room
 
-      if (!this.tick && startTick)
+      if (!this.tick && startTick) {
         this.tick = setInterval(() => this.messageTick(), TICK_INTERVAL)
+        console.log('TICK STARTED')
+      }
 
     } catch (e) {
       console.log('[WS]: join failed: ', e)

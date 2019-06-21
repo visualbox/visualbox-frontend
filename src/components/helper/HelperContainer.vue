@@ -53,7 +53,6 @@ import get from 'lodash-es/get'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { API, WS } from '@/service'
 import { Tooltip } from '@/components'
-import { parseConfig } from '@/lib/utils'
 
 const BUFFER_MAX = 10000
 

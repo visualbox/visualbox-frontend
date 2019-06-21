@@ -48,6 +48,7 @@ class DashboardHandler {
         } catch (e) {}
 
         this.data[i] = data
+        console.log(this.data)
         IFrameHandler.onDataChange(i, data)
 
         /**

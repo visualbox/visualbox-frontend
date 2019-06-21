@@ -173,11 +173,13 @@ const actions = {
       commit(t.DASHBOARD_SET_LIST, list)
     }
   },
-  async create ({ commit }) {
+  async create ({ commit }, label) {
     let result = []
 
     try {
-      result.push(await API.invoke('post', '/dashboard'))
+      result.push(await API.invoke('post', '/dashboard', {
+        body: { label }
+      }))
     } catch (e) {
       throw e
     } finally {

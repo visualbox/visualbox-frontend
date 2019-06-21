@@ -137,7 +137,7 @@ export default {
      */
     onResize ({ width }) {
       const { xs, sm, md, lg } = this.$vuetify.breakpoint.thresholds
-      let cols = (width >= lg || width >= md)
+      const cols = (width >= lg || width >= md)
         ? 4
         : 12
 

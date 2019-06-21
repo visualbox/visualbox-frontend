@@ -1,6 +1,4 @@
-import Auth from '@aws-amplify/auth'
-
-const TICK_INTERVAL = 15000
+const TICK_INTERVAL = 25000
 
 interface IWSMessage {
   action: 'join' | 'leave' | 'message'
@@ -27,7 +25,6 @@ class WS {
   }
 
   public messageTick () {
-    console.log('TICK', this.room)
     if (!this.room)
       return
 
@@ -97,10 +94,8 @@ class WS {
 
       this.room = room
 
-      if (!this.tick && startTick) {
+      if (!this.tick && startTick)
         this.tick = setInterval(() => this.messageTick(), TICK_INTERVAL)
-        console.log('TICK STARTED')
-      }
 
     } catch (e) {
       console.log('[WS]: join failed: ', e)
@@ -141,20 +136,7 @@ class WS {
   }
 
   private async getEndpoint () {
-    const endpoint = process.env.VUE_APP_WEBSOCKET_ENDPOINT || ''
-    return endpoint
-
-    /*
-    let token = 'anonymous'
-
-    try {
-      token = (await Auth.currentSession()).getIdToken().getJwtToken()
-    } catch (e) {
-      // Silent...
-    }
-
-    return `${endpoint}?token=${token}`
-    */
+    return process.env.VUE_APP_WEBSOCKET_ENDPOINT || ''
   }
 }
 

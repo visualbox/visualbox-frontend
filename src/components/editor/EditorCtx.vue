@@ -42,6 +42,16 @@
       v-list-item-content
         v-list-item-subtitle Import Files
 
+    //- Console
+    v-list-item.no-hover(
+      @click="toggleConsole"
+      :class="{ 'v-list-item--active' : showHelper }"
+    )
+      v-list-item-action.hover-actions-always
+        v-icon(small) {{ type === 'INTEGRATION' ? 'mdi-console' : 'mdi-shape' }}
+      v-list-item-content
+        v-list-item-subtitle {{ type === 'INTEGRATION' ? 'Console' : 'Preview' }}
+
     //- Configuration Model
     template
       v-list-item.no-hover(@click="openPanel.config = !openPanel.config")
@@ -154,10 +164,12 @@ export default {
     ...mapState('Route', ['path']),
     ...mapState('Project', [
       'configMapModel',
+      'type',
       'fileTree',
       'showInfo',
       'showSettings',
       'showImport',
+      'showHelper',
       'settings',
       'active',
       'dirty'
@@ -353,6 +365,9 @@ export default {
         this.PROJECT_SHOW_SETTINGS()
       else
         this.PROJECT_SHOW_IMPORT()
+    },
+    toggleConsole () {
+      this.PROJECT_SHOW_HELPER(!this.showHelper)
     },
     /**
      * Need to calculate destination because

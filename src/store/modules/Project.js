@@ -112,6 +112,9 @@ const mutations = {
     state.showImport = true
   },
   [t.PROJECT_SHOW_HELPER] (state, payload) {
+    state.showInfo = false
+    state.showSettings = false
+    state.showImport = false
     state.showHelper = !!payload
   },
   [t.PROJECT_SET_HELPER_LAYOUT] (state, payload) {
@@ -301,7 +304,6 @@ const getters = {
       return -1
     
     const keys = Object.keys(versions)
-    console.log('KEYS', keys)
     return (keys.length <= 0)
       ? 0
       : keys.reduce(semverMax)

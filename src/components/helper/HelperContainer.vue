@@ -76,6 +76,7 @@ export default {
   }),
   computed: {
     ...mapState('Project', [
+      'configMapModel',
       'layoutHelper',
       'dirty',
       'files',
@@ -86,7 +87,7 @@ export default {
         i: '_0', // Dummy 'i' in helper
         id: this.id,
         version: '^', // Always local in helper
-        model: this.model
+        model: this.configMapModel
       }
     }
   },

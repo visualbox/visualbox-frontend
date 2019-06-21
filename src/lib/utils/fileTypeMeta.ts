@@ -1,5 +1,7 @@
 export default (name: string) => {
-  const fileType = name.split('.').pop()
+  const fileType = name
+    ? name.split('.').pop()
+    : null
 
   switch (fileType) {
     case 'Dockerfile':

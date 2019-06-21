@@ -51,7 +51,7 @@
           v-list-item-subtitle Configuration Model
       input-types.pt-3.pl-3.pr-3(
         v-if="openPanel.config"
-        v-model="configMapModel"
+        v-model="configMapModelProxy"
         :config="parsedConfigMap"
       )
 
@@ -141,18 +141,19 @@ export default {
     openPanel: {
       files: true,
       settings: false,
-      config: false
+      config: false,
     },
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileName: null,
     editFileDisplayName: null,
-    configMapModel: {}
+    configMapModelProxy: {}
   }),
   computed: {
     ...mapState('Route', ['path']),
     ...mapState('Project', [
+      'configMapModel',
       'fileTree',
       'showInfo',
       'showSettings',
@@ -197,18 +198,27 @@ export default {
         }, {})
 
         // Apply user input
-        for (const name in this.configMapModel) {
+        for (const name in this.configMapModelProxy) {
           if (defaults.hasOwnProperty(name))
-            defaults[name] = this.configMapModel[name]
+            defaults[name] = this.configMapModelProxy[name]
         }
 
-        this.configMapModel = defaults
+        this.configMapModelProxy = defaults
+      }
+    },
+
+    configMapModelProxy: {
+      immediate: true,
+      deep: true,
+      handler (val) {
+        this.PROJECT_SET_CONFIG_MAP_MODEL(val)
       }
     }
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
     ...mapMutations('Project', [
+      'PROJECT_SET_CONFIG_MAP_MODEL',
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
       'PROJECT_SHOW_IMPORT',

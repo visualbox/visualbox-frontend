@@ -36,6 +36,8 @@
         )
           v-list-item(
             :to="item.to"
+            :href="item.href"
+            :target="item.href ? '_new' : ''"
             :exact="item.to === '/app'"
           )
             v-list-item-action
@@ -61,12 +63,13 @@ export default Vue.extend({
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-hexagon-multiple' },
-      { title: 'Help Center', href: 'https://docs.visualbox.io', icon: 'mdi-help-circle' }
+      { title: 'Help', href: 'https://docs.visualbox.io', icon: 'mdi-help-circle' }
     ],
     itemsBottom: [
-      // { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle', class: 'bottom_upper' },
-      { title: 'Settings', to: '/app/s', icon: 'mdi-settings', class: 'bottom_upper' },
-      { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby', class: 'bottom' }
+      // { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle' },
+      { title: 'Discord', href: 'https://discord.gg/VVnJmqh', icon: 'mdi-discord' },
+      { title: 'Settings', to: '/app/s', icon: 'mdi-settings' },
+      { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby' }
     ]
   })
 })

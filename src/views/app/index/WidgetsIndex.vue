@@ -9,7 +9,32 @@ v-container(fill-height fluid)
       .subheading Widgets are the building blocks of your dashboard.
       .subheading They are self-contained components that are fed data from integrations.
       .subheading You can create your own widgets, or search for already existing widgets.
-      .subheading Existing widgets can be modified to your own needs.
+      v-container.pa-0.mt-4(fluid grid-list-lg)
+        v-layout(row wrap)
+          v-flex(v-bind="cols")
+            v-card(flat color="primary" @click="addWidget")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title New Widget
+                  v-list-item-subtitle Create a new widget from scratch.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-star-four-points
+          v-flex(v-bind="cols")
+            v-card(flat @click="toggleExplorer")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title Explore
+                  v-list-item-subtitle Discover already made widgets.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-search-web
+          v-flex(v-bind="cols")
+            v-card(flat href="https://docs.visualbox.io/widgets/" target="_new")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title Documentation
+                  v-list-item-subtitle Learn how to develop widgets.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-launch
       v-icon.index-icon mdi-hexagon-multiple
 
     //- Adding widget preconfig
@@ -65,6 +90,7 @@ v-container(fill-height fluid)
 import { mapState, mapActions } from 'vuex'
 import { Explorer } from '@/components'
 import EventBus from '@/lib/eventBus'
+import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 
 export default {
   name: 'WidgetsIndex',
@@ -87,7 +113,11 @@ export default {
         icon: 'mdi-language-javascript',
         color: '#efdb4f'
       }
-    ]
+    ],
+
+    // Responsive stuff
+    resizeSensor: null,
+    cols: { xs12: true }
   }),
   computed: mapState('App', ['isLoading']),
   methods: {
@@ -109,9 +139,29 @@ export default {
         this.setIsLoading(false)
         this.isAdding = false
       }
+    },
+    addWidget () {
+      EventBus.$emit('vbox:addWidget')
+    },
+    toggleExplorer () {
+      EventBus.$emit('vbox:toggleExplorer')
+    },
+
+    /**
+     * Use custom resize watcher since Vuetify
+     * won't detect element resize (only window).
+     */
+    onResize ({ width }) {
+      const { xs, sm, md, lg } = this.$vuetify.breakpoint.thresholds
+      let cols = (width >= lg || width >= md)
+        ? 4
+        : 12
+
+      this.cols = { [`xs${cols}`]: true }
     }
   },
   mounted () {
+    this.resizeSensor = new ResizeSensor(this.$el, this.onResize)
     EventBus.$on('vbox:addWidget', () => {
       this.isAdding = true
       this.isExploring = false
@@ -122,6 +172,7 @@ export default {
     })
   },
   beforeDestroy () {
+    this.resizeSensor.detach()
     EventBus.$off('vbox:addWidget')
     EventBus.$off('vbox:toggleExplorer')
   }
@@ -135,4 +186,7 @@ export default {
 
   .flex
     position relative
+
+  .v-card
+    z-index 10
 </style>

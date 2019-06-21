@@ -24,6 +24,7 @@ const state = {
   showImport: false,
   showHelper: false,
   layoutHelper: 'horizontal',
+  configMapModel: {},
 
   id: null,
   uid: null,
@@ -49,6 +50,7 @@ const mutations = {
     state.showImport = false
     state.showHelper = false
     state.layoutHelper = 'horizontal'
+    state.configMapModel = {}
 
     state.id = null
     state.uid = null
@@ -77,6 +79,9 @@ const mutations = {
     state.updatedAt = copy.updatedAt || 0
     state.lastBuild = copy.lastBuild || 0
     state.ready = true
+  },
+  [t.PROJECT_SET_CONFIG_MAP_MODEL] (state, payload) {
+    state.configMapModel = cloneDeep(payload)
   },
   [t.PROJECT_UPDATE_FILE_TREE] (state) {
     state.fileTree = Zip.fileTree

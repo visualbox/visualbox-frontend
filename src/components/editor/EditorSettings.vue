@@ -21,20 +21,6 @@ v-container#editor-settings(fill-height)
             outlined
           )
 
-      //- Widget only have 'javascript' runtime
-      template(v-if="runtime !== 'javascript'")
-        .headline.mb-3.mt-4 Runtime
-        v-layout
-          v-flex
-            select-runtime(
-              v-model="runtime"
-              disabled
-            )
-        v-layout.mt-2
-          v-flex
-            span.grey--text
-              | The runtime can unfortunately not be changed after creation.
-              | Please create a new project if you want to change the runtime.
       v-layout.mt-4
         v-spacer
         v-btn.ma-0.px-3(
@@ -112,14 +98,12 @@ v-container#editor-settings(fill-height)
 <script>
 import semver from 'semver'
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import { SelectRuntime } from '@/components'
 import { cloneDeep } from '@/lib/utils'
 import EventBus from '@/lib/eventBus'
 import { Zip } from '@/service'
 
 export default {
   name: 'EditorSettings',
-  components: { SelectRuntime },
   data: () => ({
     newSemver: null
   }),
@@ -134,8 +118,7 @@ export default {
     thumb: {
       get () { return this.settings.thumb },
       set (value) { this.PROJECT_SET_SETTINGS({ key: 'thumb', value }) }
-    },
-    runtime () { return this.settings.runtime }
+    }
   },
   methods: {
     ...mapMutations('Project', ['PROJECT_SET_SETTINGS']),

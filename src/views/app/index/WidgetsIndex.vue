@@ -47,15 +47,15 @@ v-container(fill-height fluid)
             hide-details single-line
             autofocus outlined
           )
-      .headline.mb-3.mt-4 Select Runtime
+      .headline.mb-3.mt-4 Select Template
       v-layout
         v-flex
           v-select(
-            v-model="settings.runtime"
-            :items="runtimes"
+            v-model="template"
+            :items="templates"
             :disabled="isLoading"
             item-text="text"
-            item-value="runtime"
+            item-value="template"
             hide-details single-line
             outlined
           )
@@ -89,6 +89,7 @@ v-container(fill-height fluid)
 <script>
 import { mapState, mapActions } from 'vuex'
 import { Explorer } from '@/components'
+import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
 import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 
@@ -103,17 +104,17 @@ export default {
       local: false
     },
     settings: {
-      name: '',
-      runtime: 'javascript'
+      name: ''
     },
-    runtimes: [
+    templates: [
       {
-        text: 'JavaScript',
-        runtime: 'javascript',
-        icon: 'mdi-language-javascript',
-        color: '#efdb4f'
+        text: 'HTML',
+        template: 'widget-plain',
+        icon: 'mdi-language-html5',
+        color: '#e44d26'
       }
     ],
+    template: 'widget-plain',
 
     // Responsive stuff
     resizeSensor: null,
@@ -122,14 +123,16 @@ export default {
   computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Widget', ['create']),
+    ...mapActions('Widget', ['create', 'commitFiles']),
     async submit () {
       if (!this.settings.name || this.settings.name === '')
         return
 
       this.setIsLoading(true)
       try {
-        await this.create({ settings: this.settings })
+        const id = await this.create({ settings: this.settings })
+        const blob = await Zip.loadTemplate(this.template)
+        await this.commitFiles({ id, blob })
       } catch (e) {
         this.setSnackbar({
           type: 'error',

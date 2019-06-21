@@ -75,15 +75,18 @@ const actions = {
   },
   async create ({ commit }, { id = null, settings = null }) {
     let result = [] // Default value
+    let item = null
 
     try {
-      result.push(await API.invoke('post', '/integration', {
+      item = await API.invoke('post', '/integration', {
         body: { id, settings }
-      }))
+      })
+      result.push(item)
     } catch (e) {
       throw e
     } finally {
       commit(t.INTEGRATION_CONCAT_LIST, result)
+      return item ? item.id : null
     }
   },
   async del ({ commit }, id) {

@@ -101,6 +101,12 @@ v-container#explorer(fluid)
                   v-btn(color="primary") View
                   v-card-title.subtitle-1.font-weight-medium {{ item.settings.name }}
                   v-card-text {{ item.intro }}
+          v-flex(xs12)
+            img.mb-3(
+              :src="require('../assets/img/search-by-algolia-dark-background.svg')"
+              max-width="150"
+              style="float: right"
+            )
 
     //- Selected
     template(v-else-if="!search && selected")

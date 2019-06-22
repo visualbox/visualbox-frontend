@@ -157,7 +157,7 @@ export default {
       this.consolePrint('Starting container', WSType.INFO)
 
       try {
-        const { token } = await API.invoke('post', '/containers/ltl2', {
+        const { token } = await API.invoke('post', '/containers/ltl', {
           body: { integrations: [this.integration] }
         })
         WS.join(token, 'client', true, message => this.onMessage(message))

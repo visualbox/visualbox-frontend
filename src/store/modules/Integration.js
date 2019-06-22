@@ -134,7 +134,7 @@ const actions = {
 
   async publish ({ commit }, { id, version }) {
     try {
-      const { versions } = await API.invoke('post', '/registry2', {
+      const { versions } = await API.invoke('post', '/registry', {
         body: {
           type: 'INTEGRATION',
           id,

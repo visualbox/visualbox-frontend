@@ -66,7 +66,7 @@ class DashboardHandler {
    */
   async initDashboard () {
     try {
-      const { token } = await API.invoke('post', '/containers/ltl2', {
+      const { token } = await API.invoke('post', '/containers/ltl', {
         body: { integrations: this.integrations }
       })
 
@@ -84,7 +84,7 @@ class DashboardHandler {
    */
   async addIntegration (integration) {
     try {
-      await API.invoke('post', '/containers/ltl2', {
+      await API.invoke('post', '/containers/ltl', {
         body: {
           token: this.token,
           integrations: [integration]

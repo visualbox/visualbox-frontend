@@ -133,10 +133,14 @@ const actions = {
     }
   },
 
-  async publish ({ commit }, id) {
+  async publish ({ commit }, { id, version }) {
     try {
       const { versions } = await API.invoke('post', '/registry', {
-        body: { type: 'WIDGET', id }
+        body: {
+          type: 'WIDGET',
+          id,
+          version
+        }
       })
       commit(t.WIDGET_SET_VERSIONS, { id, versions })
       commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions }, { root: true })

@@ -70,10 +70,13 @@ export default {
     })
 
     // Should save project before publish?
-    EventBus.$on('vbox:publishProject', async () => {
+    EventBus.$on('vbox:publishProject', async (version) => {
       try {
         this.setIsLoading(true)
-        await this.publish(this.id)
+        await this.publish({
+          id: this.id,
+          version
+        })
         this.setSnackbar({
           type: 'info',
           msg: `Published widget`,

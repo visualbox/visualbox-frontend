@@ -2,171 +2,92 @@
 #helper-integration
   v-system-bar
     //- Tabs
-    .tab(:active="tab === 0" @click="tab = 0") Configure
-    .tab(:active="tab === 1" @click="tab = 1") Console
+    //- .tab(:active="tab === 0" @click="tab = 0") Build
+    .tab(active) Console
 
     //- Clear console
     tooltip(text="Clear Console" :open-delay="800" top)
-      v-icon.ml-2(@click="clear" color="red") mdi-cancel
+      v-icon.pl-3(@click="consoleClear" color="grey") mdi-cancel
 
     //- Restart
     tooltip(text="Restart" :open-delay="800" top)
-      v-icon(@click="restart" color="yellow") mdi-restart
+      v-icon(@click="restart" :disabled="isBuilding" color="grey") mdi-restart
+
+    //- Build
+    tooltip(text="Build" :open-delay="800" top)
+      v-icon(@click="startBuild" :disabled="isBuilding" color="blue") mdi-progress-wrench
 
     v-spacer
-    
-    //- Freeze
-    tooltip(text="Freeze Console" :open-delay="800" top)
-      v-icon(
-        :color="freeze ? 'blue' : ''"
-        @click="freeze = !freeze"
-      ) mdi-snowflake
 
     //- Dock bottom
     tooltip(text="Dock Bottom" :open-delay="800" top)
       v-icon(
-        :color="layoutHelper === 'horizontal' ? 'primary' : ''"
+        :color="layoutHelper === 'horizontal' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
     tooltip(text="Dock Right" :open-delay="800" top)
       v-icon(
-        :color="layoutHelper === 'vertical' ? 'primary' : ''"
+        :color="layoutHelper === 'vertical' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
       ) mdi-page-layout-sidebar-right
 
     //- Close helper
-    v-icon(@click="PROJECT_SHOW_HELPER(false)") mdi-close
-
-  //- Config pane
-  .pane(:active="tab === 0")
-    input-types(
-      v-model="model"
-      :config="config"
-    )
+    v-icon.pr-3(
+      color="grey"
+      @click="PROJECT_SHOW_HELPER(false)"
+    ) mdi-close
 
   //- Console pane
-  .pane(:active="tab === 1" ref="terminal")
+  .pane(active ref="terminal")
     .ln(
       v-for="(item, index) in consoleBuffer"
       :key="index"
     )
-      //- template(v-if="item.status")
-        b.mr-1(:style="{ 'color': item.status.color }") {{ item.status.text }}
-      pre(:style="{ 'color': item.status.color || 'white' }") {{ item.ln }}
+      pre(:style="{ 'color': item.color }") {{ item.ln }}
 </template>
 
 <script>
 import get from 'lodash-es/get'
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
-import IO from '@/lib/socket'
-import API from '@/service/API'
-import { InputTypes, Tooltip } from '@/components'
-import { parseConfig } from '@/lib/utils'
+import { mapState, mapMutations, mapActions } from 'vuex'
+import { API, WS } from '@/service'
+import { Tooltip } from '@/components'
 
-const BUFFER_MAX = 100
+const BUFFER_MAX = 10000
 
-const T_INFO = 'T_INFO'
-const T_WARNING = 'T_WARNING'
-const T_ERROR = 'T_ERROR'
-const T_OUTPUT = 'T_OUTPUT'
-const T_TICK = 'T_TICK'
+const WSType = {
+  TICK: 'TICK',
+  INIT: 'INIT',
+  TERMINATE: 'TERMINATE',
+  INFO: 'INFO',
+  OUTPUT: 'OUTPUT',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+}
 
 export default {
   name: 'HelperContainer',
-  components: {
-    InputTypes,
-    Tooltip
-  },
+  components: { Tooltip },
   data: () => ({
-    tab: 1,
-    model: {},
-    modelDirty: false,
     consoleBuffer: [],
-    freeze: false,
-    token: null,
-    tick: null
+    isBuilding: false
   }),
   computed: {
-    ...mapGetters('Integration', ['configMapById']),
     ...mapState('Project', [
+      'configMapModel',
       'layoutHelper',
       'dirty',
       'files',
       'id'
     ]),
-    config () {
-      const configMap = this.configMapById(this.id)
-
-      // Something went wrong retieving local config map
-      if (!configMap || typeof configMap === 'string') {
-        const error = !configMap ? 'Unable to get config.json' : configMap
-        return {
-          error: [error],
-          variables: []
-        }
-      }
-
-      return parseConfig(configMap)
-    },
     integration () {
       return {
         i: '_0', // Dummy 'i' in helper
         id: this.id,
-        version: '^', // always local in helper
-        model: this.model
+        version: '^', // Always local in helper
+        model: this.configMapModel
       }
-    }
-  },
-  watch: {
-    /**
-     * Re-apply defaults to model bound to input types.
-     */
-    config: {
-      immediate: true,
-      deep: true,
-      handler () {
-        const variables = get(this.config, 'variables', [])
-        const defaults = variables.reduce((acc, cur) => {
-          acc[cur.name] = cur.default || null
-          return acc
-        }, {})
-
-        // Apply user input
-        for (const name in this.model) {
-          if (defaults.hasOwnProperty(name))
-            defaults[name] = this.model[name]
-        }
-
-        this.model = defaults
-      }
-    },
-
-    model: {
-      deep: true,
-      handler () {
-        this.modelDirty = true
-      }
-    },
-
-    /**
-     * Watch to see if model was dirty and changed
-     * "back" to console. If so, restart container.
-     */
-    tab (val) {
-      if (val === 1 && this.modelDirty) {
-        this.modelDirty = false
-        this.print('model was changed', T_INFO)
-        this.restart()
-      }
-    },
-
-    freeze (val) {
-      if (val)
-        this.terminate()
-      else
-        this.restart()
     }
   },
   methods: {
@@ -174,8 +95,9 @@ export default {
       'PROJECT_SET_HELPER_LAYOUT',
       'PROJECT_SHOW_HELPER'
     ]),
+    ...mapActions('Integration', ['build']),
 
-    scrollTerminal () {
+    consoleScroll () {
       const el = this.$refs.terminal
       if (!el)
         return
@@ -187,155 +109,89 @@ export default {
       }
     },
 
-    /**
-     * Print a line to the console.
-     */
-    print (ln, statusType) {
-      if (statusType === T_TICK)
+    consolePrint (ln, wsMessageType) {
+      if (wsMessageType === WSType.TICK)
         return
 
       if (this.consoleBuffer.length > BUFFER_MAX)
         this.consoleBuffer.shift()
 
-      let status = null
-      if (statusType === T_INFO)
-        status = { text: '[info]:', color: 'green' }
-      else if (statusType === T_WARNING)
-        status = { text: '[warning]:', color: 'orange' }
-      else if (statusType === T_ERROR)
-        status = { text: '[error]:', color: 'red' }
-      else if (statusType === T_OUTPUT)
-        status = { text: '[output]:', color: 'deepskyblue' }
+      let color
+      switch (wsMessageType) {
+        case WSType.INFO: color = 'green'; break
+        case WSType.WARNING: color = 'orange'; break
+        case WSType.ERROR: color = 'red'; break
+        case WSType.OUTPUT: color = 'deepskyblue'; break
+        default: color = 'white'; break
+      }
 
       this.consoleBuffer.push({
         timestamp: +new Date(),
-        ln, status
+        color,
+        ln
       })
-
-      this.scrollTerminal()
+      this.consoleScroll()
     },
 
-    /**
-     * Clear the console.
-     */
-    clear () {
+    consoleClear () {
       this.consoleBuffer = []
     },
 
-    /**
-     * Send a message to the container.
-     */
-    publish (message) {
-      if (!this.token)
-        throw new Error('[DashboardHandler]: No token to publish to')
-
-      IO.emit('message', message)
-    },
-
-    /**
-     * Restart container.
-     */
-    restart () {
-      this.print('restarting container', T_INFO)
-      this.freeze = false
-      this.publish({
-        type: 'START',
-        integration: this.integration
-      })
-    },
-
-    /**
-     * Terminate container.
-     */
-    terminate () {
-      this.publish({
-        type: 'TERMINATE',
-        i: -1
-      })
-    },
-
-    /**
-     * The container has sent a message.
-     */
-    onMessage (m) {
-      const { type } = m
-
+    onMessage ({ type, data }) {
       switch (type) {
-
-        /**
-         * Container sent an INIT message.
-         */
-        case 'INIT':
-          this.print('container started', T_INFO)
-          break
-
-        /**
-         * Container integration is giving output.
-         * 'i' is included in the message but we
-         * don't care about it in the helper
-         * component.
-         */
-        case 'OUTPUT':
-          this.print(m.data, T_OUTPUT)
-          break;
-
-        case 'STATUS':
-          this.print(m.data, m.statusType)
-          break;
+        case 'INIT': this.consolePrint('Container started', WSType.INFO); break
+        case 'INFO': this.consolePrint(data, WSType.INFO); break
+        case 'OUTPUT': this.consolePrint(data, WSType.OUTPUT); break
+        case 'WARNING': this.consolePrint(data, WSType.WARNING); break
+        case 'ERROR': this.consolePrint(data, WSType.ERROR); break
       }
     },
 
-    /**
-     * Init container socket connection.
-     */
-    initSocket () {
-      IO.reset()
-
-      if (!this.token)
-        throw new Error('[DashboardHandler]: No token to subscribe to')
-
-      IO.join(this.token)
-      IO.on('message', m => this.onMessage(m))
-
-      /**
-       * Start ticker to keep container
-       * alive.
-       */
-      if (this.tick !== null)
-        clearInterval(this.tick)
-      this.tick = setInterval(() => {
-        this.publish({ type: 'TICK' })
-      }, 15000)
+    restart () {
+      this.consolePrint('Restarting container', WSType.INFO)
+      this.launch()
     },
 
-    /**
-     * Init container by calling LTL.
-     */
-    async initContainer () {
-      this.clear()
-      this.print('starting container', T_INFO)
+    async launch () {
+      this.consoleClear()
+      this.consolePrint('Starting container', WSType.INFO)
 
       try {
-        const { token } = await API.invoke('post', '/containers/ltl', {
+        const { token } = await API.invoke('post', '/containers/ltl2', {
           body: { integrations: [this.integration] }
         })
-
-        this.token = token
-        this.initSocket()
+        WS.join(token, 'client', true, message => this.onMessage(message))
       } catch (e) {
-        console.log('[DashboardHandler]: error; ', e)
+        console.log('[launch]: error:', e)
+      }
+    },
+
+    async startBuild () {
+      this.consoleClear()
+      this.consolePrint('Starting build', WSType.INFO)
+      this.isBuilding = true
+
+      try {
+        const { buildId } = await this.build(this.id)
+        WS.join(buildId, 'build', false, message => {
+          this.onMessage(message)
+
+          if (message.data.indexOf('visualbox-build-done') !== -1) {
+            this.consolePrint('Build is done!', WSType.OUTPUT)
+            this.isBuilding = false
+          }
+        })
+      } catch (e) {
+        console.log('[startBuild]: error:', e)
+        this.isBuilding = false
       }
     }
   },
   mounted () {
-    this.initContainer()
+    this.launch()
   },
   beforeDestroy () {
-    this.publish({ type: 'TERMINATE' })
-    IO.end()
-
-    if (this.tick !== null)
-      clearInterval(this.tick)
+    WS.leave()
   }
 }
 </script>
@@ -350,11 +206,11 @@ export default {
   >>> .v-system-bar
     margin 0
     padding 0
-    height 30px !important
+    height 35px !important
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 5px 6px 4px
+      padding 6px 15px 8px
       display inline-block
       cursor pointer
       z-index 25
@@ -365,15 +221,16 @@ export default {
 
     // Place above gutter overlay
     .tooltip-element, >.v-icon
-      height 24px
-      margin-right 10px
       z-index 25
+
+    .tooltip-element .v-icon, >.v-icon
+      padding 10px 8px 9px
 
   .pane
     display none
     padding 16px
     position absolute
-    top 31px; right 0; left 0; bottom 0;
+    top 35px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]

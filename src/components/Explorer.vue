@@ -101,6 +101,12 @@ v-container#explorer(fluid)
                   v-btn(color="primary") View
                   v-card-title.subtitle-1.font-weight-medium {{ item.settings.name }}
                   v-card-text {{ item.intro }}
+          v-flex(xs12)
+            img.mb-3(
+              :src="require('../assets/img/search-by-algolia-dark-background.svg')"
+              max-width="150"
+              style="float: right"
+            )
 
     //- Selected
     template(v-else-if="!search && selected")
@@ -153,37 +159,38 @@ export default {
     }),
     browseLocal () {
       const list = this.config.type === 'INTEGRATION'
-        ? this.listIntegration
+        ? this.listIntegration.filter(({ lastBuild }) => !!lastBuild)
         : this.listWidget
 
-      return list.map(item => {
-        const readme = marked(item.readme, {
-          sanitize: true,
-          gfm: true,
-          silent: true
+      return list
+        .map(item => {
+          const readme = marked(item.readme, {
+            sanitize: true,
+            gfm: true,
+            silent: true
+          })
+
+          // Strip HTML
+          const doc = new DOMParser().parseFromString(readme, 'text/html')
+          const intro = doc.body.textContent || ''
+
+          const versions = Object.keys(item.versions).map(k => ({ text: k, value: k }))
+          versions.unshift({
+            text: 'Latest',
+            value: '*'
+          })
+
+          return {
+            id: item.id,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            uid: item.uid,
+            readme,
+            intro,
+            settings: item.settings,
+            versions
+          }
         })
-
-        // Strip HTML
-        const doc = new DOMParser().parseFromString(readme, 'text/html')
-        const intro = doc.body.textContent || ''
-
-        const versions = Object.keys(item.versions).map(k => ({ text: k, value: k }))
-        versions.unshift({
-          text: 'Latest',
-          value: '*'
-        })
-
-        return {
-          id: item.id,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          uid: item.uid,
-          readme,
-          intro,
-          settings: item.settings,
-          versions
-        }
-      })
     },
     currentList () {
       return this.local ? this.browseLocal : this.browsePopular

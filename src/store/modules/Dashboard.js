@@ -173,11 +173,13 @@ const actions = {
       commit(t.DASHBOARD_SET_LIST, list)
     }
   },
-  async create ({ commit }) {
+  async create ({ commit }, label) {
     let result = []
 
     try {
-      result.push(await API.invoke('post', '/dashboard'))
+      result.push(await API.invoke('post', '/dashboard', {
+        body: { label }
+      }))
     } catch (e) {
       throw e
     } finally {
@@ -322,7 +324,7 @@ const actions = {
     commit(t.DASHBOARD_CONCAT_FOCUSED, { focused, payload })
 
     const { i, id, version, model } = focused
-    DashboardHandler.restartIntegration({ i, id, version, model })
+    DashboardHandler.restartIntegration({ i, model })
   },
 
   /**

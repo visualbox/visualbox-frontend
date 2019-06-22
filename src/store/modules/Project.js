@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import JSZip from 'jszip'
+import semverMax from 'semver-max'
 import * as t from '@/store/types'
 import get from 'lodash-es/get'
 import isObject from 'lodash-es/isObject'
-import { cloneDeep } from '@/lib/utils'
+import { cloneDeep, parseConfig } from '@/lib/utils'
 import { Zip } from '@/service'
 
 const parseSettings = (opts = {}) => {
@@ -23,12 +24,16 @@ const state = {
   showImport: false,
   showHelper: false,
   layoutHelper: 'horizontal',
+  configMapModel: {},
 
   id: null,
   uid: null,
+  type: null,
   fileTree: [],
   settings: {},
   versions: {},
+  updatedAt: null,
+  lastBuild: null,
 
   active: null,
   open: new Set(),
@@ -45,12 +50,16 @@ const mutations = {
     state.showImport = false
     state.showHelper = false
     state.layoutHelper = 'horizontal'
+    state.configMapModel = {}
 
     state.id = null
     state.uid = null
+    state.type = null
     state.fileTree = []
     state.settings = {}
     state.versions = {}
+    state.updatedAt = null
+    state.lastBuild = null
 
     state.active = null
     state.open.clear()
@@ -59,14 +68,20 @@ const mutations = {
 
     Zip.reset()
   },
-  [t.PROJECT_SET_LOADED] (state, payload) {
-    const copy = cloneDeep(payload)
+  [t.PROJECT_SET_LOADED] (state, { type, project }) {
+    const copy = cloneDeep(project)
 
-    state.id = payload.id
-    state.uid = payload.uid
+    state.id = copy.id
+    state.uid = copy.uid
+    state.type = type
     state.settings = parseSettings(copy)
     state.versions = parseVersions(copy)
+    state.updatedAt = copy.updatedAt || 0
+    state.lastBuild = copy.lastBuild || 0
     state.ready = true
+  },
+  [t.PROJECT_SET_CONFIG_MAP_MODEL] (state, payload) {
+    state.configMapModel = cloneDeep(payload)
   },
   [t.PROJECT_UPDATE_FILE_TREE] (state) {
     state.fileTree = Zip.fileTree
@@ -97,6 +112,9 @@ const mutations = {
     state.showImport = true
   },
   [t.PROJECT_SHOW_HELPER] (state, payload) {
+    state.showInfo = false
+    state.showSettings = false
+    state.showImport = false
     state.showHelper = !!payload
   },
   [t.PROJECT_SET_HELPER_LAYOUT] (state, payload) {
@@ -145,6 +163,8 @@ const mutations = {
     state.showImport = false
   },
   [t.PROJECT_TOUCH_FILE] (state, name) {
+    state.updatedAt = +new Date()
+
     state.dirty.add(name)
     state.dirty = new Set(state.dirty)
 
@@ -155,12 +175,16 @@ const mutations = {
     }
   },
   [t.PROJECT_RENAME_FILE] (state, { name, newName }) {
+    state.updatedAt = +new Date()
+
     // Handle dirty state
     state.dirty.delete(name)
     state.dirty.add(newName)
     state.dirty = new Set(state.dirty)
   },
   [t.PROJECT_RENAME_FOLDER] (state, { name, newName }) {
+    state.updatedAt = +new Date()
+
     const len = name.length
 
     // Basically swap out old prefix everywhere
@@ -185,7 +209,7 @@ const mutations = {
 }
 
 const actions = {
-  async load ({ commit }, { project, signedUrl }) {
+  async load ({ commit }, { type, project, signedUrl }) {
     commit(t.PROJECT_RESET)
 
     if (!signedUrl)
@@ -199,7 +223,7 @@ const actions = {
       const blob = await result.blob()
       Zip.reset(await JSZip.loadAsync(blob))
       commit(t.PROJECT_UPDATE_FILE_TREE)
-      commit(t.PROJECT_SET_LOADED, project)
+      commit(t.PROJECT_SET_LOADED, { type, project })
     } catch (e) {
       throw e
     }
@@ -271,9 +295,9 @@ const actions = {
 const getters = {
   /**
    * Return the registry version of the project.
-   * 0  - not been published before
-   * -1 - published but later removed
-   * >0 - latest version
+   * 0    - not been published before
+   * -1   - published but later removed
+   * else - latest version
    */
   registryVersion: ({ versions }) => {
     if (!isObject(versions))
@@ -282,7 +306,35 @@ const getters = {
     const keys = Object.keys(versions)
     return (keys.length <= 0)
       ? 0
-      : Math.max(...keys)
+      : keys.reduce(semverMax)
+  },
+
+  /**
+   * Retrieve parsed config map for current project.
+   * Make use if type to determine which Vuex module
+   * to fetch from.
+   */
+  parsedConfigMap: ({ type, id }, getters, rootState, rootGetters) => {
+    if (type !== 'INTEGRATION' && type !== 'WIDGET') {
+      return {
+        error: [`Invalid project type '${type}'`],
+        variables: []
+      }
+    }
+
+    const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
+    const configMap = rootGetters[`${capitalizedType}/configMapById`](id)
+
+    // Something went wrong retieving local config map
+    if (!configMap || typeof configMap === 'string') {
+      const error = !configMap ? 'Unable to get config.json' : configMap
+      return {
+        error: [error],
+        variables: []
+      }
+    }
+
+    return parseConfig(configMap)
   }
 }
 

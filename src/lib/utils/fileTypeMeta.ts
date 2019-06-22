@@ -1,7 +1,27 @@
 export default (name: string) => {
-  const fileType = name.split('.').pop()
+  const fileType = name
+    ? name.split('.').pop()
+    : null
 
   switch (fileType) {
+    case 'Dockerfile':
+      return {
+        icon: 'mdi-docker',
+        color: '#2b9be8',
+        monacoLanguage: 'dockerfile'
+      }
+    case 'go':
+      return {
+        icon: 'mdi-language-go',
+        color: '#29beb1',
+        monacoLanguage: 'go'
+      }
+    case 'html':
+      return {
+        icon: 'mdi-language-html5',
+        color: '#e34c25',
+        monacoLanguage: 'html'
+      }
     case 'js':
       return {
         icon: 'mdi-language-javascript',
@@ -20,12 +40,6 @@ export default (name: string) => {
         color: '#3e95de',
         monacoLanguage: 'markdown'
       }
-    case 'html':
-      return {
-        icon: 'mdi-language-html5',
-        color: '#e34c25',
-        monacoLanguage: 'html'
-      }
     case 'npm':
       return {
         icon: 'mdi-npm',
@@ -37,12 +51,6 @@ export default (name: string) => {
         icon: 'mdi-language-python',
         color: '#4180b1',
         monacoLanguage: 'python'
-      }
-    case 'go':
-      return {
-        icon: 'mdi-language-go',
-        color: '#29beb1',
-        monacoLanguage: 'go'
       }
     case 'txt':
       return {

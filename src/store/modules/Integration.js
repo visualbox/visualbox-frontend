@@ -40,6 +40,11 @@ const mutations = {
     if (index >= 0)
       Vue.set(state.list[index], 'versions', payload.versions)
   },
+  [t.INTEGRATION_SET_LAST_BUILD] (state, payload) {
+    const index = state.list.findIndex(({ id }) => id === payload.id)
+    if (index >= 0)
+      Vue.set(state.list[index], 'lastBuild', payload.lastBuild)
+  },
   [t.INTEGRATION_SET_MAPS] (state, payload) {
     let configMap
     try {
@@ -70,15 +75,18 @@ const actions = {
   },
   async create ({ commit }, { id = null, settings = null }) {
     let result = [] // Default value
+    let item = null
 
     try {
-      result.push(await API.invoke('post', '/integration', {
+      item = await API.invoke('post', '/integration', {
         body: { id, settings }
-      }))
+      })
+      result.push(item)
     } catch (e) {
       throw e
     } finally {
       commit(t.INTEGRATION_CONCAT_LIST, result)
+      return item ? item.id : null
     }
   },
   async del ({ commit }, id) {
@@ -124,10 +132,14 @@ const actions = {
     }
   },
 
-  async publish ({ commit }, id) {
+  async publish ({ commit }, { id, version }) {
     try {
-      const { versions } = await API.invoke('post', '/registry', {
-        body: { type: 'INTEGRATION', id }
+      const { versions } = await API.invoke('post', '/registry2', {
+        body: {
+          type: 'INTEGRATION',
+          id,
+          version
+        }
       })
       commit(t.INTEGRATION_SET_VERSIONS, { id, versions })
       commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions }, { root: true })
@@ -143,6 +155,18 @@ const actions = {
       })
       commit(t.INTEGRATION_SET_VERSIONS, { id, versions: false })
       commit(`Project/${t.PROJECT_SET_VERSIONS}`, { id, versions: false }, { root: true })
+    } catch (e) {
+      throw e
+    }
+  },
+
+  async build ({ commit }, id) {
+    try {
+      const { buildId, lastBuild } = await API.invoke('post', '/build', {
+        body: { id }
+      })
+      commit(t.INTEGRATION_SET_LAST_BUILD, { id, lastBuild })
+      return { buildId }
     } catch (e) {
       throw e
     }

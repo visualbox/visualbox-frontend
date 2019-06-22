@@ -1,13 +1,10 @@
 import API from '@/service/API'
-// import PubNub from '@/lib/pubnub'
-import IO from '@/lib/socket'
-import { IFrameHandler } from '@/service'
+import { WS, IFrameHandler } from '@/service'
 import EventBus from '@/lib/eventBus'
 
 class DashboardHandler {
   constructor () {
     this.token = null
-    this.tick = null
     this.data = {}
     this.isPublicDashboard = false
   }
@@ -36,20 +33,9 @@ class DashboardHandler {
       this.store.commit('Dashboard/DASHBOARD_ADD_INITED_INTEGRATION', i)
   }
 
-  /**
-   * The container has sent a message.
-   */
-  onMessage (m) {
-    const { type } = m
-
+  onMessage ({ type, i, data }) {
     switch (type) {
-
-      /**
-       * Container sent an INIT message.
-       */
-      case 'INIT':
-        this.addInitedIntegration(m.i)
-        break
+      case 'INIT': this.addInitedIntegration(i); break
 
       /**
        * Container integration is giving output.
@@ -57,8 +43,6 @@ class DashboardHandler {
        * know where to send the data.
        */
       case 'OUTPUT':
-        let { i, data } = m
-
         try {
           data = JSON.parse(data)
         } catch (e) {}
@@ -72,38 +56,8 @@ class DashboardHandler {
          */
         if (this.store.state.Dashboard.focusedWidget)
           EventBus.$emit('vbox:dataChanged')
-        break;
+        break
     }
-  }
-
-  publish (message) {
-    if (!this.token)
-      throw new Error('[DashboardHandler]: No token to publish to')
-
-    IO.emit('message', message)
-  }
-
-  initSocket (token = null) {
-    IO.reset()
-
-    if (token)
-      this.token = token
-
-    if (!this.token)
-      throw new Error('[DashboardHandler]: No token to subscribe to')
-
-    IO.join(this.token)
-    IO.on('message', m => this.onMessage(m))
-
-    /**
-     * Start ticker to keep container
-     * alive.
-     */
-    if (this.tick !== null)
-      clearInterval(this.tick)
-    this.tick = setInterval(() => {
-      this.publish({ type: 'TICK' })
-    }, 15000)
   }
 
   /**
@@ -112,12 +66,12 @@ class DashboardHandler {
    */
   async initDashboard () {
     try {
-      const { token } = await API.invoke('post', '/containers/ltl', {
+      const { token } = await API.invoke('post', '/containers/ltl2', {
         body: { integrations: this.integrations }
       })
 
       this.token = token
-      this.initSocket()
+      WS.join(token, 'client', true, message => this.onMessage(message))
     } catch (e) {
       console.log('[DashboardHandler]: error; ', e)
     }
@@ -130,7 +84,7 @@ class DashboardHandler {
    */
   async addIntegration (integration) {
     try {
-      await API.invoke('post', '/containers/ltl', {
+      await API.invoke('post', '/containers/ltl2', {
         body: {
           token: this.token,
           integrations: [integration]
@@ -141,16 +95,13 @@ class DashboardHandler {
     }
   }
 
-  restartIntegration (integration) {
-    this.publish({
-      type: 'START',
-      integration
-    })
+  restartIntegration ({ i, model }) {
+    WS.messageRestart({ i, model })
   }
 
   removeIntegration (i) {
     delete this.data[i]
-    this.publish({ type: 'TERMINATE', i })
+    WS.messageTerminate(i)
   }
 
   /**
@@ -159,15 +110,9 @@ class DashboardHandler {
    * and clearing token / data.
    */
   end () {
-    this.publish({ type: 'TERMINATE' })
-    IO.end()
+    WS.leave()
     this.token = null
     this.data = {}
-
-    if (this.tick !== null) {
-      clearInterval(this.tick)
-      this.tick = null
-    }
   }
 }
 

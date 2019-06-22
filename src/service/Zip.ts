@@ -119,6 +119,18 @@ class Zip {
     return await this.zip.generateAsync({ type: 'base64' })
   }
 
+  public async loadTemplate (templateStr: string) {
+    try {
+      const response = await fetch(`${process.env.VUE_APP_TEMPLATE_ENDPOINT + templateStr}.zip`)
+      const blob = await response.blob()
+      this.reset(await JSZip.loadAsync(blob))
+      return blob
+    } catch (e) {
+      console.log(e)
+      throw e
+    }
+  }
+
   get fileTree () {
     const convertLevel = (folder: JSZip) => {
       const outFolder: IFileTreeNode[] = []

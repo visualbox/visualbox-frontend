@@ -20,7 +20,7 @@
       v-list-item-action.hover-actions-always
         v-icon(small) mdi-information-outline
       v-list-item-content
-        v-list-item-subtitle View Info
+        v-list-item-subtitle View README.md
 
     //- Settings
     v-list-item.no-hover(
@@ -30,7 +30,7 @@
       v-list-item-action.hover-actions-always
         v-icon(small) mdi-settings
       v-list-item-content
-        v-list-item-subtitle Settings
+        v-list-item-subtitle Options
 
     //- Import
     v-list-item.no-hover(
@@ -38,9 +38,32 @@
       :class="{ 'v-list-item--active' : showImport }"
     )
       v-list-item-action.hover-actions-always
-        v-icon(small) mdi-package-up
+        v-icon(small) mdi-import
       v-list-item-content
         v-list-item-subtitle Import Files
+
+    //- Console
+    v-list-item.no-hover(
+      @click="toggleConsole"
+      :class="{ 'v-list-item--active' : showHelper }"
+    )
+      v-list-item-action.hover-actions-always
+        v-icon(small) {{ type === 'INTEGRATION' ? 'mdi-console' : 'mdi-shape' }}
+      v-list-item-content
+        v-list-item-subtitle {{ type === 'INTEGRATION' ? 'Console' : 'Preview' }}
+
+    //- Configuration Model
+    template
+      v-list-item.no-hover(@click="openPanel.config = !openPanel.config")
+        v-list-item-action.hover-actions-always
+          v-icon(small)  {{ openPanel.config ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+        v-list-item-content
+          v-list-item-subtitle Configuration Model
+      input-types.pt-3.pl-3.pr-3(
+        v-if="openPanel.config"
+        v-model="configMapModelProxy"
+        :config="parsedConfigMap"
+      )
 
     //- Files
     v-list-item.no-hover(@click="openPanel.files = !openPanel.files")
@@ -107,8 +130,9 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
-import { ContextToolbar, Tooltip } from '@/components'
+import get from 'lodash-es/get'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+import { ContextToolbar, Tooltip, InputTypes } from '@/components'
 import { fileTypeMeta, cloneDeep } from '@/lib/utils'
 import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
@@ -119,31 +143,38 @@ export default {
   name: 'EditorCtx',
   components: {
     ContextToolbar,
-    Tooltip
+    Tooltip,
+    InputTypes
   },
   data: () => ({
     fileTypeMeta,
     openPanel: {
       files: true,
-      settings: false
+      settings: false,
+      config: false,
     },
     openTree: [],
     localActive: [],
     lastClick: +new Date(),
     editFileName: null,
-    editFileDisplayName: null
+    editFileDisplayName: null,
+    configMapModelProxy: {}
   }),
   computed: {
     ...mapState('Route', ['path']),
     ...mapState('Project', [
+      'configMapModel',
+      'type',
       'fileTree',
       'showInfo',
       'showSettings',
       'showImport',
+      'showHelper',
       'settings',
       'active',
       'dirty'
     ]),
+    ...mapGetters('Project', ['parsedConfigMap']),
     activeTab: {
       get () { return !this.active ? [] : [ this.active ] },
       set (val) { this.localActive = val }
@@ -163,10 +194,43 @@ export default {
       else if (newVal)
         this.PROJECT_SET_PEEK(newVal)
     },
+
+    /**
+     * Re-apply defaults to model bound to configuration
+     * model input types.
+     */
+    parsedConfigMap: {
+      immediate: true,
+      deep: true,
+      handler () {
+        const variables = get(this.parsedConfigMap, 'variables', [])
+        const defaults = variables.reduce((acc, cur) => {
+          acc[cur.name] = cur.default || null
+          return acc
+        }, {})
+
+        // Apply user input
+        for (const name in this.configMapModelProxy) {
+          if (defaults.hasOwnProperty(name))
+            defaults[name] = this.configMapModelProxy[name]
+        }
+
+        this.configMapModelProxy = defaults
+      }
+    },
+
+    configMapModelProxy: {
+      immediate: true,
+      deep: true,
+      handler (val) {
+        this.PROJECT_SET_CONFIG_MAP_MODEL(val)
+      }
+    }
   },
   methods: {
     ...mapActions('App', ['setSnackbar']),
     ...mapMutations('Project', [
+      'PROJECT_SET_CONFIG_MAP_MODEL',
       'PROJECT_SHOW_INFO',
       'PROJECT_SHOW_SETTINGS',
       'PROJECT_SHOW_IMPORT',
@@ -301,6 +365,9 @@ export default {
         this.PROJECT_SHOW_SETTINGS()
       else
         this.PROJECT_SHOW_IMPORT()
+    },
+    toggleConsole () {
+      this.PROJECT_SHOW_HELPER(!this.showHelper)
     },
     /**
      * Need to calculate destination because

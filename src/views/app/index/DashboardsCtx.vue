@@ -6,7 +6,7 @@
     tooltip(text="New Dashboard" :open-delay="800" bottom)
       v-btn(
         icon
-        @click="submit"
+        @click="addDashboard"
         :loading="isLoading"
         :disabled="isLoading"
       )
@@ -30,6 +30,7 @@
 import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
 import { ContextToolbar, Tooltip } from '@/components'
+import EventBus from '@/lib/eventBus'
 
 export default Vue.extend({
   name: 'DashboardsCtx',
@@ -42,24 +43,13 @@ export default Vue.extend({
     ...mapState('Dashboard', ['list'])
   },
   methods: {
-    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Dashboard', ['create', 'del']),
+    ...mapActions('Dashboard', ['del']),
+    addDashboard () {
+      EventBus.$emit('vbox:addDashboard')
+    },
     deleteDashboard (id: string) {
       if (confirm('Are you sure you want to delete the dashboard?'))
         this.del(id)
-    },
-    async submit () {
-      this.setIsLoading(true)
-      try {
-        await this.create()
-      } catch (e) {
-        this.setSnackbar({
-          type: 'error',
-          msg: e.message
-        })
-      } finally {
-        this.setIsLoading(false)
-      }
     }
   }
 })

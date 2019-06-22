@@ -35,12 +35,6 @@
           text
         )
           v-icon mdi-auto-fix
-        v-btn(
-          :color="showHelper ? 'primary' : ''"
-          @click="PROJECT_SHOW_HELPER(!showHelper)"
-          text
-        )
-          v-icon mdi-console
   .grid-layout(
     :class="showHelper ? layoutHelper : 'no-split'"
     :nudge-tabs="editorIsOpen"
@@ -148,7 +142,6 @@ export default {
     ...mapMutations('Project', [
       'PROJECT_SET_ACTIVE',
       'PROJECT_CLOSE_OPEN',
-      'PROJECT_SHOW_HELPER',
       'PROJECT_TOUCH_FILE'
     ]),
     formatCode () {
@@ -328,7 +321,7 @@ export default {
       grid-template-columns unset !important
 
       .gutter
-        height 35px
+        height 40px
         margin-top -5px
 
         &:hover

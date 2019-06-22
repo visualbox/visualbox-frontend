@@ -9,7 +9,32 @@ v-container(fill-height fluid)
       .subheading Integrations are the engines behind your dashboard.
       .subheading They fetch, process and format data to be displayed by widgets.
       .subheading You can create your own integration, or search for already existing integrations.
-      .subheading Existing integrations can be modified to your own needs.
+      v-container.pa-0.mt-4(fluid grid-list-lg)
+        v-layout(row wrap)
+          v-flex(v-bind="cols")
+            v-card(flat color="primary" @click="addIntegration")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title New Integration
+                  v-list-item-subtitle Create a new integration from scratch.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-star-four-points
+          v-flex(v-bind="cols")
+            v-card(flat @click="toggleExplorer")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title Explore
+                  v-list-item-subtitle Discover already made integrations.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-search-web
+          v-flex(v-bind="cols")
+            v-card(flat href="https://docs.visualbox.io/integrations/" target="_new")
+              v-list-item(three-line)
+                v-list-item-content
+                  v-list-item-title Documentation
+                  v-list-item-subtitle Learn how to develop integrations.
+                v-list-item-avatar
+                  v-icon(x-large) mdi-launch
       v-icon.index-icon mdi-source-fork
 
     //- Adding integration preconfig
@@ -22,11 +47,11 @@ v-container(fill-height fluid)
             hide-details single-line
             autofocus outlined
           )
-      .headline.mb-3.mt-4 Select Runtime
+      .headline.mb-3.mt-4 Select Template
       v-layout
         v-flex
-          select-runtime(
-            v-model="settings.runtime"
+          select-template(
+            v-model="template"
             :loading="isLoading"
           )
       v-layout.mt-4
@@ -52,13 +77,15 @@ v-container(fill-height fluid)
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { SelectRuntime, Explorer } from '@/components'
+import { SelectTemplate, Explorer } from '@/components'
+import { Zip } from '@/service'
 import EventBus from '@/lib/eventBus'
+import ResizeSensor from 'css-element-queries/src/ResizeSensor'
 
 export default {
   name: 'IntegrationsIndex',
   components: {
-    SelectRuntime,
+    SelectTemplate,
     Explorer
   },
   data: () => ({
@@ -69,21 +96,27 @@ export default {
       local: false
     },
     settings: {
-      name: '',
-      runtime: 'node'
-    }
+      name: ''
+    },
+    template: 'integration-node',
+
+    // Responsive stuff
+    resizeSensor: null,
+    cols: { xs12: true }
   }),
   computed: mapState('App', ['isLoading']),
   methods: {
     ...mapActions('App', ['setIsLoading', 'setSnackbar']),
-    ...mapActions('Integration', ['create']),
+    ...mapActions('Integration', ['create', 'commitFiles']),
     async submit () {
       if (!this.settings.name || this.settings.name === '')
         return
 
       this.setIsLoading(true)
       try {
-        await this.create({ settings: this.settings })
+        const id = await this.create({ settings: this.settings })
+        const blob = await Zip.loadTemplate(this.template)
+        await this.commitFiles({ id, blob })
       } catch (e) {
         this.setSnackbar({
           type: 'error',
@@ -93,9 +126,29 @@ export default {
         this.setIsLoading(false)
         this.isAdding = false
       }
+    },
+    addIntegration () {
+      EventBus.$emit('vbox:addIntegration')
+    },
+    toggleExplorer () {
+      EventBus.$emit('vbox:toggleExplorer')
+    },
+
+    /**
+     * Use custom resize watcher since Vuetify
+     * won't detect element resize (only window).
+     */
+    onResize ({ width }) {
+      const { xs, sm, md, lg } = this.$vuetify.breakpoint.thresholds
+      const cols = (width >= lg || width >= md)
+        ? 4
+        : 12
+
+      this.cols = { [`xs${cols}`]: true }
     }
   },
   mounted () {
+    this.resizeSensor = new ResizeSensor(this.$el, this.onResize)
     EventBus.$on('vbox:addIntegration', () => {
       this.isAdding = true
       this.isExploring = false
@@ -106,6 +159,7 @@ export default {
     })
   },
   beforeDestroy () {
+    this.resizeSensor.detach()
     EventBus.$off('vbox:addIntegration')
     EventBus.$off('vbox:toggleExplorer')
   }
@@ -119,4 +173,7 @@ export default {
 
   .flex
     position relative
+
+  .v-card
+    z-index 10
 </style>

@@ -109,12 +109,12 @@ export default {
     templates: [
       {
         text: 'HTML',
-        template: 'widget-plain',
+        template: 'widget-html',
         icon: 'mdi-language-html5',
         color: '#e44d26'
       }
     ],
-    template: 'widget-plain',
+    template: 'widget-html',
 
     // Responsive stuff
     resizeSensor: null,

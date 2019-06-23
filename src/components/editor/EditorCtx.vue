@@ -2,13 +2,13 @@
 #editor-ctx
   context-toolbar
     tooltip(text="Back" :open-delay="800" bottom)
-      v-btn(@click="goBack" icon)
+      v-btn(@click="goBack" fab text)
         v-icon mdi-menu-left
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
       tooltip(text="Save" :open-delay="800" bottom)
-        v-btn(@click="saveProject" icon)
+        v-btn(@click="saveProject" fab text)
           v-icon mdi-floppy
 
   v-list.hover-actions(dense)
@@ -468,9 +468,8 @@ export default {
 
       .options
         display none
-        padding-right 5px
         z-index 7
 
         .v-icon
-          padding-right 10px
+          padding-right 8px
 </style>

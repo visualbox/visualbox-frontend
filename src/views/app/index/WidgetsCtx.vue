@@ -4,14 +4,14 @@
     .subheading Manage Widgets
     v-spacer
     tooltip(text="Explore Widgets" :open-delay="800" bottom)
-      v-btn.mr-1(@click="toggleExplorer" icon)
+      v-btn.mr-1(@click="toggleExplorer" fab text)
         v-icon mdi-magnify
     tooltip(text="New Widget" :open-delay="800" bottom)
       v-btn(
-        icon
         @click="addWidget"
         :loading="isLoading"
         :disabled="isLoading"
+        fab text
       )
         v-icon mdi-plus-box
 

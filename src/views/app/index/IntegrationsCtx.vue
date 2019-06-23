@@ -4,14 +4,14 @@
     .subheading Manage Integrations
     v-spacer
     tooltip(text="Explore Integrations" :open-delay="800" bottom)
-      v-btn.mr-1(@click="toggleExplorer" icon)
+      v-btn.mr-1(@click="toggleExplorer" fab text)
         v-icon mdi-magnify
     tooltip(text="New Integration" :open-delay="800" bottom)
       v-btn(
         @click="addIntegration"
         :loading="isLoading"
         :disabled="isLoading"
-        icon
+        fab text
       )
         v-icon mdi-plus-box
 

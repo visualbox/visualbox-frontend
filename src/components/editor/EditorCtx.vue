@@ -433,11 +433,14 @@ export default {
         position absolute
         margin-left -20px
 
+      .v-treeview-node__root
+        min-height 40px
+
       &:not([edit-file]) .v-treeview-node__root
         &:hover:before
           content ''
           width 100%
-          height 35px
+          height 40px
           position absolute
           left 0
           background-color $vb-primary-list-hover
@@ -446,7 +449,7 @@ export default {
         &.v-treeview-node--active:before
             content ''
             width 100%
-            height 35px
+            height 40px
             position absolute
             left 0
             background-color $vb-primary-list-active

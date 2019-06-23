@@ -31,14 +31,14 @@ export default {
         template: 'integration-node',
         icon: 'mdi-nodejs',
         color: '#43853d'
-      }
-      /*
+      },
       {
-        text: 'Python 3.6',
-        runtime: 'python3',
+        text: 'Python 3.7',
+        template: 'integration-python3.7',
         icon: 'mdi-language-python',
         color: '#4180b1'
-      },
+      }
+      /*
       {
         text: 'Go',
         runtime: 'golang',

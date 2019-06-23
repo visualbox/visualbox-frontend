@@ -206,11 +206,11 @@ export default {
   >>> .v-system-bar
     margin 0
     padding 0
-    height 35px !important
+    height 40px !important
     background rgba(255, 255, 255, .2)
 
     .tab
-      padding 6px 15px 8px
+      padding 9px 15px 10px
       display inline-block
       cursor pointer
       z-index 25
@@ -224,13 +224,13 @@ export default {
       z-index 25
 
     .tooltip-element .v-icon, >.v-icon
-      padding 10px 8px 9px
+      padding 11px 8px 13px
 
   .pane
     display none
     padding 16px
     position absolute
-    top 35px; right 0; left 0; bottom 0;
+    top 40px; right 0; left 0; bottom 0;
     overflow auto
 
     &[active]

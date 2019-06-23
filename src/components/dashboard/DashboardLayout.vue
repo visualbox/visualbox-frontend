@@ -192,6 +192,10 @@ export default {
       right 5px
       display none
 
+      .v-speed-dial__list
+        .v-btn
+          margin-top 10px
+
     iframe
       width 100%
       height 100%

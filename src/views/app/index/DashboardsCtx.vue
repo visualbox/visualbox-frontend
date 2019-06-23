@@ -5,10 +5,10 @@
     v-spacer
     tooltip(text="New Dashboard" :open-delay="800" bottom)
       v-btn(
-        icon
         @click="addDashboard"
         :loading="isLoading"
         :disabled="isLoading"
+        fab text
       )
         v-icon mdi-plus-box
 

@@ -37,7 +37,7 @@ const actions = {
       commit(t.PUBLIC_SET_W_SOURCE_MAP, widgetSourceMap)
       commit(t.PUBLIC_SET_LOADED, dashboard)
 
-      DashboardHandler.initSocket(token)
+      DashboardHandler.initPublicDashboard(token)
     } catch (e) {
       throw e
     }

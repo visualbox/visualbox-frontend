@@ -77,6 +77,10 @@ class DashboardHandler {
     }
   }
 
+  async initPublicDashboard (token) {
+    WS.join(token, 'public-client', true, message => this.onMessage(message))
+  }
+
   /**
    * Add an integration by calling LTL
    * with current token and the new integration

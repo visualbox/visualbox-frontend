@@ -1,14 +1,14 @@
 <template lang="pug">
 v-container#public(fluid fill-height)
   v-layout(
-    :align-center="isLoading"
-    :column="isLoading"
-    :row="!isLoading"
+    :align-center="!isReady"
+    :column="!isReady"
+    :row="isReady"
     justify-center
     fill-height
   )
     //- Loading
-    template(v-if="isLoading")
+    template(v-if="!isReady")
       img(
         :src="require('../assets/img/vbox-white.svg')"
         width="150"
@@ -17,7 +17,7 @@ v-container#public(fluid fill-height)
 
     //- Dashboard
     public-dashboard-layout(
-      v-if="!isLoading"
+      v-if="isReady"
       :style="style"
     )
 </template>
@@ -30,8 +30,10 @@ export default {
   name: 'Public',
   components: { PublicDashboardLayout },
   computed: {
-    ...mapState('App', ['isLoading']),
     ...mapState('Public', ['loaded']),
+    isReady () {
+      return this.loaded !== null
+    },
     style () {
       try {
         const { r, g, b, a } = this.loaded.settings.rgba
@@ -46,11 +48,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions('App', ['setIsLoading', 'setSnackbar']),
+    ...mapActions('App', ['setSnackbar']),
     ...mapActions('Public', ['initPublicDashboard']),
   },
   async mounted () {
-    this.setIsLoading(true)
     try {
       await this.initPublicDashboard(this.$route.params.id)
     } catch (e) {
@@ -58,8 +59,6 @@ export default {
         type: 'error',
         msg: e.message
       })
-    } finally {
-      this.setIsLoading(false)
     }
   }
 }

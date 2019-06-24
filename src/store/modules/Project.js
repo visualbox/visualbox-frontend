@@ -112,9 +112,9 @@ const mutations = {
     state.showImport = true
   },
   [t.PROJECT_SHOW_HELPER] (state, payload) {
-    state.showInfo = false
-    state.showSettings = false
-    state.showImport = false
+    // state.showInfo = false
+    // state.showSettings = false
+    // state.showImport = false
     state.showHelper = !!payload
   },
   [t.PROJECT_SET_HELPER_LAYOUT] (state, payload) {

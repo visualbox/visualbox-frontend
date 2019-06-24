@@ -21,6 +21,9 @@ export default {
   name: 'App',
   components: { NavigationDrawer },
   mixins: [ unauthGuard ],
+  data: () => ({
+    split: null
+  }),
   computed: {
     ...mapState('App', ['appIsReady']),
     ...mapState('Dashboard', ['isFullscreen']),
@@ -33,7 +36,7 @@ export default {
   },
   methods: mapActions('App', ['setIsLoading', 'setSnackbar', 'initApp']),
   async mounted () {
-    Split({
+    this.split = Split({
       columnGutters: [{
         track: 1,
         element: this.$refs.gutter
@@ -52,6 +55,9 @@ export default {
     } finally {
       this.setIsLoading(false)
     }
+  },
+  beforeDestroy () {
+    split.destroy()
   }
 }
 </script>

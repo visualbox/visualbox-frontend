@@ -115,8 +115,7 @@ Vue.component('monaco-editor', {
       */
       this.editor.onDidChangeModelContent((e /* monaco.editor.IModelContentChangedEvent */) => {
         const value = this.editor.getValue()
-        if (this.value !== value)
-          this.$emit('change', value, e)
+        this.$emit('change', value, e)
       })
       /*
       this.editor.onDidChangeModelDecorations((e: monaco.editor.IModelDecorationsChangedEvent) => {

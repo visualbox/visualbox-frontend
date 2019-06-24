@@ -42,7 +42,7 @@
       v-list-item-content
         v-list-item-subtitle Import Files
 
-    //- Console
+    //- Helper
     v-list-item.no-hover(
       @click="toggleConsole"
       :class="{ 'v-list-item--active' : showHelper }"
@@ -356,7 +356,6 @@ export default {
       EventBus.$emit('vbox:saveProject', true)
     },
     showPage (page) {
-      this.PROJECT_SHOW_HELPER(false)
       this.PROJECT_SET_ACTIVE(null)
 
       if (page === 'info')

@@ -77,7 +77,10 @@ export default {
     EditorImport
   },
   data: () => ({
-    split: Split({}),
+    split: Split({
+      rowMinSizes: { 0: 0.1 },
+      columnMinSizes: { 0: 0.1 }
+    }),
     hoverIndex: null,
     hoverIndexIcon: null,
     initEditorModel: true,
@@ -201,14 +204,22 @@ export default {
     },
     async active (name) {
       this.initEditorModel = true
+
+      let newEditorModel
       try {
-        this.editorModel = await Zip.readFile(name)
+        newEditorModel = await Zip.readFile(name)
       } catch (e) {
-        this.editorModel = ''
+        newEditorModel = ''
       }
+
+      // Force update
+      if (newEditorModel === this.editorModel)
+        this.initEditorModel = false
+
+      this.editorModel = newEditorModel
     },
     editorModel (contents) {
-      // Don't write if switching file
+      // Don't write if active has marked as inited
       if (this.initEditorModel) {
         this.initEditorModel = false
         return
@@ -238,6 +249,9 @@ export default {
         this.compiledMarkdown = compiledMarkdown
       }
     }
+  },
+  beforeDestroy () {
+    split.destroy()
   }
 }
 </script>

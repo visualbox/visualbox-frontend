@@ -18,7 +18,7 @@ grid-layout#public-dashboard-layout(
     :h="item.h"
     :i="item.i"
     :style="getWidgetStyle(item)"
-    :class="getWidgetClass(item)"
+    class="no-transition"
   )
     iframe(
       :ref="item.i"
@@ -29,6 +29,15 @@ grid-layout#public-dashboard-layout(
       allowpaymentrequest="true"
       allowfullscreen="true"
     )
+    v-overlay(
+      :value="showOverlay(item)"
+      :opacity="0.95"
+      absolute
+    )
+      img(
+        :src="require('../../assets/img/vbox-white.svg')"
+        width="50"
+      )
 </template>
 
 <script>
@@ -84,11 +93,8 @@ export default {
         return {}
       }
     },
-    getWidgetClass ({ i, settings }) {
-      return {
-        'hide': !!settings.hide && !this.widgetsWithData.includes(i),
-        'no-transition': true
-      }
+    showOverlay ({ i, settings }) {
+      return !!settings.hide && !this.widgetsWithData.includes(i)
     }
   },
   created () {
@@ -104,6 +110,19 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@keyframes pulse
+  0%
+    opacity 0
+    transform scale(1)
+  20%
+    opacity .5
+  80%
+    opacity 0
+    transform scale(1.5)
+  100%
+    opacity 0
+    transform scale(2)
+
 #public-dashboard-layout
   width 100%
   height 100%
@@ -112,12 +131,6 @@ export default {
 
   .vue-grid-item
     overflow hidden
-    -webkit-transition: filter 0.25s, opacity 0.25s !important
-    transition filter 0.25s, opacity 0.25s !important
-
-    &.hide
-      filter blur(10px)
-      opacity .25
 
     &.vue-resizable
       -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;
@@ -130,6 +143,18 @@ export default {
       width 100%
       height 100%
       border 0
+
+    >>> .v-overlay__content
+      opacity .75
+
+      &:after
+        content url('../../assets/img/vbox-white.svg')
+        top 0
+        width 50px
+        height 50px
+        position absolute
+        display block
+        animation pulse 4s ease 0s infinite
 
   >>> .vue-grid-placeholder
     background #000

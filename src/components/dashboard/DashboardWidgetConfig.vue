@@ -56,6 +56,15 @@
         v-expansion-panel-content
           color-picker(v-model="bgc")
 
+    v-layout.mb-3(row xs12)
+      v-flex
+        v-switch(
+          v-model="hide"
+          label="Hide Until Data Received"
+          color="primary"
+          hide-details
+        )
+
     input-types.mt-3(
       v-model="model"
       :config="config"
@@ -105,6 +114,18 @@ export default {
         const { rgba } = val
         this.updateFocusedWidget({ settings: { rgba } })
       }, 20)
+    },
+    hide: {
+      get () {
+        const { hide } = this.focusedWidget.settings
+        return typeof hide === 'undefined'
+          ? false
+          : !!hide
+      },
+      set (hide) {
+        hide = !!hide
+        this.updateFocusedWidget({ settings: { hide } })
+      }
     },
     config () {
       const { id, version } = this.focusedWidget

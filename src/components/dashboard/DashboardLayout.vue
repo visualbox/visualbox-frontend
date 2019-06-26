@@ -19,8 +19,8 @@ grid-layout#dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
-    :style="getWidgetStyle(item.settings)"
-    :class="{ 'focused' : isFocused(item.i), 'no-transition': !isEditing }"
+    :style="getWidgetStyle(item)"
+    :class="getWidgetClass(item)"
   )
     v-speed-dial(
       direction="bottom"
@@ -94,7 +94,7 @@ export default {
     layoutUpdatedEvent (widgets) {
       this.DASHBOARD_CONCAT_LOADED({ widgets })
     },
-    getWidgetStyle (settings) {
+    getWidgetStyle ({ settings }) {
       // rgba
       const { r, g, b, a } = settings.rgba
       // radius
@@ -117,6 +117,12 @@ export default {
         'background-color': cssBgc,
         'border-radius': cssRadius,
         'box-shadow': cssShadow
+      }
+    },
+    getWidgetClass ({ i, settings }) {
+      return {
+        'focused': this.isFocused(i),
+        'no-transition': !this.isEditing
       }
     },
     isFocused (wI) {

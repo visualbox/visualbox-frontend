@@ -17,8 +17,8 @@ grid-layout#public-dashboard-layout(
     :w="item.w"
     :h="item.h"
     :i="item.i"
-    :style="getWidgetStyle(item.settings)"
-    class="no-transition"
+    :style="getWidgetStyle(item)"
+    :class="getWidgetClass(item)"
   )
     iframe(
       :ref="item.i"
@@ -45,7 +45,8 @@ export default {
     GridItem
   },
   data: () => ({
-    layout: []
+    layout: [],
+    widgetsWithData: []
   }),
   computed: {
     ...mapState('Public', ['loaded']),
@@ -54,7 +55,7 @@ export default {
     }
   },
   methods: {
-    getWidgetStyle (settings) {
+    getWidgetStyle ({ settings }) {
       try {
         // rgba
         const { r, g, b, a } = settings.rgba
@@ -82,6 +83,12 @@ export default {
       } catch (e) {
         return {}
       }
+    },
+    getWidgetClass ({ i, settings }) {
+      return {
+        'hide': !!settings.hide && !this.widgetsWithData.includes(i),
+        'no-transition': true
+      }
     }
   },
   created () {
@@ -90,6 +97,7 @@ export default {
   mounted () {
     IFrameHandler.makePublicDashboard()
     IFrameHandler.attachRefs(this.$refs)
+    IFrameHandler.attachOnWidgetDataCb(i => this.widgetsWithData.push(i))
     IFrameHandler.generate(this.widgets)
   }
 }
@@ -104,6 +112,12 @@ export default {
 
   .vue-grid-item
     overflow hidden
+    -webkit-transition: filter 0.25s, opacity 0.25s !important
+    transition filter 0.25s, opacity 0.25s !important
+
+    &.hide
+      filter blur(10px)
+      opacity .25
 
     &.vue-resizable
       -webkit-box-shadow: 0 3px 5px -1px rgba(0,0,0,.2),0 5px 8px 0 rgba(0,0,0,.14),0 1px 14px 0 rgba(0,0,0,.12)!important;

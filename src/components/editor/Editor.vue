@@ -251,7 +251,7 @@ export default {
     }
   },
   beforeDestroy () {
-    split.destroy()
+    this.split.destroy()
   }
 }
 </script>

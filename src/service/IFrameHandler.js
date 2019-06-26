@@ -6,6 +6,7 @@ class IFrameHandler {
     this.store = store
     this.refs = null
     this.isPublicDashboard = false
+    this.cb = null
   }
 
   /**
@@ -20,6 +21,10 @@ class IFrameHandler {
 
   attachRefs (refs) {
     this.refs = refs
+  }
+
+  attachOnWidgetDataCb (cb) {
+    this.cb = cb
   }
 
   /**
@@ -84,7 +89,6 @@ class IFrameHandler {
   /**
    * Call whenever data object is changed.
    * Widgets sources may have gotten another value.
-   * @param {Array} widgets Widget list.
    * @param {Object} i      Dashboard integration ID.
    * @param {Object} data   Updated data object.
    */
@@ -125,8 +129,12 @@ class IFrameHandler {
           value = get(data, source, null)
         }
 
-        if (value !== null)
+        if (value !== null) {
           this.postMessage('sendData', widget.i, value)
+
+          if (this.cb)
+            this.cb(widget.i)
+        }
 
       } catch (e) {
         console.warn('Failed to send updated data to widget', e)

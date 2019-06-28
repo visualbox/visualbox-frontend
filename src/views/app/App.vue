@@ -67,13 +67,13 @@ export default {
 
 #app
   display grid
-  grid-template none / 1fr 0 3fr
+  grid-template-rows none
+  grid-template-columns 1fr 0 3fr
   position absolute
   top 0; right 0; left 0; bottom 0;
 
   &.fullscreen
-    grid-template none / 100%
-    grid-template-columns unset !important
+    grid-template-columns 100% !important
 
     .grid-item:first-child, .grid-item:nth-child(2)
       display none

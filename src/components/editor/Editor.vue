@@ -320,8 +320,8 @@ export default {
       top 48px
 
     &.vertical
-      grid-template none / 3fr 0 1fr
       grid-template-rows unset !important
+      grid-template-columns 3fr 0 1fr
 
       .gutter
         width 10px
@@ -331,7 +331,7 @@ export default {
           cursor col-resize
 
     &.horizontal
-      grid-template 3fr 0 1fr / none
+      grid-template-rows 3fr 0 1fr
       grid-template-columns unset !important
 
       .gutter

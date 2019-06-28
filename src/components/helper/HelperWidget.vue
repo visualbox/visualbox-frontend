@@ -30,7 +30,7 @@
   .pane.pa-0(active)
     iframe(
       ref="preview"
-      sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-same-origin allow-scripts"
+      sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-scripts"
       allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor"
       scrolling="auto"
       allowTransparency="true"

@@ -2,7 +2,7 @@ const TICK_INTERVAL = 25000
 
 interface IWSMessage {
   action: 'join' | 'leave' | 'message'
-  type?: 'TICK' | 'INIT' | 'TERMINATE' | 'RESTART' | 'INFO' | 'OUTPUT' | 'WARNING' | 'ERROR'
+  type?: 'TICK' | 'INIT' | 'TERMINATE' | 'RESTART' | 'INFO' | 'OUTPUT' | 'LARGEOUTPUT' | 'WARNING' | 'ERROR'
   room?: string
   i?: string
   data?: string

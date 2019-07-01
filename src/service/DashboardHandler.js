@@ -33,7 +33,7 @@ class DashboardHandler {
       this.store.commit('Dashboard/DASHBOARD_ADD_INITED_INTEGRATION', i)
   }
 
-  onMessage ({ type, i, data }) {
+  async onMessage ({ type, i, data }) {
     switch (type) {
       case 'INIT': this.addInitedIntegration(i); break
 
@@ -56,6 +56,22 @@ class DashboardHandler {
          */
         if (this.store.state.Dashboard.focusedWidget)
           EventBus.$emit('vbox:dataChanged')
+        break
+
+      /**
+       * Container integration has uploaded a
+       * large (127 KB+) message to a presigned URL.
+       * Download it and handle it as a regular OUTPUT.
+       */
+      case 'LARGEOUTPUT':
+        try {
+          const response = await fetch(data)
+          this.onMessage({
+            i,
+            type: 'OUTPUT',
+            data: await response.text()
+          })
+        } catch (e) {}
         break
     }
   }

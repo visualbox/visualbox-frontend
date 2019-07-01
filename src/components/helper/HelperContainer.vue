@@ -142,8 +142,21 @@ export default {
         case 'INIT': this.consolePrint('Container started', WSType.INFO); break
         case 'INFO': this.consolePrint(data, WSType.INFO); break
         case 'OUTPUT': this.consolePrint(data, WSType.OUTPUT); break
+        case 'LARGEOUTPUT': this.handleLargeOutput(data); break
         case 'WARNING': this.consolePrint(data, WSType.WARNING); break
         case 'ERROR': this.consolePrint(data, WSType.ERROR); break
+      }
+    },
+
+    async handleLargeOutput (url) {
+      try {
+        const response = await fetch(url)
+        this.onMessage({
+          type: 'OUTPUT',
+          data: await response.text()
+        })
+      } catch (e) {
+        console.log('[handleLargeOutput]: failed: ', e)
       }
     },
 

@@ -63,6 +63,7 @@ export default Vue.extend({
       { title: 'Dashboards', to: '/app/d', icon: 'mdi-panorama-wide-angle' },
       { title: 'Manage Integrations', to: '/app/i', icon: 'mdi-source-fork' },
       { title: 'Manage Widgets', to: '/app/w', icon: 'mdi-hexagon-multiple' },
+      // { title: 'Artificial Intelligence', to: '/app/ml', icon: 'mdi-brain' },
       { title: 'Help', href: 'https://docs.visualbox.io', icon: 'mdi-help-circle' }
     ],
     itemsBottom: [

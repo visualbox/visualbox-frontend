@@ -85,7 +85,7 @@ v-container#explorer(fluid)
         v-layout(row wrap)
           v-flex(xs12)
             .headline.font-weight-light {{ local ? 'Local' : 'Popular' }}
-          v-flex(
+          v-flex.hoverpop(
             v-for="(item, index) in currentList"
             :key="index"
             @click="selected = item"
@@ -339,73 +339,73 @@ export default {
   height 100%
   min-height 100%
 
-  // Needed to access responsive content
-  >>> .v-responsive__content
+  // Apply animation to relevant targets
+  >>> .hoverpop .v-card .v-image
+    -webkit-transition all 125ms ease-in-out
+    -ms-transition all 125ms ease-in-out
+    -moz-transition all 125ms ease-in-out
+    transition all 125ms ease-in-out
+
+  // >>> needed to access v-responsive
+  .hoverpop
     &:hover
-      .v-card
-        .v-image
-          -webkit-transform scale(1.0235) translateZ(0)
-          -ms-transform scale(1.0235) translateZ(0)
-          -moz-transform scale(1.0235) translateZ(0)
-          transform scale(1.0235) translateZ(0)
+      >>> >.v-responsive
+        .v-card
+          .v-image
+            -webkit-transform scale(1.0235) translateZ(0)
+            -ms-transform scale(1.0235) translateZ(0)
+            -moz-transform scale(1.0235) translateZ(0)
+            transform scale(1.0235) translateZ(0)
 
-        .content
-          .v-btn
-            opacity 1
+          .content
+            .v-btn
+              opacity 1
 
-    .v-card
-      position absolute
-      top 0; bottom 0; left 0; right 0;
-      background-color $vb-drawer-mini
-      overflow hidden
+    >>> >.v-responsive
       border-radius 10px
-      cursor pointer
 
-      -webkit-transition all 125ms ease-in
-      -ms-transition all 125ms ease-in
-      -moz-transition all 125ms ease-in
-      transition all 125ms ease-in
+      .v-card
+        position absolute
+        top 0; bottom 0; left 0; right 0;
+        background-color $vb-drawer-mini
+        overflow hidden
+        cursor pointer
 
-      .v-image
-        height 40%
-
-        -webkit-transition all 125ms ease-in
-        -ms-transition all 125ms ease-in
-        -moz-transition all 125ms ease-in
-        transition all 125ms ease-in
-
-        &:before
-          content ''
-          height 50%
-          position absolute
-          bottom 0; left 0; right 0;
-          background-image linear-gradient(transparent, $vb-drawer-mini)
-
-      .content
-        height 60%
-        position relative
-
-        .v-btn
-          position absolute
-          top -52px; right 16px;
-          opacity 0
-
-        .subtitle-1
-          padding 8px 16px
-          white-space nowrap
-          text-overflow ellipsis
-          overflow hidden
-          display block
-
-        .v-card__text
-          position absolute
-          top 44px; bottom 0; left 0; right 0;
-          overflow hidden
+        .v-image
+          height 40%
 
           &:before
             content ''
-            height 50px
+            height 50%
             position absolute
             bottom 0; left 0; right 0;
             background-image linear-gradient(transparent, $vb-drawer-mini)
+
+        .content
+          height 60%
+          position relative
+
+          .v-btn
+            position absolute
+            top -52px; right 16px;
+            opacity 0
+
+          .subtitle-1
+            padding 8px 16px
+            white-space nowrap
+            text-overflow ellipsis
+            overflow hidden
+            display block
+
+          .v-card__text
+            position absolute
+            top 44px; bottom 0; left 0; right 0;
+            overflow hidden
+
+            &:before
+              content ''
+              height 50px
+              position absolute
+              bottom 0; left 0; right 0;
+              background-image linear-gradient(transparent, $vb-drawer-mini)
 </style>

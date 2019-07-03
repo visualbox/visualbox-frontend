@@ -55,6 +55,7 @@ import { API, WS } from '@/service'
 import { Tooltip } from '@/components'
 
 const BUFFER_MAX = 10000
+const BUILD_MAGIC_STR = '$9#]'
 
 const WSType = {
   TICK: 'TICK',
@@ -187,11 +188,11 @@ export default {
       try {
         const { buildId } = await this.build(this.id)
         WS.join(buildId, 'build', false, message => {
-          this.onMessage(message)
-
-          if (message.data.indexOf('visualbox-build-done') !== -1) {
+          if (message.data.indexOf(BUILD_MAGIC_STR) !== -1) {
             this.consolePrint('Build is done!', WSType.OUTPUT)
             this.isBuilding = false
+          } else {
+            this.onMessage(message)
           }
         })
       } catch (e) {
@@ -201,7 +202,7 @@ export default {
     }
   },
   mounted () {
-    this.launch()
+    // this.launch()
   },
   beforeDestroy () {
     WS.leave()

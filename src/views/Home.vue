@@ -8,12 +8,12 @@ v-container
       :poster="require('../assets/img/hero.jpg')"
     )
       source(
-        :src="require('../assets/img/hero.mp4')"
-        type="video/mp4"
-      )
-      source(
         :src="require('../assets/img/hero.webm')"
         type="video/webm"
+      )
+      source(
+        :src="require('../assets/img/hero.mp4')"
+        type="video/mp4"
       )
   v-responsive(:aspect-ratio="2.5/1")
     v-container(fill-height grid-list-xl)

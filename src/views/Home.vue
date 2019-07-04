@@ -24,6 +24,9 @@ v-container
           .headline.font-weight-thin
             | Integrate any data source and create beautiful
             | realtime dashboards.
+          .headline.font-weight-thin
+            | Enrich data with trained models from Acumos by
+            | the LF Deep Learning Foundation.
         .hidden-md-and-up.my-4 &nbsp;
         v-flex(xs12 sm12 md4 lg3 xl2)
           v-card

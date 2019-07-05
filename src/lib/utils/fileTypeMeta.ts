@@ -46,11 +46,23 @@ export default (name: string) => {
         color: '#ca3736',
         monacoLanguage: 'json'
       }
+    case 'proto':
+      return {
+        icon: 'mdi-buffer',
+        color: '#fff',
+        monacoLanguage: 'text'
+      }
     case 'py':
       return {
         icon: 'mdi-language-python',
         color: '#4180b1',
         monacoLanguage: 'python'
+      }
+    case 'sh':
+      return {
+        icon: 'mdi-console',
+        color: '#4caf50',
+        monacoLanguage: 'shell'
       }
     case 'txt':
       return {

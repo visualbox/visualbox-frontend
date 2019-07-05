@@ -340,16 +340,26 @@ export default {
   min-height 100%
 
   // Apply animation to relevant targets
-  >>> .hoverpop .v-card .v-image
-    -webkit-transition all 125ms ease-in-out
-    -ms-transition all 125ms ease-in-out
-    -moz-transition all 125ms ease-in-out
-    transition all 125ms ease-in-out
+  .hoverpop, >>> .hoverpop .v-card .v-image
+    -webkit-transition transform 0.3s ease 0s
+    -ms-transition transform 0.3s ease 0s
+    -moz-transition transform 0.3s ease 0s
+    transition transform 0.3s ease 0s
+
+  >>> .hoverpop > .v-responsive
+    -webkit-transition all 0.3s ease 0s
+    -ms-transition all 0.3s ease 0s
+    -moz-transition all 0.3s ease 0s
+    transition all 0.3s ease 0s
 
   // >>> needed to access v-responsive
   .hoverpop
     &:hover
+      transform translateY(-5px)
+
       >>> >.v-responsive
+        box-shadow rgba(0, 0, 0, 0.3) 0px 8px 4px
+
         .v-card
           .v-image
             -webkit-transform scale(1.0235) translateZ(0)

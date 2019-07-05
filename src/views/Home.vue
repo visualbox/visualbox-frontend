@@ -19,14 +19,11 @@ v-container
     v-container(fill-height grid-list-xl)
       v-layout(align-center justify-center row wrap)
         v-flex(xs12 sm12 md8 lg8 xl6)
-          .display-3.font-weight-thin.mb-2 Data integration, AI and
+          .display-3.font-weight-thin.mb-2 Data integration and
           .display-3.font-weight-thin.mb-4 visualization toolbox
           .headline.font-weight-thin
             | Integrate any data source and create beautiful
             | realtime dashboards.
-          .headline.font-weight-thin
-            | Enrich data with trained models from Acumos by
-            | the LF Deep Learning Foundation.
         .hidden-md-and-up.my-4 &nbsp;
         v-flex(xs12 sm12 md4 lg3 xl2)
           v-card

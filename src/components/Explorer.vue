@@ -101,6 +101,11 @@ v-container#explorer(fluid)
                   v-btn(color="primary") View
                   v-card-title.subtitle-1.font-weight-medium {{ item.settings.name }}
                   v-card-text {{ item.intro }}
+                  v-card-actions.grey--text(v-if="!local")
+                    v-icon.mr-1(color="grey" small) mdi-download
+                    | {{ item.downloads }}
+                    v-icon.ml-2.mr-1(color="grey" small) mdi-silverware-fork
+                    | {{ item.forks }}
           v-flex(xs12)
             img.mb-3(
               :src="require('../assets/img/search-by-algolia-dark-background.svg')"
@@ -295,6 +300,8 @@ export default {
             uid: hit.uid,
             readme,
             intro,
+            downloads: hit.downloads || 0,
+            forks: hit.forks || 0,
             settings: hit.settings,
             versions
           }
@@ -408,14 +415,20 @@ export default {
             display block
 
           .v-card__text
-            position absolute
-            top 44px; bottom 0; left 0; right 0;
             overflow hidden
 
             &:before
               content ''
-              height 50px
+              height 100px
               position absolute
-              bottom 0; left 0; right 0;
-              background-image linear-gradient(transparent, $vb-drawer-mini)
+              bottom -1px; left 0; right 0;
+              background-image linear-gradient(transparent, $vb-drawer-mini 50%, $vb-drawer-mini)
+
+          .v-card__actions
+            padding-left 16px
+            padding-right 16px
+            padding 4px 16px 12px
+            font-size 14px
+            position absolute
+            bottom 0
 </style>

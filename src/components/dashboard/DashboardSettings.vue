@@ -112,6 +112,17 @@
               icon
             )
               v-icon mdi-launch
+      v-layout(
+        v-if="isPublic"
+        row
+      )
+        v-flex
+          v-switch.ma-1(
+            v-model="isIndexed"
+            label="Make Discoverable in Explorer"
+            color="primary"
+            hide-details
+          )
       v-flex.mt-2
         .body-2.grey--text
           | This option will make your dashboard publicly available.
@@ -160,6 +171,13 @@ export default {
          * accessible immediately (and not "only" after the
          * automatically scheduled commit happens).
          */
+        this.commit()
+      }
+    },
+    isIndexed: {
+      get () { return !!this.loaded.indexed },
+      set (isIndexed) {
+        this.DASHBOARD_CONCAT_LOADED({ indexed: isIndexed })
         this.commit()
       }
     },

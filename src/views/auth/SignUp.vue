@@ -2,7 +2,7 @@
 base-card
   v-card-text.pa-5
     .text-xs-center.mb-5(v-if="!done")
-      v-img(
+      img(
         :src="require('../../assets/img/vbox.svg')"
         width="60"
       )

@@ -18,7 +18,7 @@ div
       v-expansion-panel
         v-expansion-panel-header
           v-avatar.mr-3(
-            :size="30"
+            :size="26"
             :color="internalValue[field.name]"
           )
           | {{ field.label }}

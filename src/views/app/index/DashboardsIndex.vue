@@ -8,6 +8,7 @@ v-container(fill-height fluid)
       .display-3.mb-4 VisualBox
       .headline Welcome back!
       v-icon.index-icon mdi-creation
+      explorer-dashboards.mt-5
 
     //- Adding dashboard preconfig
     v-container.max-800(v-if="isAdding")
@@ -37,10 +38,12 @@ v-container(fill-height fluid)
 <script lang="ts">
 import Vue from 'vue'
 import { mapState, mapActions } from 'vuex'
+import { ExplorerDashboards } from '@/components'
 import EventBus from '@/lib/eventBus'
 
 export default Vue.extend({
   name: 'DashboardsIndex',
+  components: { ExplorerDashboards },
   data: () => ({
     isAdding: false,
       label: ''

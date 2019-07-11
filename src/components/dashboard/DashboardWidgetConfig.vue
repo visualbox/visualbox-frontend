@@ -18,7 +18,7 @@
               expand-icon=""
               style="min-height: unset;"
             )
-              v-icon(small).ml-2.mr-4 mdi-code-braces
+              v-icon.ml-1.mr-3.my-1 mdi-code-braces
               | Data Source
       v-card
         v-toolbar(color="black")
@@ -49,7 +49,7 @@
       v-expansion-panel
         v-expansion-panel-header
           v-avatar.mr-3(
-            :size="30"
+            :size="26"
             :color="bgc"
           )
           | Background Color

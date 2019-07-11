@@ -23,7 +23,7 @@
             :color="buttonColorExplorer('INTEGRATION')"
             text block large
           )
-            v-icon mdi-source-pull
+            v-icon mdi-source-fork
       v-flex(xs4)
         tooltip(text="Add Widget" bottom)
           v-btn.ma-0(
@@ -31,7 +31,7 @@
             :color="buttonColorExplorer('WIDGET')"
             text block large
           )
-            v-icon mdi-hexagon
+            v-icon mdi-hexagon-multiple
       v-flex(xs4)
         tooltip(text="Dashboard Settings" bottom)
           v-btn.ma-0(

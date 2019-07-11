@@ -1,24 +1,75 @@
 <template lang="pug">
 #dashboard-settings
   .pa-3
-    v-flex(xs12)
-      v-text-field(
-        v-model="label"
-        label="Dashboard Name"
-        hide-details
-        outlined
-      )
-    v-flex.mt-3(xs12)
-      v-expansion-panels.elevation-1
-        v-expansion-panel
-          v-expansion-panel-header
-            v-avatar.mr-3(
-              :size="30"
-              :color="bgc"
+    v-text-field(
+      v-model="label"
+      label="Dashboard Name"
+      hide-details
+      outlined
+    )
+    v-dialog(
+      v-model="dialog"
+      width="500"
+    )
+      template(#activator="{ on }")
+        v-expansion-panels.elevation-1
+          v-expansion-panel(v-on="on")
+            v-expansion-panel-header(
+              expand-icon=""
+              style="min-height: unset;"
             )
-            | Background Color
-          v-expansion-panel-content
-            color-picker(v-model="bgc")
+              v-icon.ml-1.mr-3.my-1 mdi-share-variant
+              | Share Dashboard
+      base-card
+        v-card-text.px-4.pt-4.pb-3
+          .text-xs-center.headline.mb-3 Share Dashboard
+          v-switch.ma-0(
+            v-model="isPublic"
+            label="Make Dashboard Public"
+            color="primary"
+            hide-details
+          )
+          .body-2.grey--text.mt-3
+            | The following conditions apply:<br>
+            ul.my-2
+              li Integration configurations <b class="white--text">will be hidden</b>.
+              li Widget configurations <b class="white--text">will not be hidden</b>.
+            | Only make your dashboard public if you are okay with this.
+          .mt-3(v-if="isPublic")
+            v-text-field(
+              v-model="publicURL"
+              @click:append="openPublicURL"
+              @click="$event.target.select()"
+              prefix="Public URL:"
+              append-icon="mdi-launch"
+              hide-details outlined
+              full-width readonly
+            )
+            v-switch.mt-3(
+              v-model="isIndexed"
+              label="Appear in VisualBox Dashboard Explorer"
+              color="primary"
+              hide-details
+            )
+        v-card-actions.pb-4.pr-4
+          v-spacer
+          v-btn.ma-0.px-3(
+            @click="dialog = false"
+            color="primary"
+            large outlined
+          ) Close
+
+    v-expansion-panels.mt-3.elevation-1
+      v-expansion-panel
+        v-expansion-panel-header
+          v-avatar.mr-3(
+            :size="26"
+            :color="bgc"
+          )
+          | Background Color
+        v-expansion-panel-content
+          color-picker(v-model="bgc")
+
     v-layout.mt-3(row xs12)
       v-flex
         .ma-0 Widget Border Radius
@@ -91,32 +142,6 @@
           hide-details
           single-line
         )
-    v-layout.mt-3(column xs12)
-      v-layout(row)
-        v-flex
-          v-switch.ma-1(
-            v-model="isPublic"
-            label="Public"
-            color="primary"
-            hide-details
-          )
-        v-flex(
-          v-if="isPublic"
-          align-self-end
-          shrink
-        )
-          tooltip(text="Open Public Dashboard" :open-delay="800" bottom)
-            v-btn(
-              :href="publicUrl"
-              target="_blank"
-              icon
-            )
-              v-icon mdi-launch
-      v-flex.mt-2
-        .body-2.grey--text
-          | This option will make your dashboard publicly available.
-          | Integration configurations <b class="white--text">will be hidden</b>. Widget configurations <b class="white--text">will not be hidden</b>.
-          | Only enable this option if you are okay with that.
 </template>
 
 <script>
@@ -124,15 +149,18 @@ import debounce from 'lodash-es/debounce'
 import { Chrome } from 'vue-color'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { Tooltip } from '@/components'
+import { BaseCard } from '@/components/base'
 
 export default {
   name: 'DashboardSettings',
   components: {
     'color-picker': Chrome,
-    Tooltip
+    Tooltip,
+    BaseCard
   },
   data: () => ({
     colors: '#FFF',
+    dialog: false,
     radiusMin: 0,
     radiusMax: 50,
     radiusDefault: 5,
@@ -143,8 +171,8 @@ export default {
   }),
   computed: {
     ...mapState('Dashboard', ['loaded']),
-    publicUrl () {
-      return `/public/${this.loaded.id}`
+    publicURL () {
+      return `${window.location.origin}/public/${this.loaded.id}`
     },
     label: {
       get () { return this.loaded.label },
@@ -154,12 +182,27 @@ export default {
       get () { return !!this.loaded.public },
       set (isPublic) {
         this.DASHBOARD_CONCAT_LOADED({ public: isPublic })
+
+        /**
+         * 'isIndexed' cannot be 'true' if 'isPublic'
+         * is 'false'.
+         */
+        if (!isPublic && this.isIndexed === true)
+          this.DASHBOARD_CONCAT_LOADED({ indexed: false })
+
         /**
          * Immediately commit dashboard changes when public
          * is changed so that if the public dashboard is
          * accessible immediately (and not "only" after the
          * automatically scheduled commit happens).
          */
+        this.commit()
+      }
+    },
+    isIndexed: {
+      get () { return !!this.loaded.indexed },
+      set (isIndexed) {
+        this.DASHBOARD_CONCAT_LOADED({ indexed: isIndexed })
         this.commit()
       }
     },
@@ -227,7 +270,10 @@ export default {
   },
   methods: {
     ...mapMutations('Dashboard', ['DASHBOARD_CONCAT_LOADED']),
-    ...mapActions('Dashboard', ['commit'])
+    ...mapActions('Dashboard', ['commit']),
+    openPublicURL () {
+      window.open(this.publicURL, '_blank')
+    }
   }
 }
 </script>

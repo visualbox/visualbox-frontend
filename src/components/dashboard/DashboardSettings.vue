@@ -9,7 +9,7 @@
     )
     v-dialog(
       v-model="dialog"
-      width="500"
+      width="450"
     )
       template(#activator="{ on }")
         v-expansion-panels.elevation-1

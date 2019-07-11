@@ -20,26 +20,23 @@
         tooltip(text="Add Integration" bottom)
           v-btn.ma-0(
             @click="clickOpenExplorer('INTEGRATION')"
-            :color="buttonColorExplorer('INTEGRATION')"
             text block large
           )
-            v-icon mdi-source-fork
+            v-icon(:color="buttonColorExplorer('INTEGRATION')") mdi-source-fork
       v-flex(xs4)
         tooltip(text="Add Widget" bottom)
           v-btn.ma-0(
             @click="clickOpenExplorer('WIDGET')"
-            :color="buttonColorExplorer('WIDGET')"
             text block large
           )
-            v-icon mdi-hexagon-multiple
+            v-icon(:color="buttonColorExplorer('WIDGET')") mdi-hexagon-multiple
       v-flex(xs4)
         tooltip(text="Dashboard Settings" bottom)
           v-btn.ma-0(
             @click="clickToggleSettings(null)"
-            :color="isSettings ? 'white' : 'grey'"
             text block large
           )
-            v-icon mdi-settings
+            v-icon(:color="isSettings ? 'white' : 'grey'") mdi-settings
 
     dashboard-integration-list(v-if="!isSettings")
 

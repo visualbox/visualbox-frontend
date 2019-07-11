@@ -7,3 +7,4 @@ const client = algoliasearch(
 
 export const integrationsIndex = client.initIndex(process.env.VUE_APP_ALGOLIASEARCH_INTEGRATIONS_INDEX || '')
 export const widgetsIndex = client.initIndex(process.env.VUE_APP_ALGOLIASEARCH_WIDGETS_INDEX || '')
+export const dashboardsIndex = client.initIndex(process.env.VUE_APP_ALGOLIASEARCH_DASHBOARDS_INDEX || '')

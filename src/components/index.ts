@@ -1,6 +1,7 @@
 export { default as Tooltip } from '@/components/Tooltip.vue'
 export { default as ContextToolbar } from './ContextToolbar.vue'
 export { default as Explorer } from './Explorer.vue'
+export { default as ExplorerDashboards } from './ExplorerDashboards.vue'
 export { default as NavigationDrawer } from './NavigationDrawer.vue'
 export { default as InputTypes } from './InputTypes.vue'
 export { default as SelectTemplate } from './SelectTemplate.vue'

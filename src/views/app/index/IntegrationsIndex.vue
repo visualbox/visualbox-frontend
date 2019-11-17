@@ -5,11 +5,11 @@ v-container(fill-height fluid)
       v-if="!isAdding && !isExploring"
       xs12 sm12 md10 lg8 xl6
     )
-      .display-3.mb-4 Integrations
+      .display-3.mb-6 Integrations
       .subheading Integrations are the engines behind your dashboard.
       .subheading They fetch, process and format data to be displayed by widgets.
       .subheading You can create your own integration, or search for already existing integrations.
-      v-container.pa-0.mt-4(fluid grid-list-lg)
+      v-container.pa-0.mt-6(fluid grid-list-lg)
         v-layout(row wrap)
           v-flex(v-bind="cols")
             v-card(flat color="primary" @click="addIntegration")
@@ -69,7 +69,7 @@ v-container(fill-height fluid)
         ) Create
 
   //- Explore integrations
-  explorer.pa-0(
+  explorer(
     v-if="isExploring"
     :config="explorerConfig"
   )

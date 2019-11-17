@@ -2,16 +2,16 @@
 #dashboard-ctx(v-if="loaded")
   context-toolbar
     tooltip(text="Back" :open-delay="800" bottom)
-      v-btn(@click="goBack" fab text)
+      v-btn(@click="goBack" text fab small)
         v-icon mdi-menu-left
     .subheading {{ loaded.label }}
     template(v-if="!isExploring")
       v-spacer
       tooltip(text="Fullscreen" :open-delay="800" bottom)
-        v-btn.mr-1(@click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)" fab text)
+        v-btn.mr-1(@click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)" text fab small)
           v-icon {{ fullscreenIcon }}
       tooltip(text="Move / Resize" :open-delay="800" bottom)
-        v-btn(@click="DASHBOARD_SET_EDITING(!isEditing)" fab text)
+        v-btn(@click="DASHBOARD_SET_EDITING(!isEditing)" text fab small)
           v-icon {{ editingIcon }}
 
   template(v-if="!focusedIntegration && !focusedWidget")

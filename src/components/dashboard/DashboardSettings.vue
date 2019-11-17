@@ -1,7 +1,7 @@
 <template lang="pug">
 #dashboard-settings
   .pa-3
-    v-text-field(
+    v-text-field.mb-4(
       v-model="label"
       label="Dashboard Name"
       hide-details
@@ -21,15 +21,15 @@
               v-icon.ml-1.mr-3.my-1 mdi-share-variant
               | Share Dashboard
       base-card
-        v-card-text.px-4.pt-4.pb-3
-          .text-xs-center.headline.mb-3 Share Dashboard
+        v-card-text.px-6.pt-6.pb-3
+          .text-center.headline.mb-4 Share Dashboard
           v-switch.ma-0(
             v-model="isPublic"
             label="Make Dashboard Public"
             color="primary"
             hide-details
           )
-          .body-2.grey--text.mt-3
+          .body-2.grey--text.mt-4
             | The following conditions apply:<br>
             ul.my-2
               li Integration configurations <b class="white--text">will be hidden</b>.
@@ -43,9 +43,9 @@
               prefix="Public URL:"
               append-icon="mdi-launch"
               hide-details outlined
-              full-width readonly
+              readonly
             )
-            v-switch.mt-3(
+            v-switch.mt-4(
               v-model="isIndexed"
               label="Appear in VisualBox Dashboard Explorer"
               color="primary"
@@ -59,7 +59,7 @@
             large outlined
           ) Close
 
-    v-expansion-panels.mt-3.elevation-1
+    v-expansion-panels.mt-4.elevation-1
       v-expansion-panel
         v-expansion-panel-header
           v-avatar.mr-3(
@@ -70,7 +70,7 @@
         v-expansion-panel-content
           color-picker(v-model="bgc")
 
-    v-layout.mt-3(row xs12)
+    v-layout.mt-4(row xs12)
       v-flex
         .ma-0 Widget Border Radius
         v-slider.mt-0(
@@ -94,7 +94,7 @@
           hide-details
           single-line
         )
-    v-layout.mt-3(row xs12)
+    v-layout.mt-4(row xs12)
       v-flex
         .ma-0 Widget Shadow Opacity
         v-slider.mt-0(
@@ -118,7 +118,7 @@
           hide-details
           single-line
         )
-    v-layout.mt-3(row xs12)
+    v-layout.mt-4(row xs12)
       v-flex
         .ma-0 Widget Shadow Radius
         v-slider.mt-0(

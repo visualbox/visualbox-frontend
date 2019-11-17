@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Storage from '@aws-amplify/storage'
 import * as t from '@/store/types'
 import { API, Zip } from '@/service'
-import { cloneDeep } from '@/lib/utils'
+import { cloneDeep, mergeDeep } from '@/lib/utils'
 
 const state = {
   list: []
@@ -24,8 +24,10 @@ const mutations = {
   },
   [t.WIDGET_COMMIT] (state, project) {
     const index = state.list.findIndex(({ id }) => id === project.id)
-    if (index >= 0)
-      Vue.set(state.list, index, project)
+    if (index >= 0) {
+      const merged = mergeDeep(state.list[index], project)
+      Vue.set(state.list, index, merged)
+    }
   },
   [t.WIDGET_CLEAN_DASHBOARD] (state, widgets) {
     // Remove every widget that does not exist in list

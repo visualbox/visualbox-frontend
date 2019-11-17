@@ -32,19 +32,19 @@ grid-layout#dashboard-layout(
         slot="activator"
         @click.native.stop="DASHBOARD_SET_FOCUSED_WIDGET(item.i)"
         color="grey darken-3"
-        dark fab
+        dark fab small
       )
         v-icon mdi-pencil
       v-btn(
         @click.native.stop="copyWidget(item.i)"
         color="primary"
-        fab dark
+        fab dark small
       )
         v-icon mdi-content-copy
       v-btn(
         @click.native.stop="removeWidget(item)"
         color="red"
-        fab dark
+        fab dark small
       )
         v-icon mdi-delete
     iframe(
@@ -193,14 +193,16 @@ export default {
     &:hover:not(.vue-resizable) .v-speed-dial
       display block
 
-    .v-speed-dial
-      top 25px
+    >>> .v-speed-dial
+      top 5px
       right 5px
       display none
 
       .v-speed-dial__list
+        top 75% !important
+
         .v-btn
-          margin-top 10px
+          margin-top 1px
 
     iframe
       width 100%

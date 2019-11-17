@@ -5,11 +5,11 @@ v-container(fill-height fluid)
       v-if="!isAdding && !isExploring"
       xs12 sm12 md10 lg8 xl6
     )
-      .display-3.mb-4 Widgets
+      .display-3.mb-6 Widgets
       .subheading Widgets are the building blocks of your dashboard.
       .subheading They are self-contained components that are fed data from integrations.
       .subheading You can create your own widgets, or search for already existing widgets.
-      v-container.pa-0.mt-4(fluid grid-list-lg)
+      v-container.pa-0.mt-6(fluid grid-list-lg)
         v-layout(row wrap)
           v-flex(v-bind="cols")
             v-card(flat color="primary" @click="addWidget")
@@ -80,7 +80,7 @@ v-container(fill-height fluid)
         ) Create
 
   //- Explore widgets
-  explorer.pa-0(
+  explorer(
     v-if="isExploring"
     :config="explorerConfig"
   )

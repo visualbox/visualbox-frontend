@@ -19,13 +19,13 @@
             :href="item.href"
             :target="item.href ? '_new' : ''"
             :exact="item.to === '/app'"
+            :ripple="false"
           )
             v-list-item-action
               v-icon(
                 :color="item.color"
                 medium
               ) {{ item.icon }}
-          
       v-spacer
       v-list(two-line)
         tooltip(
@@ -39,6 +39,7 @@
             :href="item.href"
             :target="item.href ? '_new' : ''"
             :exact="item.to === '/app'"
+            :ripple="false"
           )
             v-list-item-action
               v-icon(
@@ -91,15 +92,11 @@ export default Vue.extend({
 
     >>> .v-list
       padding 0
-      background unset
 
       .v-list-item
         height 56px
         -webkit-transition none !important
         transition none !important
-
-        &:hover
-          background unset
 
         &--active
           background $vb-primary !important
@@ -107,9 +104,9 @@ export default Vue.extend({
         &--link
           .v-icon
             color $vb-drawer-icon !important
-          
-          &:hover:before
-            opacity 0 !important
+
+          &:before
+            background-color unset !important
 
         &--link:hover, &--active
           .v-icon

@@ -346,6 +346,10 @@ export default {
   height 100%
   min-height 100%
 
+  .select
+    .v-input__control
+      min-height 38px !important
+
   // Apply animation to relevant targets
   .hoverpop, >>> .hoverpop .v-card .v-image
     -webkit-transition transform 0.3s ease 0s

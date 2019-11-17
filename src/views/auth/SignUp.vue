@@ -1,7 +1,7 @@
 <template lang="pug">
 base-card
-  v-card-text.pa-5
-    .text-xs-center.mb-5(v-if="!done")
+  v-card-text.pa-12
+    .text-center.mb-8(v-if="!done")
       img(
         :src="require('../../assets/img/vbox.svg')"
         width="60"
@@ -19,20 +19,20 @@ base-card
     )
       v-container.pa-0
         v-layout.pb-4(wrap)
-          v-flex(xs12 sm6)
+          v-flex.pa-1(xs12 sm6)
             v-text-field(
               v-model="firstName"
               :rules="[rules.required('Enter first name')]"
               label="First name"
               autofocus
             )
-          v-flex(xs12 sm6)
+          v-flex.pa-1(xs12 sm6)
             v-text-field(
               v-model="lastName"
               :rules="[rules.required('Enter last name')]"
               label="Last name"
             )
-          v-flex(xs12)
+          v-flex.pa-1(xs12)
             v-text-field(
               v-model="email"
               :rules="[rules.required('Enter your email address')]"
@@ -40,24 +40,24 @@ base-card
               hint="You can use letters, numbers & periods"
               persistent-hint
             )
-          v-flex(xs12 sm6)
+          v-flex.pa-1(xs12 sm6)
             v-text-field(
               v-model="password"
               :rules="[rules.required('Enter a password'), rules.pwdLength]"
               label="Password"
               type="password"
             )
-          v-flex(xs12 sm6)
+          v-flex.pa-1(xs12 sm6)
             v-text-field(
               v-model="confirmPassword"
               :rules="[rules.required('Confirm your password'), rules.confirm]"
               label="Confirm password"
               type="password"
             )
-          v-flex.pa-0(xs12)
+          v-flex.pa-1(xs12)
             v-messages(:value="['Use a password with 6 or more characters']")
 
-        v-layout.pt-5(
+        v-layout.pa-1.pt-5(
           alig-center
           justify-space-between
         )

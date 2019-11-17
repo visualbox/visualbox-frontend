@@ -2,13 +2,13 @@
 #editor-ctx
   context-toolbar
     tooltip(text="Back" :open-delay="800" bottom)
-      v-btn(@click="goBack" fab text)
+      v-btn(@click="goBack" text fab small)
         v-icon mdi-menu-left
     .subheading {{ settings.name }}
     template(v-if="dirty.size > 0")
       v-spacer
       tooltip(text="Save" :open-delay="800" bottom)
-        v-btn(@click="saveProject" fab text)
+        v-btn(@click="saveProject" text fab small)
           v-icon mdi-floppy
 
   v-list.hover-actions(dense)
@@ -59,7 +59,7 @@
           v-icon(small)  {{ openPanel.config ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
         v-list-item-content
           v-list-item-subtitle Configuration Model
-      input-types.pt-3.pl-3.pr-3(
+      input-types.pt-5.pl-5.pr-5(
         v-if="openPanel.config"
         v-model="configMapModelProxy"
         :config="parsedConfigMap"
@@ -435,6 +435,20 @@ export default {
       .v-treeview-node__root
         min-height 40px
 
+        &:before
+          -webkit-transition: none !important
+          transition: none !important
+          background-color $vb-primary-list-hover
+
+      .v-treeview-node
+        &:hover:before
+          content ''
+          width 100%
+          height 40px
+          position absolute
+          left 0
+          background-color $vb-primary-list-hover
+
       &:not([edit-file]) .v-treeview-node__root
         &:hover:before
           content ''
@@ -445,14 +459,9 @@ export default {
           background-color $vb-primary-list-hover
           z-index 6
 
-        &.v-treeview-node--active:before
-            content ''
-            width 100%
-            height 40px
-            position absolute
-            left 0
-            background-color $vb-primary-list-active
-            z-index 6
+        &.v-treeview-node--active
+          .v-treeview-node__label
+            color #FFF
 
         &:hover .options
           display flex

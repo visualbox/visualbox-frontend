@@ -1,8 +1,8 @@
 <template lang="pug">
 base-card
-  v-card-text.pa-5
-    .text-xs-center.mb-5
-      h1.headline.mb-3 {{ model ? 'Welcome' : 'Sign In' }}
+  v-card-text.pa-12
+    .text-center.mb-6
+      h1.headline.mb-5 {{ model ? 'Welcome' : 'Sign In' }}
 
       .welcome
         v-slide-y-transition(mode="out-in")
@@ -39,7 +39,7 @@ base-card
           @prev="model--"
           @next="submit"
         )
-  v-layout.pt-5(justify-center)
+  v-layout.pt-12(justify-center)
     router-link.grey--text.text--darken-1(to="/auth/forgot") Forgot password?
 </template>
 
@@ -89,7 +89,7 @@ export default {
 
 <style lang="stylus" scoped>
 .v-card
-  height 352px
+  height 330px
 
   .v-card__text
     overflow hidden

@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  .mb-3(
+  .mb-4(
     v-for="(field, index) in config.variables"
     :key="index"
   )
@@ -73,7 +73,7 @@ div
       :label="field.label"
       item-text="label"
       item-value="value"
-      outlined
+      outlined hide-details
     )
     //- Date type
     v-menu(

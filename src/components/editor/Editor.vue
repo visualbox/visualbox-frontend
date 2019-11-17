@@ -269,6 +269,9 @@ export default {
       margin-right 0 !important
       margin-left 0 !important
 
+      .v-tabs-bar
+        background none
+
       .v-tab
         color #FFF
         font-weight unset

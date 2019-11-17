@@ -10,7 +10,7 @@ import isObject from 'lodash-es/isObject'
  */
 export default (object: IObject, base: IObject): IObject => {
   const changes = (o: IObject, b: IObject) => {
-    return transform(o, (result, value, key) => {
+    return transform(o, (result: IObject, value, key) => {
       if (!isEqual(value, b[key]))
         result[key] = (isObject(value) && isObject(b[key])) ? changes(value, b[key]) : value
     })

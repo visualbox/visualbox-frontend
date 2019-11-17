@@ -1,6 +1,6 @@
 import isObject from 'lodash-es/isObject'
 
-const MAX_LEVEL_COUNT: number = 15
+const MAX_LEVEL_COUNT: number = 50
 
 interface INode {
   key: string

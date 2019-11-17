@@ -11,7 +11,7 @@ v-list(dense subheader)
       v-list-item-icon
         v-img(
           :src="require('../assets/img/vbox-white.svg')"
-          width="30"
+          width="25"
         )
       v-list-item-content
         v-list-item-title(v-text="item.label")

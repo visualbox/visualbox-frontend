@@ -411,6 +411,7 @@ const actions = {
 
     let widget = cloneDeep(originalWidget)
     widget.i = ni
+    console.log('new I:', ni)
     commit(t.DASHBOARD_ADD_WIDGET, widget)
   },
 

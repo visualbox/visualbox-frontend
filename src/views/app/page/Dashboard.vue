@@ -4,7 +4,10 @@ v-container#dashboard(
   :class="{ 'is-exploring': isExploring }"
   fluid
 )
-  context-toolbar.fs-toolbar(v-if="isFullscreen")
+  v-toolbar.fs-toolbar(
+    v-if="isFullscreen"
+    dense flat
+  )
     v-spacer
     v-btn(
       @click="DASHBOARD_SET_FULLSCREEN(!isFullscreen)"
@@ -27,13 +30,12 @@ v-container#dashboard(
 <script>
 import debounce from 'lodash-es/debounce'
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { ContextToolbar, Explorer } from '@/components'
+import { Explorer } from '@/components'
 import { DashboardLayout } from '@/components/dashboard'
 
 export default {
   name: 'Dashboard',
   components: {
-    ContextToolbar,
     Explorer,
     DashboardLayout
   },
@@ -112,6 +114,8 @@ export default {
 
   .fs-toolbar
     position fixed !important
+    top 0; left 0; right 0;
+    background-color $vb-app-ctx-toolbar !important
     z-index 1
   
   .nudge-fs
@@ -119,6 +123,7 @@ export default {
 
   >>> #explorer
     position absolute !important
+    padding 24px
     z-index 1
     background $vb-application
 </style>

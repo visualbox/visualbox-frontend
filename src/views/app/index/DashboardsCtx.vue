@@ -8,7 +8,7 @@
         @click="addDashboard"
         :loading="isLoading"
         :disabled="isLoading"
-        fab text
+        text fab small
       )
         v-icon mdi-plus-box
 

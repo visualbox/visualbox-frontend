@@ -5,10 +5,10 @@ v-container(fill-height fluid)
       v-if="!isAdding"
       xs12 sm12 md10 lg8 xl6
     )
-      .display-3.mb-4 VisualBox
+      .display-3.mb-6 VisualBox
       .headline Welcome back!
       v-icon.index-icon mdi-creation
-      explorer-dashboards.mt-5
+      explorer-dashboards.mt-12
 
     //- Adding dashboard preconfig
     v-container.max-800(v-if="isAdding")

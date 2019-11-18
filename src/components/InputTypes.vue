@@ -80,8 +80,8 @@ div
       v-if="field.type === 'date'"
       :close-on-content-click="false"
       transition="scale-transition"
-      offset-y full-width
       min-width="290px"
+      offset-y
     )
       template(#activator="{ on }")
         v-text-field(
@@ -97,7 +97,6 @@ div
         color="primary"
         no-title scrollable
       )
-
   //- Integration config parse errors
   v-alert(
     v-for="(item, index) in config.error"

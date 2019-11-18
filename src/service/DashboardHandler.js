@@ -73,6 +73,9 @@ class DashboardHandler {
           })
         } catch (e) {}
         break
+
+      default:
+        console.log('default (error)', data)
     }
   }
 

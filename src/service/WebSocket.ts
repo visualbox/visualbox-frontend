@@ -94,7 +94,10 @@ class WS {
 
       this.room = room
 
-      if (!this.tick && startTick)
+      if (this.tick)
+        clearInterval(this.tick)
+
+      if (startTick)
         this.tick = setInterval(() => this.messageTick(), TICK_INTERVAL)
 
     } catch (e) {

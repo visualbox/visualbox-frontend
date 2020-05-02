@@ -63,7 +63,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #app
   display grid

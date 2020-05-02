@@ -269,14 +269,12 @@ export default {
         this.loading = false
       }
     },
-    browse () {
-      this.index.search({
-        query: '',
-        // facetFilters: `uid:-'${this.identityId}'`
-      }, (err, result) => {
-        if (err)
-          return
-        this.browsePopular = result.hits.map(hit => {
+    async browse () {
+      try {
+        const { hits } = await this.index.search('', {
+          // facetFilters: `uid:-'${this.identityId}'`
+        })
+        this.browsePopular = hits.map(hit => {
           const readme = marked(hit.readme, {
             sanitize: true,
             gfm: true,
@@ -306,7 +304,9 @@ export default {
             versions
           }
         })
-      })
+      } catch (e) {
+        return
+      }
     },
 
     /**
@@ -339,7 +339,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../assets/styles/colors';
+@import '../styles/colors';
 
 #explorer
   width 100%

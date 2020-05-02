@@ -75,7 +75,8 @@ class DashboardHandler {
         break
 
       default:
-        console.log('default (error)', data)
+        // TODO: log error in integration specific log
+        // console.log('default (error)', data)
     }
   }
 

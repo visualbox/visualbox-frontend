@@ -36,7 +36,7 @@
             @click="clickToggleSettings(null)"
             text block large
           )
-            v-icon(:color="isSettings ? 'white' : 'grey'") mdi-settings
+            v-icon(:color="isSettings ? 'white' : 'grey'") mdi-cog
 
     dashboard-integration-list(v-if="!isSettings")
 

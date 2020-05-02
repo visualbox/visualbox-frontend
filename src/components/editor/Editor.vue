@@ -257,7 +257,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #editor
   height 100%

@@ -4,7 +4,7 @@ import store from '@/store'
 
 // Styles
 import '@mdi/font/css/materialdesignicons.css'
-import '@/assets/styles/global.styl'
+import '@/styles/global.styl'
 
 // Libraries
 import '@/lib/amplify'

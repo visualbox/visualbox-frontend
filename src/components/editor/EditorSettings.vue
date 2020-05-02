@@ -186,7 +186,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #editor-settings
   max-width 800px

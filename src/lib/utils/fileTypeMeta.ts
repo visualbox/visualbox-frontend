@@ -30,13 +30,13 @@ export default (name: string) => {
       }
     case 'json':
       return {
-        icon: 'mdi-json',
+        icon: 'mdi-code-json',
         color: '#ca3736',
         monacoLanguage: 'json'
       }
     case 'md':
       return {
-        icon: 'mdi-markdown',
+        icon: 'mdi-language-markdown',
         color: '#3e95de',
         monacoLanguage: 'markdown'
       }

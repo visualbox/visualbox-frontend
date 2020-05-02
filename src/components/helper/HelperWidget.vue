@@ -7,14 +7,24 @@
     v-spacer
 
     //- Dock bottom
-    tooltip(text="Dock Bottom" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Dock Bottom"
+    )
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
-    tooltip(text="Dock Right" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Dock Right"
+    )
       v-icon(
         :color="layoutHelper === 'vertical' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
@@ -55,8 +65,8 @@ export default {
       'sourceMapById'
     ]),
     ...mapState('Project', [
-      'configMapModel',
       'layoutHelper',
+      'configMapModel',
       'dirty',
       'files',
       'id'
@@ -100,7 +110,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #helper-widget
   height 100%

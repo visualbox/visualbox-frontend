@@ -6,28 +6,53 @@
     .tab(active) Console
 
     //- Clear console
-    tooltip(text="Clear Console" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Clear Console"
+    )
       v-icon.pl-3(@click="consoleClear" color="grey") mdi-cancel
 
     //- Restart
-    tooltip(text="Restart" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Restart"
+    )
       v-icon(@click="restart" :disabled="isBuilding" color="grey") mdi-restart
 
     //- Build
-    tooltip(text="Build" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Build"
+    )
       v-icon(@click="startBuild" :disabled="isBuilding" color="blue") mdi-progress-wrench
 
     v-spacer
 
     //- Dock bottom
-    tooltip(text="Dock Bottom" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Dock Bottom"
+    )
       v-icon(
         :color="layoutHelper === 'horizontal' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('horizontal')"
       ) mdi-page-layout-footer
 
     //- Dock right
-    tooltip(text="Dock Right" :open-delay="800" top)
+    tooltip(
+      :top="layoutHelper === 'horizontal'"
+      :bottom="layoutHelper === 'vertical'"
+      :open-delay="800"
+      text="Dock Right"
+    )
       v-icon(
         :color="layoutHelper === 'vertical' ? 'white' : 'grey'"
         @click="PROJECT_SET_HELPER_LAYOUT('vertical')"
@@ -76,8 +101,8 @@ export default {
   }),
   computed: {
     ...mapState('Project', [
-      'configMapModel',
       'layoutHelper',
+      'configMapModel',
       'dirty',
       'files',
       'id'
@@ -211,7 +236,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #helper-integration
   height 100%

@@ -12,7 +12,7 @@ export default Vue.extend({
 </script>
 
 <style lang="stylus" scoped>
-@import '../assets/styles/colors'
+@import '../styles/colors'
 
 .v-toolbar
   white-space nowrap

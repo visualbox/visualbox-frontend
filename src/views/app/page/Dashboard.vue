@@ -102,7 +102,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../../assets/styles/colors';
+@import '../../../styles/colors';
 
 #dashboard
   height 100%

@@ -29,12 +29,16 @@ input:-webkit-autofill
     transition: 0.2s cubic-bezier(.25, .8, .50, 1) !important
 
 .index-icon
-  position absolute
+  position absolute !important
   top 0
   right 0
   font-size 400px !important
   line-height 250px !important
   color rgba(255, 255, 255, .025) !important
+
+.tooltip-element
+  .v-icon::after
+      display none
 
 .v-application .markdown
   hr

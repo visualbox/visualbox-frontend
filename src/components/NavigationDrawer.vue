@@ -70,7 +70,7 @@ export default Vue.extend({
     itemsBottom: [
       // { title: 'GitHub', to: '/app/gh', icon: 'mdi-github-circle' },
       { title: 'Discord', href: 'https://discord.gg/VVnJmqh', icon: 'mdi-discord' },
-      { title: 'Settings', to: '/app/s', icon: 'mdi-settings' },
+      { title: 'Settings', to: '/app/s', icon: 'mdi-cog' },
       { title: 'Logout', to: '/app/signout', icon: 'mdi-power-standby' }
     ]
   })
@@ -78,7 +78,7 @@ export default Vue.extend({
 </script>
 
 <style lang="stylus" scoped>
-@import '../assets/styles/colors';
+@import '../styles/colors';
 
 #navigation-drawer
   height 100%

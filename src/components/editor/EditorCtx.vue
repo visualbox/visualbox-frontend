@@ -28,7 +28,7 @@
       :class="{ 'v-list-item--active' : showSettings }"
     )
       v-list-item-action.hover-actions-always
-        v-icon(small) mdi-settings
+        v-icon(small) mdi-cog
       v-list-item-content
         v-list-item-subtitle Options
 
@@ -385,7 +385,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../../assets/styles/colors';
+@import '../../styles/colors';
 
 #editor-ctx
   >>> .v-list

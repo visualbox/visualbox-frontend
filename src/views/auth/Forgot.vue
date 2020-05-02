@@ -1,8 +1,8 @@
 <template lang="pug">
 base-card
-  v-card-text.pa-5
-    .text-xs-center.mb-5
-      h1.headline.mb-3 Forgot Password
+  v-card-text.pa-12
+    .text-center.mb-12
+      h1.headline.mb-5 Forgot Password
       .subheading provide your email and get a new password
 
     div

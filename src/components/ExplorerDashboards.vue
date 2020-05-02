@@ -29,21 +29,21 @@ export default {
     list: []
   }),
   methods: {
-    browse () {
-      dashboardsIndex.search({
-        query: '',
-        // facetFilters: `uid:-'${this.identityId}'`
-      }, (err, result) => {
-        if (err)
-          return
-        this.list = result.hits.sort((a, b) => {
+    async browse () {
+      try {
+        const { hits } = await dashboardsIndex.search('', {
+          // facetFilters: `uid:-'${this.identityId}'`
+        })
+        this.list = hits.sort((a, b) => {
           if (a.updatedAt < b.updatedAt)
             return 1
           if (a.updatedAt > b.updatedAt)
             return -1
           return 0
         })
-      })
+      } catch (e) {
+        return
+      }
     },
     getPublicURL (id) {
       return `${window.location.origin}/public/${id}`

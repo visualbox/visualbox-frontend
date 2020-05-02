@@ -1,6 +1,6 @@
 /* eslint-disable */
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const webpack = require('webpack')
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
     },
     plugins: [
       new MonacoWebpackPlugin(),
-      new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
       new webpack.DefinePlugin({
         'process.platform': 0 // bypass process check by Monaco
       })

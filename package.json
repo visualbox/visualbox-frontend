@@ -16,7 +16,7 @@
     "@mdi/font": "^5.1.45",
     "algoliasearch": "^4.2.0",
     "css-element-queries": "^1.2.3",
-    "jszip": "^3.4.0",
+    "jszip": "^3.7.0",
     "localforage": "^1.7.3",
     "lodash-es": "^4.17.15",
     "marked": "^1.0.0",
